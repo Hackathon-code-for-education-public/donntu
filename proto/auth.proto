@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package="api/auth";
+
+enum Role {
+  applicant = 0;
+  student = 1;
+  manager = 2;
+}
+
+message Empty {}
+
+message SignInRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message SignUpRequest {
+  string email = 1;
+  string password = 2;
+  Role role = 3;
+}
+
+message SignOutRequest {
+  string accessToken = 1;
+}
+
+message AuthRequest {
+  string accessToken = 1;
+  Role role = 2;
+}
+
+message AuthResponse {
+  string userId = 1;
+  Role role = 2;
+}
+
+message RefreshRequest {
+  string refreshToken = 1;
+}
+
+message Tokens {
+  string access = 1;
+  string refresh = 2;
+}
+
+service Auth {
+  rpc SignIn(SignInRequest) returns (Tokens);
+  rpc SignUp(SignUpRequest) returns (Tokens);
+  rpc SignOut(SignOutRequest) returns (Empty);
+
+  rpc Auth(AuthRequest) returns (AuthResponse);
+  rpc Refresh(RefreshRequest) returns (Tokens);
+}
