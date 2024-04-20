@@ -1,17 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Image from "next/image";
-import Link from "next/link";
-
-import { MapPinIcon } from "lucide-react";
+import { OpenDay } from "@/components/open-day";
+import { UniversityReviews } from "@/components/university-reviews";
 
 interface Params {
   id: string;
@@ -41,6 +30,7 @@ export default function Page({ params }: { params: Params }) {
       link: "https://donntu.ru/news/id202401270929",
     },
     {
+      universityName: "",
       description:
         "День открытых дверей факультета компьютерных технологий и информатики",
       place: "Онлайн",
@@ -135,32 +125,13 @@ export default function Page({ params }: { params: Params }) {
             <div className="mt-4"></div>
           </TabsContent>
           <TabsContent value="reviews" className="m-5">
-            Отзывы
+            <h2 className="text-lg">Отзывы</h2>
+            <UniversityReviews id={params.id} />
           </TabsContent>
           <TabsContent value="open-day" className="m-5">
             <h2 className="text-lg">Дни открытых дверей в {universityName}</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
-              {openDays.map((day) => {
-                return (
-                  <Card key={day.link}>
-                    <CardHeader>
-                      <CardTitle>{universityName}</CardTitle>
-                      <CardDescription>{day.description}</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <div className="flex gap-2">
-                        <MapPinIcon />
-                        <p>{day.place}</p>
-                      </div>
-                    </CardContent>
-                    <CardFooter>
-                      <Button variant="outline" className="w-full" asChild>
-                        <Link href={day.link}>Подробнее</Link>
-                      </Button>
-                    </CardFooter>
-                  </Card>
-                );
-              })}
+              {openDays.map((day) => <OpenDay key={day.link} day={{...day, universityName: "ДонНТУ"}} />)}
             </div>
           </TabsContent>
           <TabsContent value="dorm">
