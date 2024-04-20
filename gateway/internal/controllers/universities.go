@@ -41,3 +41,28 @@ func (a *UniversitiesController) GetOpenDays() fiber.Handler {
 		return ok(c, days)
 	}
 }
+
+func (a *UniversitiesController) GetReviews() fiber.Handler {
+	type request struct {
+		Id     string `query:"universityId"`
+		Offset int    `query:"offset"`
+		Limit  int    `query:"limit"`
+	}
+
+	return func(ctx fiber.Ctx) error {
+		var req request
+		if err := ctx.Bind().Query(&req); err != nil {
+			a.log.Error("error while bind request: ", slog.String("universityId", req.Id))
+			return bad(err.Error())
+		}
+		a.log.Info("get reviews request: ", slog.String("universityId", req.Id))
+
+		reviews, err := a.universityService.GetReviews(ctx.Context(), req.Id, req.Offset, req.Limit)
+		if err != nil {
+			a.log.Error("error while get reviews: ", slog.String("universityId", req.Id))
+			return internal(err.Error())
+		}
+
+		return ok(ctx, reviews)
+	}
+}
