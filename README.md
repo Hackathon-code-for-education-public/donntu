@@ -1,5 +1,5 @@
 # donntu
 
-![alt text](https://imgur.com/a/FrX13zb)
+![alt text](https://imgur.com/4INJLec)
 
-![alt text]()
+![alt text](https://imgur.com/lPpUN9X)
