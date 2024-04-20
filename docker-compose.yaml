@@ -1,0 +1,18 @@
+version: '4.5'
+
+include:
+  - auth-service/docker-compose.yaml
+  - file-service/docker-compose.yaml
+  - gateway/docker-compose.yaml
+
+# services:
+  # auth-service:
+  #   extends:
+  #     file: auth-service/docker-compose.yml
+  #     name: auth-service
+  
+  # file-service:
+  #   extends:
+  #     file: file-service/docker-compose.yml
+  #     name: file-service
+
