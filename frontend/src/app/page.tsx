@@ -1,5 +1,9 @@
-import Panorama from "@/components/panorama";
-import Image from "next/image";
+import dynamic from "next/dynamic";
+
+const Panorama = dynamic(
+  () => import('@/components/panorama').then(module => module) as any,
+  { ssr: false },
+) as any;
 
 export default function Home() {
   return (
@@ -13,3 +17,4 @@ export default function Home() {
     </main>
   );
 }
+
