@@ -8,7 +8,7 @@ services:
     env_file:
       - .env.prod
     environment:
-      WAIT_HOSTS: postgres:5432
+      WAIT_HOSTS: verf-postgres:5432
     depends_on:
       - verf-postgres
     ports:
@@ -21,8 +21,12 @@ services:
       - pgdata:/var/lib/postgresql/data
     env_file:
       - .env.pg
+    command:
+      - "postgres"
+      - "-c"
+      - "port=5434"
     ports:
-      - "5433:5432"
+      - "5438:5434"
 
 volumes:
   pgdata:
