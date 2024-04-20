@@ -4,6 +4,7 @@ include:
   - auth-service/docker-compose.yaml
   - file-service/docker-compose.yaml
   - gateway/docker-compose.yaml
+  - universities/docker-compose.yaml
 
 # services:
   # auth-service:
