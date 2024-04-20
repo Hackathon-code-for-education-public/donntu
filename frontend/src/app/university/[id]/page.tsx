@@ -68,10 +68,10 @@ export default function Page({ params }: { params: Params }) {
               Дни открытых дверей
             </TabsTrigger>
             <TabsTrigger
-              value="dorm"
+              value="panorams"
               className="px-4 py-2 text-sm font-medium flex-1"
             >
-              Общежитие
+              Панорамы
             </TabsTrigger>
           </TabsList>
           <TabsContent value="about" className="m-5">
@@ -114,11 +114,7 @@ export default function Page({ params }: { params: Params }) {
             )}
             <UniversityOpenDays universityId={params.id} />
           </TabsContent>
-          <TabsContent value="dorm">
-            <div>В этом вузе есть общежитие</div>
-            <div>
-              Оценка общежития: <span className="font-bold">6.63</span>/10
-            </div>
+          <TabsContent value="panorams">
           </TabsContent>
         </Tabs>
       </div>
