@@ -47,3 +47,25 @@ func (s *UniversitiesService) GetOpenDays(ctx context.Context, uni *universities
 		}),
 	}, nil
 }
+
+func (s *UniversitiesService) GetReviews(ctx context.Context, request *universities.GetReviewsRequest) (*universities.Reviews, error) {
+	s.log.Info("get_reviews request received", slog.String("university_id", request.UniversityId))
+
+	reviews, err := s.service.GetReviews(ctx, request.UniversityId, int(request.Params.Limit), int(request.Params.Offset))
+	if err != nil {
+		return nil, err
+	}
+
+	return &universities.Reviews{
+		Reviews: lo.Map(reviews, func(review *domain.Review, _ int) *universities.Review {
+			return &universities.Review{
+				Sentiment:    string(review.Sentiment),
+				RepliesCount: int32(review.RepliesCount),
+				AuthorStatus: string(review.AuthorStatus),
+				Text:         review.Text,
+				Date:         review.Date.Unix(),
+				UniversityId: review.UniversityId,
+			}
+		}),
+	}, nil
+}

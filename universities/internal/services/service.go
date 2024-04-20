@@ -18,3 +18,7 @@ func NewUniversityService(universityRepo UniversityRepository) UniversityService
 func (s *universityService) GetOpenDays(ctx context.Context, universityID string) ([]*domain.OpenDay, error) {
 	return s.universityRepo.GetOpenDays(ctx, universityID)
 }
+
+func (s *universityService) GetReviews(ctx context.Context, universityID string, limit, offset int) ([]*domain.Review, error) {
+	return s.universityRepo.GetReviews(ctx, universityID, limit, offset)
+}

@@ -36,3 +36,24 @@ func (u *universitiesPg) GetOpenDays(ctx context.Context, universityID string) (
 
 	return days, nil
 }
+
+func (u *universitiesPg) GetReviews(ctx context.Context, universityID string, limit, offset int) ([]*domain.Review, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	results, err := querier.GetReviews(ctx, postgresql.GetReviewsParams{Limit: int32(limit), Offset: int32(offset), UniversityID: universityID})
+	if err != nil {
+		return nil, err
+	}
+
+	reviews := lo.Map(results, func(item postgresql.UniversityReview, _ int) *domain.Review {
+		return &domain.Review{
+			UniversityId: item.UniversityID,
+			Date:         item.Date,
+			Text:         item.Text,
+			AuthorStatus: domain.AuthorStatus(item.AuthorStatus),
+			RepliesCount: int(item.Repliescount),
+			Sentiment:    domain.Sentiment(item.Sentiment),
+		}
+	})
+
+	return reviews, nil
+}

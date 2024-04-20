@@ -5,8 +5,97 @@
 package postgresql
 
 import (
+	"database/sql/driver"
+	"fmt"
 	"time"
 )
+
+type Sentiments string
+
+const (
+	SentimentsPositive Sentiments = "positive"
+	SentimentsNegative Sentiments = "negative"
+	SentimentsNeutral  Sentiments = "neutral"
+)
+
+func (e *Sentiments) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = Sentiments(s)
+	case string:
+		*e = Sentiments(s)
+	default:
+		return fmt.Errorf("unsupported scan type for Sentiments: %T", src)
+	}
+	return nil
+}
+
+type NullSentiments struct {
+	Sentiments Sentiments `json:"sentiments"`
+	Valid      bool       `json:"valid"` // Valid is true if Sentiments is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullSentiments) Scan(value interface{}) error {
+	if value == nil {
+		ns.Sentiments, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.Sentiments.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullSentiments) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.Sentiments), nil
+}
+
+type Statuses string
+
+const (
+	StatusesValue0 Statuses = "Студент этого вуза"
+	StatusesValue1 Statuses = "Выпускник этого вуза"
+	StatusesValue2 Statuses = "Отчисленный"
+	StatusesValue3 Statuses = "Некто"
+)
+
+func (e *Statuses) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = Statuses(s)
+	case string:
+		*e = Statuses(s)
+	default:
+		return fmt.Errorf("unsupported scan type for Statuses: %T", src)
+	}
+	return nil
+}
+
+type NullStatuses struct {
+	Statuses Statuses `json:"statuses"`
+	Valid    bool     `json:"valid"` // Valid is true if Statuses is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullStatuses) Scan(value interface{}) error {
+	if value == nil {
+		ns.Statuses, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.Statuses.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullStatuses) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.Statuses), nil
+}
 
 type University struct {
 	ID       string `json:"id"`
@@ -26,4 +115,13 @@ type UniversityOpenDay struct {
 type UniversityOwner struct {
 	UniversityID string `json:"university_id"`
 	UserID       string `json:"user_id"`
+}
+
+type UniversityReview struct {
+	UniversityID string     `json:"university_id"`
+	AuthorStatus Statuses   `json:"author_status"`
+	Sentiment    Sentiments `json:"sentiment"`
+	Date         time.Time  `json:"date"`
+	Text         string     `json:"text"`
+	Repliescount int32      `json:"repliescount"`
 }
