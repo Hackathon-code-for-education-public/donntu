@@ -14,7 +14,7 @@ services:
     ports:
       - "5254:5254"
 
-  postgres:
+  verf-postgres:
     image: postgres:16.2-alpine3.19
     restart: always
     volumes:
