@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package="api/students";
+
+service Students {
+  rpc Create(CreateStudentRequest) returns (Empty);
+  rpc PostReview(CreateReviewRequest) returns (CreateReviewResponse);
+}
+
+message Empty {}
+
+message CreateStudentRequest {
+  string id = 1;
+}
+
+message CreateReviewRequest {
+  string userId = 1;
+  string universityId = 2;
+  string body = 3;
+  int32 rating = 4;
+}
+
+message CreateReviewResponse {
+  string reviewId = 1;
+}
