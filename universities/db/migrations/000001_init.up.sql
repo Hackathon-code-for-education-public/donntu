@@ -20,3 +20,10 @@ create table if not exists university_open_days
     address       text                              not null,
     link          text                              not null
 );
+
+create type statuses as enum('open', 'closed');
+
+create table if not exists university_reviews
+(
+    author_status
+);
