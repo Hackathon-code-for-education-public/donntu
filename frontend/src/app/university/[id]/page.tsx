@@ -75,7 +75,8 @@ export default function Page({ params }: { params: Params }) {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="about" className="m-5">
-            {/*
+            {
+            /*
               <div className="grid grid-cols-3 gap-4 text-center py-4 bg-gray-200 rounded-b-lg">
               <div>
                 <div className="text-3xl font-bold">22</div>
@@ -100,7 +101,8 @@ export default function Page({ params }: { params: Params }) {
             <div className="mt-4"></div>
             </div>
             </div>
-            */}
+            */
+            }
           </TabsContent>
           <TabsContent value="reviews" className="m-5">
             <h2 className="text-lg">Отзывы</h2>
