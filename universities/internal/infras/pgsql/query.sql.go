@@ -54,3 +54,43 @@ func (q *Queries) GetOpenDays(ctx context.Context, id string) ([]GetOpenDaysRow,
 	}
 	return items, nil
 }
+
+const getReviews = `-- name: GetReviews :many
+select university_id, author_status, sentiment, date, text, repliescount from university_reviews ur where ur.university_id = $3 offset $1 limit $2
+`
+
+type GetReviewsParams struct {
+	Offset       int32  `json:"offset"`
+	Limit        int32  `json:"limit"`
+	UniversityID string `json:"university_id"`
+}
+
+func (q *Queries) GetReviews(ctx context.Context, arg GetReviewsParams) ([]UniversityReview, error) {
+	rows, err := q.db.QueryContext(ctx, getReviews, arg.Offset, arg.Limit, arg.UniversityID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UniversityReview
+	for rows.Next() {
+		var i UniversityReview
+		if err := rows.Scan(
+			&i.UniversityID,
+			&i.AuthorStatus,
+			&i.Sentiment,
+			&i.Date,
+			&i.Text,
+			&i.Repliescount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
