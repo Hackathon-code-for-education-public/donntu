@@ -8,8 +8,11 @@ export default function PannellumReact() {
 
   return (
     <div>
+      <p className="text-lg font-bold mb-4 mt-4">
+        Главный корпус, г. Донецк, ул. Пушкина, д. 1
+      </p>
       <Pannellum
-        width="1000px"
+        width="850px"
         height="500px"
         image={currentPanorama}
         pitch={10}
@@ -26,7 +29,13 @@ export default function PannellumReact() {
               currentPanorama !== "/room.jpg" ? "/room.jpg" : "/mus.jpg"
             )
           }
-          name="hs1"
+        />
+        <Pannellum.Hotspot
+          type="info"
+          pitch={-10}
+          yaw={100}
+          text="Главна библиотека ДонНТУ"
+          URL="https://donntu.ru/library?ysclid=lv89zetexz657935502"
         />
       </Pannellum>
     </div>
