@@ -34,11 +34,12 @@ export class AuthAPI {
   static async register(
     email: string,
     password: string,
+    role: string,
     lastName: string,
     firstName: string,
     middleName: string
   ): Promise<any> {
-    const endpoint = `${API_HOST}/api/v1/auth/sign-up`;
+    const endpoint = `${API_HOST}/api/v1/auth/${role}/sign-up`;
   
     try {
       const data = await this.fetch(endpoint, "POST", {

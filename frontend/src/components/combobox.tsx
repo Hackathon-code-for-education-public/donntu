@@ -1,45 +1,8 @@
-"use client";
-
 import * as React from "react";
-import { Check, ChevronsUpDown } from "lucide-react";
-
-import { cn } from "@/lib/utils";
+import { ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-
-const frameworks = [
-  {
-    value: "next.js",
-    label: "Next.js",
-  },
-  {
-    value: "sveltekit",
-    label: "SvelteKit",
-  },
-  {
-    value: "nuxt.js",
-    label: "Nuxt.js",
-  },
-  {
-    value: "remix",
-    label: "Remix",
-  },
-  {
-    value: "astro",
-    label: "Astro",
-  },
-];
+import { Command, CommandGroup, CommandItem } from "@/components/ui/command";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type Item = {
     value: string,
@@ -48,13 +11,33 @@ type Item = {
 
 interface IProps {
     items: Item[],
+    value?: string,  // Controlled value
+    onChange?: (newValue: string) => void, // Callback when value changes
     defaultValue?: string,
     placeholder?: string,
 }
 
-export function ComboBox({ items, defaultValue = "", placeholder = "" } : IProps) {
+export function ComboBox({
+  items,
+  value: externalValue,
+  onChange,
+  defaultValue = "",
+  placeholder = "",
+}: IProps) {
   const [open, setOpen] = React.useState(false);
+  const isControlled = externalValue != null; // Check if the component is controlled
   const [value, setValue] = React.useState(defaultValue);
+
+  const handleSelect = (selectedValue: string) => {
+    if (!isControlled) {
+      // Only update the internal state if it's not controlled
+      setValue(selectedValue);
+    }
+    onChange?.(selectedValue); // Call the onChange prop if it exists
+    setOpen(false);
+  };
+
+  const displayLabel = items.find((item) => item.value === (isControlled ? externalValue : value))?.label;
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -65,9 +48,7 @@ export function ComboBox({ items, defaultValue = "", placeholder = "" } : IProps
           aria-expanded={open}
           className="w-full justify-between"
         >
-          {value
-            ? items.find((item) => item.value === value)?.label
-            : placeholder}
+          {displayLabel || placeholder}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
@@ -78,10 +59,7 @@ export function ComboBox({ items, defaultValue = "", placeholder = "" } : IProps
               <CommandItem
                 key={item.value}
                 value={item.value}
-                onSelect={(currentValue) => {
-                  setValue(currentValue);
-                  setOpen(false);
-                }}
+                onSelect={handleSelect}
               >
                 {item.label}
               </CommandItem>
