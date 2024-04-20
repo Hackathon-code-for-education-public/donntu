@@ -15,11 +15,12 @@ type Application struct {
 	cfg  *config.Config
 	http *fiber.App
 
-	authController *controllers.AuthController
-	log            *slog.Logger
+	authController       *controllers.AuthController
+	universityController *controllers.UniversitiesController
+	log                  *slog.Logger
 }
 
-func NewApplication(cfg *config.Config, authController *controllers.AuthController, log *slog.Logger) *Application {
+func NewApplication(cfg *config.Config, universityController *controllers.UniversitiesController, authController *controllers.AuthController, log *slog.Logger) *Application {
 	httpServer := fiber.New(fiber.Config{
 		AppName:       "gateway",
 		CaseSensitive: false,
@@ -27,10 +28,11 @@ func NewApplication(cfg *config.Config, authController *controllers.AuthControll
 	})
 
 	return &Application{
-		cfg:            cfg,
-		http:           httpServer,
-		log:            log,
-		authController: authController,
+		cfg:                  cfg,
+		http:                 httpServer,
+		log:                  log,
+		authController:       authController,
+		universityController: universityController,
 	}
 }
 
@@ -54,6 +56,9 @@ func (a *Application) Run() error {
 	au.Post("/manager/sign-up", a.authController.SignUp(domain.UserRoleManager))
 	au.Post("/sign-out", a.authController.SignOut())
 	au.Post("/refresh", a.authController.Refresh())
+
+	u := v1.Group("/universities")
+	u.Get("/open", a.universityController.GetOpenDays())
 
 	return a.http.Listen(fmt.Sprintf(":%d", a.cfg.HTTP.Port))
 }

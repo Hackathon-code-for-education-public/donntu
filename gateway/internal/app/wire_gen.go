@@ -17,9 +17,11 @@ import (
 
 func InitApp() *Application {
 	configConfig := config.New()
-	authService := services.NewAuthService(configConfig)
+	universityService := services.NewUniversityService(configConfig)
 	slogLogger := logger.New()
+	universitiesController := controllers.NewUniversityController(universityService, slogLogger)
+	authService := services.NewAuthService(configConfig)
 	authController := controllers.NewAuthController(authService, slogLogger)
-	application := NewApplication(configConfig, authController, slogLogger)
+	application := NewApplication(configConfig, universitiesController, authController, slogLogger)
 	return application
 }

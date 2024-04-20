@@ -10,6 +10,10 @@ type GRPCServicesConfig struct {
 		Host string `env:"AUTH_SERVICE_HOST"`
 		Port int    `env:"AUTH_SERVICE_PORT"`
 	}
+	UniversityService struct {
+		Host string `env:"UNIVERSITY_SERVICE_HOST"`
+		Port int    `env:"UNIVERSITY_SERVICE_PORT"`
+	}
 }
 type HTTPConfig struct {
 	Port int `env:"HTTP_PORT"`

@@ -1,0 +1,16 @@
+version: '4.5'
+
+services:
+  postgres:
+    container_name: universities_db
+    image: postgres:16.2-alpine3.19
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    env_file:
+      - .env.pg
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:
