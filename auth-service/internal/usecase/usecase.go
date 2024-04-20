@@ -24,6 +24,8 @@ type UserStorage interface {
 	Create(ctx context.Context, user *models.User) error
 	Update(ctx context.Context, user *models.User) error
 	Delete(ctx context.Context, id int) error
+
+	PatchRole(ctx context.Context, userId string, role string) error
 }
 
 type TokenStorage interface {
@@ -205,6 +207,16 @@ func (s *UseCase) Refresh(ctx context.Context, refreshToken string) (*entity.Tok
 	}
 
 	return tokens, nil
+}
+
+func (s *UseCase) PatchRole(ctx context.Context, userId string, role entity.Role) error {
+
+	err := s.userStorage.PatchRole(ctx, userId, role.String())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *UseCase) generateJwtPair(claims *entity.UserClaims) (*entity.Tokens, error) {

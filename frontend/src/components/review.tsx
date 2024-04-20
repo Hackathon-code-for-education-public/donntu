@@ -21,8 +21,6 @@ export function Review({ review }: IProps) {
   const fullReviewText = review.text;
   const isLongReview = fullReviewText.length > 300;
 
-  console.log(review.sentiment)
-
   const reviewClass = review.sentiment === 'positive' ? 'bg-green-100' : 
                       review.sentiment === 'negative' ? 'bg-red-100' : 'bg-gray-100';
   

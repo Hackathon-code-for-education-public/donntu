@@ -1,6 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+
+// @ts-ignore
 import { Pannellum } from "pannellum-react";
 import { Panorama } from "@/api/panorama";
 

@@ -7,14 +7,14 @@ services:
     env_file:
       - .env.prod
     environment:
-      WAIT_HOSTS: postgres:5432, redis:6379
+      WAIT_HOSTS: auth-postgres:5432, auth-redis:6379
     depends_on:
-      - postgres
-      - redis
+      - auth-postgres
+      - auth-redis
     ports:
       - "5252:5252"
 
-  postgres:
+  auth-postgres:
     image: postgres:16.2-alpine3.19
     restart: always
     volumes:
@@ -24,7 +24,7 @@ services:
     ports:
       - "5432:5432"
 
-  redis:
+  auth-redis:
     image: redis:7.2.4-alpine
     restart: always
     ports:

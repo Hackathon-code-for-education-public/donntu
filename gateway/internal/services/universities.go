@@ -52,3 +52,32 @@ func (s *UniversityService) GetOpenDays(ctx context.Context, universityId string
 
 	return days, nil
 }
+
+func (s *UniversityService) GetReviews(ctx context.Context, universityId string, offset int, limit int) ([]*domain.Review, error) {
+	req := &universities.GetReviewsRequest{
+		Params: &universities.Params{
+			Offset: int32(offset),
+			Limit:  int32(limit),
+		},
+		UniversityId: universityId,
+	}
+
+	res, err := s.client.GetReviews(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	reviews := make([]*domain.Review, len(res.Reviews))
+	for i, review := range res.Reviews {
+		reviews[i] = &domain.Review{
+			UniversityId: universityId,
+			Date:         time.UnixMilli(review.Date),
+			Text:         review.Text,
+			AuthorStatus: review.AuthorStatus,
+			RepliesCount: int(review.RepliesCount),
+			Sentiment:    review.Sentiment,
+		}
+	}
+
+	return reviews, nil
+}

@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	Universities_GetOpenDays_FullMethodName = "/universities.Universities/GetOpenDays"
+	Universities_GetReviews_FullMethodName  = "/universities.Universities/GetReviews"
 )
 
 // UniversitiesClient is the client API for Universities service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UniversitiesClient interface {
 	GetOpenDays(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*OpenDays, error)
+	GetReviews(ctx context.Context, in *GetReviewsRequest, opts ...grpc.CallOption) (*Reviews, error)
 }
 
 type universitiesClient struct {
@@ -46,11 +48,21 @@ func (c *universitiesClient) GetOpenDays(ctx context.Context, in *UniversityId, 
 	return out, nil
 }
 
+func (c *universitiesClient) GetReviews(ctx context.Context, in *GetReviewsRequest, opts ...grpc.CallOption) (*Reviews, error) {
+	out := new(Reviews)
+	err := c.cc.Invoke(ctx, Universities_GetReviews_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UniversitiesServer is the server API for Universities service.
 // All implementations must embed UnimplementedUniversitiesServer
 // for forward compatibility
 type UniversitiesServer interface {
 	GetOpenDays(context.Context, *UniversityId) (*OpenDays, error)
+	GetReviews(context.Context, *GetReviewsRequest) (*Reviews, error)
 	mustEmbedUnimplementedUniversitiesServer()
 }
 
@@ -60,6 +72,9 @@ type UnimplementedUniversitiesServer struct {
 
 func (UnimplementedUniversitiesServer) GetOpenDays(context.Context, *UniversityId) (*OpenDays, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOpenDays not implemented")
+}
+func (UnimplementedUniversitiesServer) GetReviews(context.Context, *GetReviewsRequest) (*Reviews, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetReviews not implemented")
 }
 func (UnimplementedUniversitiesServer) mustEmbedUnimplementedUniversitiesServer() {}
 
@@ -92,6 +107,24 @@ func _Universities_GetOpenDays_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Universities_GetReviews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetReviewsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UniversitiesServer).GetReviews(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Universities_GetReviews_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UniversitiesServer).GetReviews(ctx, req.(*GetReviewsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Universities_ServiceDesc is the grpc.ServiceDesc for Universities service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -102,6 +135,10 @@ var Universities_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetOpenDays",
 			Handler:    _Universities_GetOpenDays_Handler,
+		},
+		{
+			MethodName: "GetReviews",
+			Handler:    _Universities_GetReviews_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
