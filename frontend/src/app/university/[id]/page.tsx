@@ -1,5 +1,7 @@
 "use client";
 
+import { Panorama } from "@/api/panorama";
+import PanoramaView from "@/components/panorama";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniversityOpenDays } from "@/components/university-open-days";
@@ -10,6 +12,27 @@ import Image from "next/image";
 interface Params {
   id: string;
 }
+
+const mokPanoramas: Panorama[] = [
+  {
+    name: "Главный корпус",
+    address: "г. Донецк, ул. Пушкина, д.1",
+    loc1: "/room.jpg",
+    loc2: "/mus.jpg",
+  },
+  {
+    name: "Корпус №8",
+    address: "г. Донецк, ул. Артема, д.2",
+    loc1: "/alma.jpg",
+    loc2: "/lib.jpg",
+  },
+  {
+    name: "Корпус №3",
+    address: "г. Донецк, ул. И. Ткаченко, д.3",
+    loc1: "/mus.jpg",
+    loc2: "/lib.jpg",
+  },
+];
 
 export default function Page({ params }: { params: Params }) {
   const { data, isLoading, error } = useUniversity(params.id);
@@ -75,8 +98,7 @@ export default function Page({ params }: { params: Params }) {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="about" className="m-5">
-            {
-            /*
+            {/*
               <div className="grid grid-cols-3 gap-4 text-center py-4 bg-gray-200 rounded-b-lg">
               <div>
                 <div className="text-3xl font-bold">22</div>
@@ -101,8 +123,7 @@ export default function Page({ params }: { params: Params }) {
             <div className="mt-4"></div>
             </div>
             </div>
-            */
-            }
+            */}
           </TabsContent>
           <TabsContent value="reviews" className="m-5">
             <h2 className="text-lg">Отзывы</h2>
@@ -117,6 +138,9 @@ export default function Page({ params }: { params: Params }) {
             <UniversityOpenDays universityId={params.id} />
           </TabsContent>
           <TabsContent value="panorams">
+            <PanoramaView panorama={mokPanoramas[0]} />
+            <PanoramaView panorama={mokPanoramas[1]} />
+            <PanoramaView panorama={mokPanoramas[2]} />
           </TabsContent>
         </Tabs>
       </div>
