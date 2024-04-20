@@ -6,16 +6,16 @@ import (
 )
 
 type GRPCConfig struct {
-	Host string `env:"UNIVERSITIES_SERVICE_HOST"`
-	Port string `env:"UNIVERSITIES_SERVICE_PORT"`
+	Host string `env:"UNIVERSITY_SERVICE_HOST"`
+	Port string `env:"UNIVERSITY_SERVICE_PORT"`
 }
 
 type DatabaseConfig struct {
-	Host string `env:"UNIVERSITIES_DATABASE_HOST"`
-	Port string `env:"UNIVERSITIES_DATABASE_PORT"`
-	User string `env:"UNIVERSITIES_DATABASE_USER"`
-	Pass string `env:"UNIVERSITIES_DATABASE_PASS"`
-	Name string `env:"UNIVERSITIES_DATABASE_NAME"`
+	Host string `env:"UNIVERSITY_DATABASE_HOST"`
+	Port string `env:"UNIVERSITY_DATABASE_PORT"`
+	User string `env:"UNIVERSITY_DATABASE_USER"`
+	Pass string `env:"UNIVERSITY_DATABASE_PASS"`
+	Name string `env:"UNIVERSITY_DATABASE_NAME"`
 }
 
 type Config struct {
