@@ -21,7 +21,6 @@ type Config struct {
 		AccessKey string `env:"MINIO_ACCESS_KEY" env-required:"true"`
 		SecretKey string `env:"MINIO_SECRET_KEY" env-required:"true"`
 		Db        int    `env:"MINIO_DB" env-required:"true"`
-		Bucket    string `env:"MINIO_BUCKET" env-required:"true"`
 		Secure    bool   `env:"MINIO_SECURE" env-required:"true"`
 	}
 }

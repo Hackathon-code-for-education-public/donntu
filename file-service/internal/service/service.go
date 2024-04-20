@@ -12,7 +12,7 @@ import (
 )
 
 type Storage interface {
-	Create(ctx context.Context, fileInfo *entities.FileInfo, reader io.Reader) error
+	Create(ctx context.Context, fileInfo *entities.FileInfo, reader io.Reader, bucket string) error
 }
 
 type Service struct {
@@ -25,7 +25,7 @@ func New(storage Storage) *Service {
 	}
 }
 
-func (s *Service) Upload(ctx context.Context, file *entities.File) error {
+func (s *Service) Upload(ctx context.Context, file *entities.File, bucket string) error {
 
 	log := slog.With("method", "upload")
 
@@ -38,7 +38,7 @@ func (s *Service) Upload(ctx context.Context, file *entities.File) error {
 	file.Name = fmt.Sprintf("%s.%s", id.String(), strings.Split(file.ContentType, "/")[1])
 
 	log.Debug("uploading a file", slog.String("filename", file.Name))
-	if err := s.storage.Create(ctx, &file.FileInfo, &file.Buffer); err != nil {
+	if err := s.storage.Create(ctx, &file.FileInfo, &file.Buffer, bucket); err != nil {
 		log.Error("unable to create file", slog.String("err", err.Error()))
 		return fmt.Errorf("Service.Create unable to create file: %w", err)
 	}

@@ -12,21 +12,19 @@ import (
 
 type MinioStorage struct {
 	client *minio.Client
-	bucket string
 }
 
 func New(client *minio.Client, cfg *config.Config) (*MinioStorage, error) {
 	return &MinioStorage{
 		client: client,
-		bucket: cfg.Minio.Bucket,
 	}, nil
 }
 
-func (s *MinioStorage) checkBucket(ctx context.Context) error {
+func (s *MinioStorage) checkBucket(ctx context.Context, bucket string) error {
 
-	log := slog.With("method", "checkBucket").With("bucket", s.bucket)
+	log := slog.With("method", "checkBucket").With("bucket", bucket)
 
-	exists, err := s.client.BucketExists(ctx, s.bucket)
+	exists, err := s.client.BucketExists(ctx, bucket)
 	if err != nil {
 		log.Error("unable to check bucket exists", slog.String("err", err.Error()))
 		return fmt.Errorf("MinioStorage cannot check bucket existance: %w", err)
@@ -34,7 +32,7 @@ func (s *MinioStorage) checkBucket(ctx context.Context) error {
 
 	if !exists {
 		log.Debug("bucket not exists")
-		if err := s.client.MakeBucket(ctx, s.bucket, minio.MakeBucketOptions{}); err != nil {
+		if err := s.client.MakeBucket(ctx, bucket, minio.MakeBucketOptions{}); err != nil {
 			log.Error("unable to create bucket", slog.String("err", err.Error()))
 			return fmt.Errorf("MinioStorage cannot create bucket: %w", err)
 		}
@@ -44,17 +42,17 @@ func (s *MinioStorage) checkBucket(ctx context.Context) error {
 	return nil
 }
 
-func (s *MinioStorage) Create(ctx context.Context, fileInfo *entities.FileInfo, reader io.Reader) error {
+func (s *MinioStorage) Create(ctx context.Context, fileInfo *entities.FileInfo, reader io.Reader, bucket string) error {
 
-	log := slog.With("method", "create").With("bucket", s.bucket).With("fileName", fileInfo.Name)
+	log := slog.With("method", "create").With("bucket", bucket).With("fileName", fileInfo.Name)
 
-	if err := s.checkBucket(ctx); err != nil {
+	if err := s.checkBucket(ctx, bucket); err != nil {
 		log.Error("unable to check bucket", slog.String("err", err.Error()))
 		return fmt.Errorf("MinioStorage.Create: %w", err)
 	}
 
 	log.Debug("putting file")
-	_, err := s.client.PutObject(ctx, s.bucket, fileInfo.Name, reader, fileInfo.Size, minio.PutObjectOptions{
+	_, err := s.client.PutObject(ctx, bucket, fileInfo.Name, reader, fileInfo.Size, minio.PutObjectOptions{
 		ContentType: fileInfo.ContentType,
 	})
 	if err != nil {

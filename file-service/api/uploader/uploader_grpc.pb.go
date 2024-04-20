@@ -23,6 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UploaderClient interface {
 	Upload(ctx context.Context, opts ...grpc.CallOption) (Uploader_UploadClient, error)
+	UploadPanorama(ctx context.Context, opts ...grpc.CallOption) (Uploader_UploadPanoramaClient, error)
 }
 
 type uploaderClient struct {
@@ -67,11 +68,46 @@ func (x *uploaderUploadClient) CloseAndRecv() (*ImageInfo, error) {
 	return m, nil
 }
 
+func (c *uploaderClient) UploadPanorama(ctx context.Context, opts ...grpc.CallOption) (Uploader_UploadPanoramaClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Uploader_ServiceDesc.Streams[1], "/Uploader/UploadPanorama", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &uploaderUploadPanoramaClient{stream}
+	return x, nil
+}
+
+type Uploader_UploadPanoramaClient interface {
+	Send(*Image) error
+	CloseAndRecv() (*ImageInfo, error)
+	grpc.ClientStream
+}
+
+type uploaderUploadPanoramaClient struct {
+	grpc.ClientStream
+}
+
+func (x *uploaderUploadPanoramaClient) Send(m *Image) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *uploaderUploadPanoramaClient) CloseAndRecv() (*ImageInfo, error) {
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	m := new(ImageInfo)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // UploaderServer is the server API for Uploader service.
 // All implementations must embed UnimplementedUploaderServer
 // for forward compatibility
 type UploaderServer interface {
 	Upload(Uploader_UploadServer) error
+	UploadPanorama(Uploader_UploadPanoramaServer) error
 	mustEmbedUnimplementedUploaderServer()
 }
 
@@ -81,6 +117,9 @@ type UnimplementedUploaderServer struct {
 
 func (UnimplementedUploaderServer) Upload(Uploader_UploadServer) error {
 	return status.Errorf(codes.Unimplemented, "method Upload not implemented")
+}
+func (UnimplementedUploaderServer) UploadPanorama(Uploader_UploadPanoramaServer) error {
+	return status.Errorf(codes.Unimplemented, "method UploadPanorama not implemented")
 }
 func (UnimplementedUploaderServer) mustEmbedUnimplementedUploaderServer() {}
 
@@ -121,6 +160,32 @@ func (x *uploaderUploadServer) Recv() (*Image, error) {
 	return m, nil
 }
 
+func _Uploader_UploadPanorama_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(UploaderServer).UploadPanorama(&uploaderUploadPanoramaServer{stream})
+}
+
+type Uploader_UploadPanoramaServer interface {
+	SendAndClose(*ImageInfo) error
+	Recv() (*Image, error)
+	grpc.ServerStream
+}
+
+type uploaderUploadPanoramaServer struct {
+	grpc.ServerStream
+}
+
+func (x *uploaderUploadPanoramaServer) SendAndClose(m *ImageInfo) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *uploaderUploadPanoramaServer) Recv() (*Image, error) {
+	m := new(Image)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // Uploader_ServiceDesc is the grpc.ServiceDesc for Uploader service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -132,6 +197,11 @@ var Uploader_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "Upload",
 			Handler:       _Uploader_Upload_Handler,
+			ClientStreams: true,
+		},
+		{
+			StreamName:    "UploadPanorama",
+			Handler:       _Uploader_UploadPanorama_Handler,
 			ClientStreams: true,
 		},
 	},
