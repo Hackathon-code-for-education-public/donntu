@@ -14,14 +14,14 @@ const mockFetcher = async (url: string): Promise<UserData | null> => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   // Optionally, you can use the URL to differentiate responses if needed
-  /*
+  
   return {
     id: '1',
     role: 'applicant',
     firstName: 'Test',
     middleName: 'Test',
     lastName: 'Test',
-  };*/
+  };
 
   /*
   const error = new Error('An error occurred while fetching the data.')
