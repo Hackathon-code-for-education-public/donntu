@@ -10,16 +10,11 @@ import {
 import { MapPinIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { OpenDayData } from "@/lib/use-open-days";
 
-type Day = {
-    universityName: string,
-    description: string,
-    place: string,
-    link: string,
-};
 
 interface IProps {
-    day: Day;
+    day: OpenDayData;
 }
 
 export function OpenDay({ day }: IProps) {

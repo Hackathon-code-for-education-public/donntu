@@ -1,6 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { OpenDay } from "@/components/open-day";
+import { UniversityOpenDays } from "@/components/university-open-days";
 import { UniversityReviews } from "@/components/university-reviews";
+import Image from "next/image";
 
 interface Params {
   id: string;
@@ -10,40 +11,12 @@ export default function Page({ params }: { params: Params }) {
   const universityName = "ДонНТУ";
   const universityLongName = "Донецкий национальный технический университет";
 
-  const openDays = [
-    {
-      description:
-        "День открытых дверей факультета компьютерных технологий и информатики",
-      place: "Онлайн",
-      link: "https://donntu.ru/news/id202401270929",
-    },
-    {
-      description:
-        "День открытых дверей факультета компьютерных технологий и информатики",
-      place: "Онлайн",
-      link: "https://donntu.ru/news/id202401270929",
-    },
-    {
-      description:
-        "День открытых дверей факультета компьютерных технологий и информатики",
-      place: "Онлайн",
-      link: "https://donntu.ru/news/id202401270929",
-    },
-    {
-      universityName: "",
-      description:
-        "День открытых дверей факультета компьютерных технологий и информатики",
-      place: "Онлайн",
-      link: "https://donntu.ru/news/id202401270929",
-    },
-  ];
-
   return (
     <main className="min-h-screen">
       <div className="bg-white p-6 shadow-lg rounded-lg max-w-4xl mx-auto">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center">
-            <img
+            <Image
               alt="Logo"
               className="h-12 w-12 mr-3"
               height="50"
@@ -126,13 +99,11 @@ export default function Page({ params }: { params: Params }) {
           </TabsContent>
           <TabsContent value="reviews" className="m-5">
             <h2 className="text-lg">Отзывы</h2>
-            <UniversityReviews id={params.id} />
+            <UniversityReviews universityId={params.id} />
           </TabsContent>
           <TabsContent value="open-day" className="m-5">
             <h2 className="text-lg">Дни открытых дверей в {universityName}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
-              {openDays.map((day) => <OpenDay key={day.link} day={{...day, universityName: "ДонНТУ"}} />)}
-            </div>
+            <UniversityOpenDays universityId={params.id} />
           </TabsContent>
           <TabsContent value="dorm">
             <div>В этом вузе есть общежитие</div>
