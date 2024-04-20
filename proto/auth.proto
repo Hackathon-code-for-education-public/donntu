@@ -46,6 +46,11 @@ message Tokens {
   string refresh = 2;
 }
 
+message PatchRoleRequest {
+  string userId = 1;
+  Role newRole = 2;
+}
+
 service Auth {
   rpc SignIn(SignInRequest) returns (Tokens);
   rpc SignUp(SignUpRequest) returns (Tokens);
@@ -53,4 +58,6 @@ service Auth {
 
   rpc Auth(AuthRequest) returns (AuthResponse);
   rpc Refresh(RefreshRequest) returns (Tokens);
+
+  rpc PatchRole(PatchRoleRequest) returns (Empty);
 }

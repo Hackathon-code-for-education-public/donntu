@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS reasons;
+DROP TABLE IF EXISTS requests;
+DROP TYPE IF EXISTS status;
