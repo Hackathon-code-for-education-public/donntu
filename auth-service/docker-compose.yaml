@@ -9,8 +9,8 @@ services:
     environment:
       WAIT_HOSTS: postgres:5432, redis:6379
     depends_on:
-      - postgres
-      - redis
+      - auth-postgres
+      - auth-redis
     ports:
       - "5252:5252"
 
