@@ -12,4 +12,8 @@ type (
 		Verify(ctx context.Context, accessToken string, role string) (*UserClaims, error)
 		Refresh(ctx context.Context, refreshToken string) (*Tokens, error)
 	}
+
+	UniversityService interface {
+		GetOpenDays(ctx context.Context, universityId string) ([]*OpenDay, error)
+	}
 )
