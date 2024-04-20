@@ -9,7 +9,7 @@ const (
 type Role int8
 
 func (r Role) String() string {
-	return [...]string{"Applicant", "Student", "Manager"}[r]
+	return [...]string{"applicant", "student", "manager"}[r]
 }
 
 type User struct {
