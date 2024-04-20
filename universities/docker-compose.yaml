@@ -1,0 +1,26 @@
+version: '4.5'
+
+services:
+  postgres:
+    container_name: universities_db
+    image: postgres:16.2-alpine3.19
+    restart: always
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${UNIVERSITY_DB_USER}
+      - POSTGRES_PASSWORD=${UNIVERSITY_DB_PASS}
+      - POSTGRES_DB=${UNIVERSITY_DB_NAME}
+    ports:
+      - "5438:${UNIVERSITY_DB_PORT}"
+  gateway:
+    build:
+      context: .
+    container_name: 'uni'
+    env_file:
+      - .env
+    ports:
+      - "8090:${UNIVERSITY_SERVICE_PORT}"
+
+volumes:
+  pgdata:

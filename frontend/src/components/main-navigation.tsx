@@ -5,15 +5,17 @@ import Link from "next/link";
 
 import {
   NavigationMenu,
-  NavigationMenuContent,
   NavigationMenuItem,
   NavigationMenuLink,
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
+import { useUser } from "@/lib/use-user";
 
 export function MainNavigation() {
+  const { loading, loggedOut } = useUser();
+
   return (
     <header className="flex justify-between p-2">
       <NavigationMenu>
@@ -25,6 +27,8 @@ export function MainNavigation() {
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
+          {
+          /*
           <NavigationMenuItem>
             <Link href="/for-applicants" legacyBehavior passHref>
               <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -32,6 +36,10 @@ export function MainNavigation() {
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
+          */
+          }
+          {
+          /*
           <NavigationMenuItem>
             <Link href="/for-universities" legacyBehavior passHref>
               <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -39,13 +47,24 @@ export function MainNavigation() {
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
+          */
+          }
         </NavigationMenuList>
       </NavigationMenu>
-      <Button>
-        <Link href="/authorization" legacyBehavior passHref>
-          Вход
-        </Link>
-      </Button>
+      {!loading && loggedOut && (
+        <Button>
+          <Link href="/authorization" legacyBehavior passHref>
+            Вход
+          </Link>
+        </Button>
+      )}
+      {
+        !loading && !loggedOut && (
+          <Button>
+            Выйти
+          </Button>
+        )
+      }
     </header>
   );
 }

@@ -1,0 +1,177 @@
+package controllers
+
+import (
+	"errors"
+	"gateway/internal/domain"
+	"gateway/internal/services"
+	"github.com/gofiber/fiber/v3"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
+	"log/slog"
+	"strings"
+)
+
+type AuthController struct {
+	authService domain.AuthService
+	log         *slog.Logger
+}
+
+func NewAuthController(authService domain.AuthService, log *slog.Logger) *AuthController {
+	return &AuthController{
+		authService: authService,
+		log:         log,
+	}
+}
+
+func (a *AuthController) SignIn() fiber.Handler {
+	type request struct {
+		Email    string `json:"email" validate:"required,len=11"`
+		Password string `json:"password" validate:"required"`
+	}
+
+	return func(ctx fiber.Ctx) error {
+		var req request
+		if err := ctx.Bind().Body(&req); err != nil {
+			a.log.Error("signIn error", slog.String("err", err.Error()))
+			return bad(err.Error())
+		}
+
+		a.log.Info("signIn request", slog.String("email", req.Email))
+
+		credentials := &domain.Credentials{
+			Email:    req.Email,
+			Password: req.Password,
+		}
+
+		tokens, err := a.authService.SignIn(ctx.Context(), credentials)
+		if err != nil {
+			a.log.Error("signIn error", slog.Any("err", err))
+			return internal(err.Error())
+		}
+
+		return ok(ctx, tokens)
+	}
+}
+
+func (a *AuthController) SignUp(role domain.UserRole) fiber.Handler {
+	type request struct {
+		Email      string `json:"email" validate:"required,len=11"`
+		Password   string `json:"password" validate:"required"`
+		FirstName  string `json:"firstName" validate:"required"`
+		LastName   string `json:"lastName" validate:"required"`
+		MiddleName string `json:"middleName" validate:"required"`
+	}
+
+	return func(ctx fiber.Ctx) error {
+		var req request
+		if err := ctx.Bind().Body(&req); err != nil {
+			return bad(err.Error())
+		}
+		a.log.Debug("sign-up request", slog.Any("req", req))
+
+		u := &domain.User{
+			Role:  role,
+			Email: req.Email,
+		}
+
+		tokens, err := a.authService.SignUp(ctx.Context(), u, req.Password)
+		if err != nil {
+			if e, ok := status.FromError(err); ok {
+				switch e.Code() {
+				case codes.AlreadyExists:
+					a.log.Error("user already exists", slog.Any("err", e))
+					return bad(e.Message())
+				}
+			}
+
+			a.log.Error("internal error", slog.Any("err", err))
+			return internal(err.Error())
+		}
+
+		return ok(ctx, tokens)
+	}
+}
+
+func (a *AuthController) SignOut() fiber.Handler {
+	return func(ctx fiber.Ctx) error {
+		a.log.Debug("sign-out request")
+
+		accessToken, k := ctx.Locals("accessToken").(string)
+		if !k {
+			a.log.Error("accessToken not found")
+			return internal("accessToken not found")
+		}
+
+		if err := a.authService.SignOut(ctx.Context(), accessToken); err != nil {
+			a.log.Error("internal error", slog.Any("err", err))
+			return internal(err.Error())
+		}
+
+		return ok(ctx)
+	}
+}
+
+func (a *AuthController) Refresh() fiber.Handler {
+	type req struct {
+		RefreshToken string `json:"refreshToken" validate:"required"`
+	}
+	return func(ctx fiber.Ctx) error {
+		var r req
+		if err := ctx.Bind().Body(&r); err != nil {
+			a.log.Error("internal error", slog.Any("err", err))
+			return bad(err.Error())
+		}
+		a.log.Debug("refresh request", slog.Any("req", r))
+
+		tokens, err := a.authService.Refresh(ctx.Context(), r.RefreshToken)
+		if err != nil {
+			a.log.Error("internal error", slog.Any("err", err))
+			return internal(err.Error())
+		}
+
+		return ok(ctx, tokens)
+	}
+}
+
+func (a *AuthController) AuthRequired(role domain.UserRole) fiber.Handler {
+	return func(ctx fiber.Ctx) error {
+		auth := ctx.Get("Authorization")
+		s := strings.Split(auth, " ")
+		if len(s) != 2 {
+			a.log.Error("Authorization not found")
+			return bad("Authorization not found")
+		}
+
+		accessToken := s[1]
+
+		u, err := a.authService.Verify(ctx.Context(), accessToken, string(role))
+		if err != nil {
+			if errors.Is(err, services.ErrUnauthorized) {
+				a.log.Error("unauthorized", slog.Any("err", err))
+				return unauthorized(err.Error())
+			}
+			if errors.Is(err, services.ErrForbidden) {
+				a.log.Error("forbidden", slog.Any("err", err))
+
+				return forbidden(err.Error())
+			}
+			if errors.Is(err, services.ErrNotFound) {
+				a.log.Error("not found", slog.Any("err", err))
+				return notFound(err.Error())
+			}
+
+			if errors.Is(err, services.ErrInvalidRequest) {
+				a.log.Error("invalid request", slog.Any("err", err))
+				return bad(err.Error())
+			}
+
+			a.log.Error("internal error", slog.Any("err", err))
+			return internal(err.Error())
+		}
+
+		ctx.Locals("accessToken", accessToken)
+		ctx.Locals("user", u)
+
+		return ctx.Next()
+	}
+}

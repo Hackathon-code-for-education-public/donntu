@@ -8,8 +8,8 @@ import (
 
 type Config struct {
 	App struct {
-		Host string `env:"APP_HOST" env-required:"true"`
-		Port int    `env:"APP_PORT" env-required:"true"`
+		Host string `env:"AUTH_SERVICE_HOST" env-required:"true"`
+		Port int    `env:"AUTH_SERVICE_PORT" env-required:"true"`
 	}
 
 	Logger struct {

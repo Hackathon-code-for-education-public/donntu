@@ -26,6 +26,9 @@ POSTGRES_DB - название бд
 
 #### ENV-Переменные для работы приложения - `.env.prod`
 ```
+AUTH_SERVICE_HOST=0.0.0.0
+AUTH_SERVICE_PORT=5252
+
 DB_USER=postgres
 DB_PASS=postgres
 
@@ -42,7 +45,7 @@ JWT_ACCESS_SECRET=access
 JWT_REFRESH_SECRET=refresh
 
 JWT_ACCESS_TTL=10
-JWT_REFRESH_TTL=1440
+JWT_REFRESH_TTL=21600
 
-LOGGER_LEVEL=info
+LOGGER_LEVEL=debug
 ```

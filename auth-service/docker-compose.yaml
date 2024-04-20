@@ -1,5 +1,19 @@
 version: '4.5'
 services:
+  auth-service:
+    container_name: auth-service
+    build:
+      context: .
+    env_file:
+      - .env.prod
+    environment:
+      WAIT_HOSTS: postgres:5432, redis:6379
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "5252:5252"
+
   postgres:
     image: postgres:16.2-alpine3.19
     restart: always

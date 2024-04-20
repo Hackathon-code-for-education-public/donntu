@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option go_package = "api/uploader";
+
+service Uploader {
+    rpc Upload (stream Image) returns (ImageInfo);
+    rpc UploadPanorama(stream Image) returns (ImageInfo);
+}
+
+message Image {
+    bytes chunk = 1;
+    Metadata metadata = 2;
+}
+
+message Metadata {
+    string contentType = 1;
+}
+
+message ImageInfo {
+    string id = 1;
+}

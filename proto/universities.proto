@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package universities;
+
+option go_package = "api/universities";
+
+message UniversityId {
+  string id = 1;
+}
+
+message OpenDay {
+  string universityName = 1;
+  string description = 2;
+  string address = 3;
+  string link = 4;
+  int64 time = 5;
+}
+
+message OpenDays {
+  repeated OpenDay days = 1;
+}
+
+service Universities {
+  rpc GetOpenDays(UniversityId) returns (OpenDays);
+}
