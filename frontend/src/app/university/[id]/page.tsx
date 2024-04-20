@@ -13,12 +13,26 @@ interface Params {
   id: string;
 }
 
-const mokPanorama: Panorama = {
-  name: "Главный корпус",
-  address: "г. Донецк, ул. Пушкина, д.1",
-  loc1: "/room.jpg",
-  loc2: "/mus.jpg",
-}
+const mokPanoramas: Panorama[] = [
+  {
+    name: "Главный корпус",
+    address: "г. Донецк, ул. Пушкина, д.1",
+    loc1: "/room.jpg",
+    loc2: "/mus.jpg",
+  },
+  {
+    name: "Корпус №8",
+    address: "г. Донецк, ул. Артема, д.2",
+    loc1: "/alma.jpg",
+    loc2: "/lib.jpg",
+  },
+  {
+    name: "Корпус №3",
+    address: "г. Донецк, ул. И. Ткаченко, д.3",
+    loc1: "/mus.jpg",
+    loc2: "/lib.jpg",
+  },
+];
 
 export default function Page({ params }: { params: Params }) {
   const { data, isLoading, error } = useUniversity(params.id);
@@ -124,9 +138,9 @@ export default function Page({ params }: { params: Params }) {
             <UniversityOpenDays universityId={params.id} />
           </TabsContent>
           <TabsContent value="panorams">
-            <PanoramaView panorama={mokPanorama}/>
-            <PanoramaView panorama={mokPanorama}/>
-            <PanoramaView panorama={mokPanorama}/>
+            <PanoramaView panorama={mokPanoramas[0]} />
+            <PanoramaView panorama={mokPanoramas[1]} />
+            <PanoramaView panorama={mokPanoramas[2]} />
           </TabsContent>
         </Tabs>
       </div>
