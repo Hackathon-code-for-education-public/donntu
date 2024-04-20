@@ -26,16 +26,16 @@ export function MainNavigation() {
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <Link href="/tickets" legacyBehavior passHref>
+            <Link href="/for-applicants" legacyBehavior passHref>
               <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                Тикеты
+                Абитуриентам
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
-            <Link href="/analytics" legacyBehavior passHref>
+            <Link href="/for-universities" legacyBehavior passHref>
               <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                Аналитика
+                Университетам
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
