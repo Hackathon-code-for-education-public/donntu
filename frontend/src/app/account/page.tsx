@@ -24,30 +24,33 @@ export default function Page() {
           <p>{user.middlename}</p>
         </div>
         <p className="font-bold text-xl self-start">Личная информация:</p>
-        <Table className="w-2/3">
-          <TableBody>
-            <TableRow>
-              <TableCell className="font-medium">Фамилия</TableCell>
-              <TableCell className="text-right">{user.surname}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">Имя</TableCell>
-              <TableCell className="text-right">{user.name}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">Отчество</TableCell>
-              <TableCell className="text-right">{user.middlename}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">E-mail</TableCell>
-              <TableCell className="text-right">{user.email}</TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell className="font-medium">Роль</TableCell>
-              <TableCell className="text-right">{user.role}</TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
+        <div className="justify-stretch">
+          <Table>
+            <TableBody>
+              <TableRow>
+                <TableCell className="font-medium">Фамилия</TableCell>
+                <TableCell className="text-right">{user.surname}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Имя</TableCell>
+                <TableCell className="text-right">{user.name}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Отчество</TableCell>
+                <TableCell className="text-right">{user.middlename}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">E-mail</TableCell>
+                <TableCell className="text-right">{user.email}</TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell className="font-medium">Роль</TableCell>
+                <TableCell className="text-right">{user.role}</TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </div>
+
         <p className="font-bold text-xl self-start">Ваши отзывы: </p>
       </div>
     </main>
