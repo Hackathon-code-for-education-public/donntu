@@ -9,28 +9,35 @@ export type UserData = {
 };
 
 // Mock fetcher function
-const mockFetcher = async (url: string): Promise<UserData> => {
+const mockFetcher = async (url: string): Promise<UserData | null> => {
   // Simulate network delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   // Optionally, you can use the URL to differentiate responses if needed
+  /*
   return {
     id: '1',
     role: 'applicant',
     firstName: 'Test',
     middleName: 'Test',
     lastName: 'Test',
-  };
+  };*/
+
+  /*
+  const error = new Error('An error occurred while fetching the data.')
+  error.status = 401;
+  throw error
+  */
 };
 
 export function useUser() {
-  const { data, mutate, error } = useSWR("/api/v1/user", mockFetcher);
+  const { data, mutate, error, isLoading } = useSWR("/api/v1/user", mockFetcher);
 
-  const loading = !data && !error;
-  const loggedOut = error && error.status === 403;
+  // const loading = !data && !error;
+  const loggedOut = error && error.status === 401;
 
   return {
-    loading,
+    loading: isLoading,
     loggedOut,
     user: data,
     mutate,
