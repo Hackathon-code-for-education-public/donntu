@@ -1,5 +1,4 @@
 "use client";
-import { Review } from "./review";
 import { OpenDay } from "./open-day";
 import { useOpenDaysByUniversity } from "@/lib/use-open-days";
 

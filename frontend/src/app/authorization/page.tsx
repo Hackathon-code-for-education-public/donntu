@@ -83,40 +83,103 @@ function LoginForm() {
 }
 
 function RegisterForm() {
+  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleRegister = async (event) => {
+    event.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const data = await AuthAPI.register(
+        email,
+        password,
+        lastName,
+        firstName,
+        middleName
+      );
+      console.log("Registration successful:", data);
+      setLoading(false);
+    } catch (error) {
+      if (error instanceof Error) {
+        console.error("Registration failed:", error.message);
+        setError(error.message);
+      } else {
+        console.error("Registration failed with unknown error:", error);
+        setError("An unknown error occurred");
+      }
+      setLoading(false);
+    }
+  };
+
   return (
-    <form className="space-y-4">
+    <form className="space-y-4" onSubmit={handleRegister}>
       <div className="space-y-2">
-        <ComboBox items={items} defaultValue="applicant" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="surname">Фамилия</Label>
-        <Input id="surname" placeholder="Иванов" required type="text" />
+        <Label htmlFor="lastName">Фамилия</Label>
+        <Input
+          id="lastName"
+          value={lastName}
+          onChange={(e) => setLastName(e.target.value)}
+          placeholder="Иванов"
+          required
+          type="text"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="firstName">Имя</Label>
-        <Input id="firstName" placeholder="Иван" required type="text" />
+        <Input
+          id="firstName"
+          value={firstName}
+          onChange={(e) => setFirstName(e.target.value)}
+          placeholder="Иван"
+          required
+          type="text"
+        />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="patronymic">Отчество</Label>
-        <Input id="patronymic" placeholder="Иванович" type="text" />
+        <Label htmlFor="middleName">Отчество</Label>
+        <Input
+          id="middleName"
+          value={middleName}
+          onChange={(e) => setMiddleName(e.target.value)}
+          placeholder="Иванович"
+          type="text"
+        />
       </div>
       <div className="space-y-2">
         <Label htmlFor="email">Почта</Label>
-        <Input id="email" placeholder="m@example.com" required type="email" />
+        <Input
+          id="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="m@example.com"
+          required
+          type="email"
+        />
       </div>
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="password">Пароль</Label>
-        </div>
-        <Input id="password" required type="password" />
+        <Label htmlFor="password">Пароль</Label>
+        <Input
+          id="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          type="password"
+        />
       </div>
-      <Button className="w-full" type="submit">
+      <Button className="w-full" type="submit" disabled={loading}>
         Регистрация
       </Button>
+      {error && <div className="text-red-500">{error}</div>}
     </form>
   );
 }
-
 export default function Page() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-950 p-20">
