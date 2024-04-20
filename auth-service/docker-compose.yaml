@@ -14,7 +14,7 @@ services:
     ports:
       - "5252:5252"
 
-  postgres:
+  auth-postgres:
     image: postgres:16.2-alpine3.19
     restart: always
     volumes:
@@ -24,7 +24,7 @@ services:
     ports:
       - "5432:5432"
 
-  redis:
+  auth-redis:
     image: redis:7.2.4-alpine
     restart: always
     ports:
