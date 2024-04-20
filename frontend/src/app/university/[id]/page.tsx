@@ -1,6 +1,7 @@
 "use client";
 
-import Panorama from "@/components/panorama";
+import { Panorama } from "@/api/panorama";
+import PanoramaView from "@/components/panorama";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniversityOpenDays } from "@/components/university-open-days";
@@ -10,6 +11,13 @@ import Image from "next/image";
 
 interface Params {
   id: string;
+}
+
+const mokPanorama: Panorama = {
+  name: "Главный корпус",
+  address: "г. Донецк, ул. Пушкина, д.1",
+  loc1: "/room.jpg",
+  loc2: "/mus.jpg",
 }
 
 export default function Page({ params }: { params: Params }) {
@@ -116,9 +124,9 @@ export default function Page({ params }: { params: Params }) {
             <UniversityOpenDays universityId={params.id} />
           </TabsContent>
           <TabsContent value="panorams">
-            <Panorama />
-            <Panorama />
-            <Panorama />
+            <PanoramaView panorama={mokPanorama}/>
+            <PanoramaView panorama={mokPanorama}/>
+            <PanoramaView panorama={mokPanorama}/>
           </TabsContent>
         </Tabs>
       </div>

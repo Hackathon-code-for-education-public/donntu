@@ -2,14 +2,19 @@
 
 import React, { useState } from "react";
 import { Pannellum } from "pannellum-react";
+import { Panorama } from "@/api/panorama";
 
-export default function PannellumReact() {
-  const [currentPanorama, setCurrentPanorama] = useState("/room.jpg");
+interface PanoramaProps {
+  panorama: Panorama;
+}
+
+export default function PannellumReact({ panorama }: PanoramaProps) {
+  const [currentPanorama, setCurrentPanorama] = useState(panorama.loc1);
 
   return (
     <div>
       <p className="text-lg font-bold mb-4 mt-4">
-        Главный корпус, г. Донецк, ул. Пушкина, д. 1
+        {panorama.name + ", " + panorama.address}
       </p>
       <Pannellum
         width="850px"
@@ -26,7 +31,7 @@ export default function PannellumReact() {
           yaw={-120}
           handleClick={(evt: Event, name: string) =>
             setCurrentPanorama(
-              currentPanorama !== "/room.jpg" ? "/room.jpg" : "/mus.jpg"
+              currentPanorama !== panorama.loc1 ? panorama.loc1 : panorama.loc2
             )
           }
         />
