@@ -15,5 +15,6 @@ type (
 
 	UniversityService interface {
 		GetOpenDays(ctx context.Context, universityId string) ([]*OpenDay, error)
+		GetReviews(ctx context.Context, universityId string, offset int, limit int) ([]*Review, error)
 	}
 )

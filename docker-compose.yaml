@@ -5,6 +5,7 @@ include:
   - file-service/docker-compose.yaml
   - gateway/docker-compose.yaml
   - universities/docker-compose.yaml
+  - verification-service/docker-compose.yaml
 
 # services:
   # auth-service:

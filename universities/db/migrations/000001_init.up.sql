@@ -21,9 +21,17 @@ create table if not exists university_open_days
     link          text                              not null
 );
 
-create type statuses as enum('open', 'closed');
+create type statuses as enum ('Студент этого вуза',
+    'Выпускник этого вуза', 'Отчисленный', 'Некто');
+
+create type sentiments as enum ('positive', 'negative', 'neutral');
 
 create table if not exists university_reviews
 (
-    author_status
+    university_id text references universities (id) not null,
+    author_status statuses                          not null,
+    sentiment     sentiments                        not null,
+    date          timestamp                         not null,
+    text          text                              not null,
+    repliesCount  integer                           not null
 );

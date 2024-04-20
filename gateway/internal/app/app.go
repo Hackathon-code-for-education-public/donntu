@@ -60,5 +60,8 @@ func (a *Application) Run() error {
 	u := v1.Group("/universities")
 	u.Get("/open", a.universityController.GetOpenDays())
 
+	r := v1.Group("/reviews")
+	r.Get("/", a.universityController.GetReviews())
+
 	return a.http.Listen(fmt.Sprintf(":%d", a.cfg.HTTP.Port))
 }

@@ -20,6 +20,8 @@ type AuthUseCase interface {
 	SingOut(ctx context.Context, accessToken string) error
 	Authenticate(ctx context.Context, accessToken string, role entity.Role) (*entity.UserClaims, error)
 	Refresh(ctx context.Context, refreshToken string) (*entity.Tokens, error)
+
+	PatchRole(ctx context.Context, userId string, role entity.Role) error
 }
 
 type Server struct {
@@ -155,4 +157,17 @@ func (s *Server) Refresh(ctx context.Context, request *auth.RefreshRequest) (*au
 		Access:  tokens.Access,
 		Refresh: tokens.Refresh,
 	}, nil
+}
+
+func (s *Server) PatchRole(ctx context.Context, request *auth.PatchRoleRequest) (*auth.Empty, error) {
+	err := s.uc.PatchRole(ctx, request.UserId, entity.Role(request.NewRole))
+	if err != nil {
+		if errors.Is(err, usecase.ErrUserNotFound) {
+			return nil, status.Error(codes.NotFound, "user not found")
+		}
+
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &auth.Empty{}, nil
 }

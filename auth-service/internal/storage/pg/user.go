@@ -67,7 +67,7 @@ func (u *UserStorage) GetByEmail(ctx context.Context, email string) (*models.Use
 		return nil, err
 
 	}
-	//log.Trace("query result user", slog.Any("user", user))
+
 	return &user, nil
 }
 
@@ -142,5 +142,28 @@ func (u *UserStorage) Delete(ctx context.Context, id int) error {
 
 	log.Debug("successfully deleted user", slog.Any("id", id))
 
+	return nil
+}
+
+func (u *UserStorage) PatchRole(ctx context.Context, id string, role string) error {
+	log := ctx.Value("logger").(*slog.Logger).With("method", "PatchRole")
+
+	query, args, err := squirrel.Update("users").
+		Set("role", role).
+		Where(squirrel.Eq{"id": id}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		log.Error("failed to generate SQL query", slog.String("err", err.Error()))
+		return err
+	}
+
+	log.Debug("executing query", slog.String("query", query), slog.Any("args", args))
+	if _, err := u.db.Exec(query, args...); err != nil {
+		log.Error("failed to execute query", slog.String("err", err.Error()))
+		return err
+	}
+
+	log.Debug("successfully updated user", slog.Any("id", id))
 	return nil
 }
