@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { useUser } from "@/lib/use-user";
 
 export function MainNavigation() {
-  const { loading, loggedOut } = useUser();
+  const { user, loading, loggedOut } = useUser();
 
   return (
     <header className="flex justify-between p-2">
@@ -27,8 +27,25 @@ export function MainNavigation() {
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
-          {
-          /*
+          {user && (
+            <NavigationMenuItem>
+              <Link href="/account" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Профиль
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+          )}
+          {user && (
+            <NavigationMenuItem>
+              <Link href="/chat" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Чат
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
+          )}
+          {/*
           <NavigationMenuItem>
             <Link href="/for-applicants" legacyBehavior passHref>
               <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -36,10 +53,8 @@ export function MainNavigation() {
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
-          */
-          }
-          {
-          /*
+          */}
+          {/*
           <NavigationMenuItem>
             <Link href="/for-universities" legacyBehavior passHref>
               <NavigationMenuLink className={navigationMenuTriggerStyle()}>
@@ -47,24 +62,17 @@ export function MainNavigation() {
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
-          */
-          }
+          */}
         </NavigationMenuList>
       </NavigationMenu>
-      {!loading && loggedOut && (
+      {!loading && !loggedOut && (
         <Button>
           <Link href="/authorization" legacyBehavior passHref>
             Вход
           </Link>
         </Button>
       )}
-      {
-        !loading && !loggedOut && (
-          <Button>
-            Выйти
-          </Button>
-        )
-      }
+      {!loading && loggedOut && <Button>Выйти</Button>}
     </header>
   );
 }

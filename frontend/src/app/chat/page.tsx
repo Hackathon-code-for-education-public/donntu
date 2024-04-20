@@ -6,7 +6,6 @@ import { useChats } from "@/lib/use-chats";
 import { useMessages } from "@/lib/use-messages";
 import { PlusIcon } from "lucide-react";
 import { useState } from "react";
-import useSWR from "swr";
 
 interface Message {
   sender: string;

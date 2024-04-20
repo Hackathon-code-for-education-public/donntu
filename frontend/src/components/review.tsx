@@ -21,13 +21,15 @@ export function Review({ review }: IProps) {
   const fullReviewText = review.text;
   const isLongReview = fullReviewText.length > 300;
 
+  console.log(review.sentiment)
+
   const reviewClass = review.sentiment === 'positive' ? 'bg-green-100' : 
                       review.sentiment === 'negative' ? 'bg-red-100' : 'bg-gray-100';
   
   const [showFullReview, setShowFullReview] = useState(false);
 
   return (
-    <div className={`max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-md w-full ${reviewClass}`}>
+    <div className={`max-w-4xl mx-auto p-6 rounded-lg shadow-md w-full ${reviewClass}`}>
       <div className="flex items-start space-x-4">
         <Avatar>
           <AvatarImage
