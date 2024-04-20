@@ -7,10 +7,20 @@ services:
     restart: always
     volumes:
       - pgdata:/var/lib/postgresql/data
-    env_file:
-      - .env.pg
+    environment:
+      - POSTGRES_USER=${UNIVERSITY_DB_USER}
+      - POSTGRES_PASSWORD=${UNIVERSITY_DB_PASS}
+      - POSTGRES_DB=${UNIVERSITY_DB_NAME}
     ports:
-      - "5432:5432"
+      - "5438:${UNIVERSITY_DB_PORT}"
+  gateway:
+    build:
+      context: .
+    container_name: 'uni'
+    env_file:
+      - .env
+    ports:
+      - "8090:${UNIVERSITY_SERVICE_PORT}"
 
 volumes:
   pgdata:
