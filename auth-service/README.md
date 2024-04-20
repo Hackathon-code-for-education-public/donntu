@@ -4,27 +4,27 @@
 
 ## Среда окружения
 
-### Example of env files
-#### .env.redis
+### Пример ENV-файлов
+#### ENV-Переменные для PostgreSQL `.env.redis`
 ```
 REDIS_ARGS="--requirepass root"
 ```
 
-#### .env.pg
+#### ENV-Переменные для PostgreSQL `.env.pg`
 ```
 POSTGRES_USER - имя пользователя Postgre
 POSTGRES_PASSWORD - пароль к пользователю
 POSTGRES_DB - название бд
 ```
 
-#### .env.prod
+#### ENV-Переменные для работы приложения - `.env.prod`
 ```
 DB_USER=postgres
 DB_PASS=postgres
 
 DB_HOST=postgres
 DB_PORT=5432
-DB_NAME=users
+DB_NAME=credentials
 
 REDIS_HOST=redis
 REDIS_PORT=6379
