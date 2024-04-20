@@ -20,6 +20,30 @@ message OpenDays {
   repeated OpenDay days = 1;
 }
 
+message Params {
+  int32 offset = 1;
+  int32 limit = 2;
+}
+
+message GetReviewsRequest {
+  string universityId = 1;
+  Params params = 2;
+}
+
+message Review {
+  string universityId = 1;
+  string authorStatus = 2;
+  string sentiment = 3;
+  int64 date = 4;
+  string text = 5;
+  int32 repliesCount = 6;
+}
+
+message Reviews {
+  repeated Review reviews = 1;
+}
+
 service Universities {
   rpc GetOpenDays(UniversityId) returns (OpenDays);
+  rpc GetReviews(GetReviewsRequest) returns (Reviews);
 }
