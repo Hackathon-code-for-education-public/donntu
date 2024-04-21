@@ -4,7 +4,7 @@ import { University } from "@/api/university";
 
 export function useUniversity(id: string) {
   const { data, error, isLoading } = useSWR<University>(
-    `/api/v1/universities/${id}`,
+    id && `/api/v1/universities/${id}`,
     fetcherWithData
   );
   // TODO
