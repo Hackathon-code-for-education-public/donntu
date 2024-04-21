@@ -10,6 +10,41 @@ import (
 	"time"
 )
 
+const addPanorama = `-- name: AddPanorama :one
+insert into university_panoramas (university_id, address, name, firstlocation, secondlocation, type)
+values ($1, $2, $3, $4, $5, $6) returning university_id, address, name, firstlocation, secondlocation, type
+`
+
+type AddPanoramaParams struct {
+	UniversityID   string        `json:"university_id"`
+	Address        string        `json:"address"`
+	Name           string        `json:"name"`
+	Firstlocation  string        `json:"firstlocation"`
+	Secondlocation string        `json:"secondlocation"`
+	Type           PanoramaTypes `json:"type"`
+}
+
+func (q *Queries) AddPanorama(ctx context.Context, arg AddPanoramaParams) (UniversityPanorama, error) {
+	row := q.db.QueryRowContext(ctx, addPanorama,
+		arg.UniversityID,
+		arg.Address,
+		arg.Name,
+		arg.Firstlocation,
+		arg.Secondlocation,
+		arg.Type,
+	)
+	var i UniversityPanorama
+	err := row.Scan(
+		&i.UniversityID,
+		&i.Address,
+		&i.Name,
+		&i.Firstlocation,
+		&i.Secondlocation,
+		&i.Type,
+	)
+	return i, err
+}
+
 const getOpenDays = `-- name: GetOpenDays :many
 
 select u.name, od.description, od.address, od.link, od.date
@@ -55,8 +90,50 @@ func (q *Queries) GetOpenDays(ctx context.Context, id string) ([]GetOpenDaysRow,
 	return items, nil
 }
 
+const getPanoramas = `-- name: GetPanoramas :many
+select university_id, address, name, firstlocation, secondlocation, type from university_panoramas p where university_id = $1 and type = $2 order by p.name
+`
+
+type GetPanoramasParams struct {
+	UniversityID string        `json:"university_id"`
+	Type         PanoramaTypes `json:"type"`
+}
+
+func (q *Queries) GetPanoramas(ctx context.Context, arg GetPanoramasParams) ([]UniversityPanorama, error) {
+	rows, err := q.db.QueryContext(ctx, getPanoramas, arg.UniversityID, arg.Type)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []UniversityPanorama
+	for rows.Next() {
+		var i UniversityPanorama
+		if err := rows.Scan(
+			&i.UniversityID,
+			&i.Address,
+			&i.Name,
+			&i.Firstlocation,
+			&i.Secondlocation,
+			&i.Type,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getReviews = `-- name: GetReviews :many
-select university_id, author_status, sentiment, date, text, repliescount from university_reviews ur where ur.university_id = $3 offset $1 limit $2
+select university_id, author_status, sentiment, date, text, repliescount
+from university_reviews ur
+where ur.university_id = $3
+offset $1 limit $2
 `
 
 type GetReviewsParams struct {

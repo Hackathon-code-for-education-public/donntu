@@ -14,6 +14,10 @@ type GRPCServicesConfig struct {
 		Host string `env:"UNIVERSITY_SERVICE_HOST"`
 		Port int    `env:"UNIVERSITY_SERVICE_PORT"`
 	}
+	FileService struct {
+		Host string `env:"FILE_SERVICE_HOST"`
+		Port int    `env:"FILE_SERVICE_PORT"`
+	}
 }
 type HTTPConfig struct {
 	Port int `env:"HTTP_PORT"`
