@@ -1,4 +1,5 @@
-import { API_HOST, AuthAPI } from "./auth";
+import { AuthAPI } from "./auth";
+import { API_HOST } from "./config";
 
 export const fetcher = async (url: string) => {
   const getHeaders = (token: string | null) => ({

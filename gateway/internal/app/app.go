@@ -71,6 +71,8 @@ func (a *Application) Run() error {
 
 	r := v1.Group("/reviews")
 	r.Get("/", a.universityController.GetReviews())
+	r.Post("/", a.universityController.CreateReview())
+	r.Get("/:id", a.universityController.GetReplies())
 
 	p := v1.Group("/panoramas")
 	p.Get("/", a.universityController.GetPanorama())

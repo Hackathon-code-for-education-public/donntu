@@ -70,8 +70,9 @@ func (s *UniversityService) GetReviews(ctx context.Context, universityId string,
 	reviews := make([]*domain.Review, len(res.Reviews))
 	for i, review := range res.Reviews {
 		reviews[i] = &domain.Review{
+			ReviewId:     review.ReviewId,
 			UniversityId: universityId,
-			Date:         time.UnixMilli(review.Date),
+			Date:         time.Unix(review.Date, 0).Local(),
 			Text:         review.Text,
 			AuthorStatus: review.AuthorStatus,
 			RepliesCount: int(review.RepliesCount),
@@ -81,6 +82,55 @@ func (s *UniversityService) GetReviews(ctx context.Context, universityId string,
 
 	return reviews, nil
 }
+
+func (s *UniversityService) CreateReview(ctx context.Context, review *domain.Review) (*domain.Review, error) {
+	item, err := s.client.CreateReview(ctx, &universities.CreateReviewRequest{
+		Review: &universities.Review{
+			UniversityId: review.UniversityId,
+			Text:         review.Text,
+			AuthorStatus: review.AuthorStatus,
+			RepliesCount: int32(review.RepliesCount),
+			Sentiment:    review.Sentiment,
+		},
+		ParentReviewId: review.ParentId,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.Review{
+		ReviewId:     item.ReviewId,
+		UniversityId: review.UniversityId,
+		Date:         time.Unix(item.Date, 0).Local(),
+		Text:         item.Text,
+		AuthorStatus: item.AuthorStatus,
+		RepliesCount: int(item.RepliesCount),
+		Sentiment:    item.Sentiment,
+	}, nil
+}
+
+func (s *UniversityService) GetReplies(ctx context.Context, reviewID string) ([]*domain.Review, error) {
+	res, err := s.client.GetReplies(ctx, &universities.UniversityId{Id: reviewID})
+	if err != nil {
+		return nil, err
+	}
+
+	replies := make([]*domain.Review, len(res.Reviews))
+	for i, reply := range res.Reviews {
+		replies[i] = &domain.Review{
+			ReviewId:     reply.ReviewId,
+			UniversityId: reply.UniversityId,
+			Date:         time.Unix(reply.Date, 0).Local(),
+			Text:         reply.Text,
+			AuthorStatus: reply.AuthorStatus,
+			RepliesCount: int(reply.RepliesCount),
+			Sentiment:    reply.Sentiment,
+		}
+	}
+
+	return replies, nil
+}
+
 func (s *UniversityService) CreatePanorama(ctx context.Context, panorama *domain.Panorama) (*domain.Panorama, error) {
 	p, err := s.client.CreatePanorama(ctx, &universities.CreatePanoramaRequest{
 		Panorama: &universities.Panorama{

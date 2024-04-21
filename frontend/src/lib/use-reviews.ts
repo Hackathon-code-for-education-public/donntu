@@ -1,9 +1,8 @@
 import useSWRInfinite from "swr/infinite";
-import { fetcher, fetcherWithData } from "./fetcher";
-import { API_HOST } from "./auth";
+import { fetcherWithData } from "./fetcher";
 
 export type ReviewData = {
-  id: string;
+  reviewId: string;
   authorStatus: string;
   date: string;
   sentiment: string;
@@ -20,7 +19,7 @@ export function useReviewsByUniversity(universityId: string) {
     return `/api/v1/reviews?universityId=${universityId}&offset=${pageIndex * 10}&limit=10`;
   };
 
-  const { data, size, setSize, isLoading, error } = useSWRInfinite(getKey, fetcherWithData);
+  const { data, size, setSize, isLoading, error } = useSWRInfinite<ReviewData[]>(getKey, fetcherWithData);
 
   // Return the necessary values
   return {

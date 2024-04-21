@@ -1,4 +1,4 @@
-export const API_HOST = "http://mzhn.fun:8080";
+import { API_HOST } from "./config";
 
 export class AuthAPI {
   static getAccessToken(): string | null {
