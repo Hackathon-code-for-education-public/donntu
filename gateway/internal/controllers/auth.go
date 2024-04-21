@@ -245,7 +245,7 @@ func (a *AuthController) GetUser() fiber.Handler {
 
 		user, err := a.authService.GetUser(c.Context(), userId)
 		if err != nil {
-			return err
+			return internal(err.Error())
 		}
 
 		return ok(c, user)
