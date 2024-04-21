@@ -23,6 +23,10 @@ type Handler struct {
 	service Service
 }
 
+func NewHandler(service Service) *Handler {
+	return &Handler{service: service}
+}
+
 func (h Handler) Send(ctx context.Context, request *chat.Message) (*chat.Empty, error) {
 
 	message := &entity.Message{

@@ -4,17 +4,20 @@
 package app
 
 import (
+	"chat-service/internal/config"
+	"chat-service/internal/handlers/grpc"
+	"chat-service/internal/service"
+	"chat-service/internal/storage/pg"
+	redis2 "chat-service/internal/storage/redis"
+	"context"
 	"fmt"
 	"github.com/google/wire"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/redis/go-redis/v9"
 	"log/slog"
 	"os"
-	//"verification-service/internal/config"
-	//"verification-service/internal/handlers/grpc"
-	//"verification-service/internal/services"
-	//"verification-service/internal/storage/api"
-	//"verification-service/internal/storage/pg"
+	"time"
 )
 
 func Init() (*App, func(), error) {
@@ -24,20 +27,22 @@ func Init() (*App, func(), error) {
 			wire.NewSet(config.New),
 			wire.NewSet(initLogger),
 			wire.NewSet(initDB),
-			//
-			//wire.NewSet(pg.NewReasonStorage),
-			//wire.NewSet(pg.NewRequestStorage),
-			//wire.NewSet(api.NewAuthService),
-			//wire.NewSet(services.New),
-			//
-			//wire.Bind(new(services.ReasonStorage), new(*pg.ReasonStorage)),
-			//wire.Bind(new(services.RequestStorage), new(*pg.RequestStorage)),
-			//wire.Bind(new(services.RoleUpdater), new(*api.AuthService)),
-			//
-			//wire.Bind(new(grpc.Service), new(*services.Service)),
-			//wire.NewSet(grpc.New),
-		),
-	)
+			wire.NewSet(initRedis),
+
+			wire.NewSet(service.New),
+
+			wire.Bind(new(grpc.Service), new(*service.Service)),
+
+			wire.NewSet(pg.NewChatStorage),
+			wire.NewSet(pg.NewMessageStorage),
+			wire.NewSet(redis2.NewBroker),
+
+			wire.Bind(new(service.ChatStorage), new(*pg.ChatStorage)),
+			wire.Bind(new(service.MessageStorage), new(*pg.MessageStorage)),
+			wire.Bind(new(service.Broker), new(*redis2.Broker)),
+
+			wire.NewSet(grpc.NewHandler),
+		))
 }
 
 func initLogger(cfg *config.Config) *slog.Logger {
@@ -51,7 +56,7 @@ func initLogger(cfg *config.Config) *slog.Logger {
 		level = slog.LevelInfo
 	}
 
-	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
+	l := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
 	slog.SetDefault(l)
 	return l
 }
@@ -81,4 +86,30 @@ func initDB(cfg *config.Config) (*sqlx.DB, func(), error) {
 	slog.Info("connected to database", slog.String("conn", cs))
 
 	return db, func() { db.Close() }, nil
+}
+
+func initRedis(cfg *config.Config, log *slog.Logger) (*redis.Client, func(), error) {
+	host := cfg.Redis.Host
+	port := cfg.Redis.Port
+	pass := cfg.Redis.Pass
+	db := cfg.Redis.DB
+
+	client := redis.NewClient(&redis.Options{
+		Addr:     fmt.Sprintf("%s:%d", host, port),
+		Password: pass,
+		DB:       db,
+	})
+
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	log.Info("connecting to redis", slog.Int("db", db), slog.String("host", host), slog.Int("port", port))
+
+	if _, err := client.Ping(ctx).Result(); err != nil {
+		log.Error("failed to connect to redis", slog.String("err", err.Error()), slog.Int("db", db), slog.String("host", host), slog.Int("port", port))
+		return nil, func() { client.Close() }, err
+	}
+
+	log.Info("connected to redis", slog.Int("db", db), slog.String("host", host), slog.Int("port", port))
+
+	return client, func() { client.Close() }, nil
 }

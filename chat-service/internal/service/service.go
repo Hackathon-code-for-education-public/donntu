@@ -35,7 +35,7 @@ type Service struct {
 	//userStorage    UserStorage
 }
 
-func NewService(broker Broker, chatStorage ChatStorage, messageStorage MessageStorage) *Service {
+func New(broker Broker, chatStorage ChatStorage, messageStorage MessageStorage) *Service {
 	return &Service{
 		broker:         broker,
 		chatStorage:    chatStorage,

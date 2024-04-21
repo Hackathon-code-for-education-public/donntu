@@ -7,15 +7,18 @@
 package app
 
 import (
+	"chat-service/internal/config"
+	"chat-service/internal/handlers/grpc"
+	"chat-service/internal/service"
+	"chat-service/internal/storage/pg"
+	"chat-service/internal/storage/redis"
+	"context"
 	"fmt"
 	"github.com/jmoiron/sqlx"
+	redis2 "github.com/redis/go-redis/v9"
 	"log/slog"
 	"os"
-	"verification-service/internal/config"
-	"verification-service/internal/handlers/grpc"
-	"verification-service/internal/services"
-	"verification-service/internal/storage/api"
-	"verification-service/internal/storage/pg"
+	"time"
 )
 
 import (
@@ -27,17 +30,23 @@ import (
 func Init() (*App, func(), error) {
 	configConfig := config.New()
 	logger := initLogger(configConfig)
-	db, cleanup, err := initDB(configConfig)
+	client, cleanup, err := initRedis(configConfig, logger)
 	if err != nil {
 		return nil, nil, err
 	}
-	requestStorage := pg.NewRequestStorage(db)
-	reasonStorage := pg.NewReasonStorage(db)
-	authService := api.NewAuthService(configConfig)
-	service := services.New(requestStorage, reasonStorage, authService)
-	handler := grpc.New(service)
+	broker := redis.NewBroker(client)
+	db, cleanup2, err := initDB(configConfig)
+	if err != nil {
+		cleanup()
+		return nil, nil, err
+	}
+	chatStorage := pg.NewChatStorage(db)
+	messageStorage := pg.NewMessageStorage(db)
+	serviceService := service.New(broker, chatStorage, messageStorage)
+	handler := grpc.NewHandler(serviceService)
 	app := newApp(configConfig, logger, handler)
 	return app, func() {
+		cleanup2()
 		cleanup()
 	}, nil
 }
@@ -55,7 +64,7 @@ func initLogger(cfg *config.Config) *slog.Logger {
 		level = slog.LevelInfo
 	}
 
-	l := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
+	l := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: level}))
 	slog.SetDefault(l)
 	return l
 }
@@ -83,4 +92,30 @@ func initDB(cfg *config.Config) (*sqlx.DB, func(), error) {
 	slog.Info("connected to database", slog.String("conn", cs))
 
 	return db, func() { db.Close() }, nil
+}
+
+func initRedis(cfg *config.Config, log *slog.Logger) (*redis2.Client, func(), error) {
+	host := cfg.Redis.Host
+	port := cfg.Redis.Port
+	pass := cfg.Redis.Pass
+	db := cfg.Redis.DB
+
+	client := redis2.NewClient(&redis2.Options{
+		Addr:     fmt.Sprintf("%s:%d", host, port),
+		Password: pass,
+		DB:       db,
+	})
+
+	ctx, _ := context.WithTimeout(context.Background(), 30*time.Second)
+
+	log.Info("connecting to redis", slog.Int("db", db), slog.String("host", host), slog.Int("port", port))
+
+	if _, err := client.Ping(ctx).Result(); err != nil {
+		log.Error("failed to connect to redis", slog.String("err", err.Error()), slog.Int("db", db), slog.String("host", host), slog.Int("port", port))
+		return nil, func() { client.Close() }, err
+	}
+
+	log.Info("connected to redis", slog.Int("db", db), slog.String("host", host), slog.Int("port", port))
+
+	return client, func() { client.Close() }, nil
 }
