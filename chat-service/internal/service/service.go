@@ -3,24 +3,24 @@ package service
 import (
 	"chat-service/internal/dto"
 	"chat-service/internal/entity"
+	"chat-service/internal/handlers/grpc"
 	"chat-service/internal/models"
 	"context"
 	"github.com/google/uuid"
 	"log/slog"
 )
 
+var _ grpc.Service = (*Service)(nil)
+
 type ChatStorage interface {
 	Create(ctx context.Context, id string, userId string, targetId string) error
-	ListChatByUserId(ctx context.Context, userId string) ([]*entity.Chat, error)
-	GetHistory(ctx context.Context, chatId string)
+	ListChatByUserId(ctx context.Context, userId string) ([]*dto.Chat, error)
+	GetHistory(ctx context.Context, chatId string) ([]*models.Message, error)
 }
 
 type MessageStorage interface {
 	Save(ctx context.Context, message *models.Message) error
 	MarkAsRead(ctx context.Context, messageId int64) error
-}
-
-type UserStorage interface {
 }
 
 type Broker interface {
@@ -32,7 +32,15 @@ type Service struct {
 	broker         Broker
 	chatStorage    ChatStorage
 	messageStorage MessageStorage
-	userStorage    UserStorage
+	//userStorage    UserStorage
+}
+
+func NewService(broker Broker, chatStorage ChatStorage, messageStorage MessageStorage) *Service {
+	return &Service{
+		broker:         broker,
+		chatStorage:    chatStorage,
+		messageStorage: messageStorage,
+	}
 }
 
 func (s Service) Send(ctx context.Context, message *entity.Message) error {
@@ -101,6 +109,10 @@ func (s Service) CreateChat(ctx context.Context, ch *entity.Chat) error {
 	return nil
 }
 
-func (s Service) ListChat(ctx context.Context, userId string) ([]*entity.Chat, error) {
+func (s Service) ListChat(ctx context.Context, userId string) ([]*dto.Chat, error) {
 	return s.chatStorage.ListChatByUserId(ctx, userId)
+}
+
+func (s Service) GetHistory(ctx context.Context, chatId string) ([]*models.Message, error) {
+	return s.chatStorage.GetHistory(ctx, chatId)
 }

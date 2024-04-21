@@ -1,7 +1,7 @@
 package redis
 
 import (
-	"chat-service/internal/models"
+	"chat-service/internal/dto"
 	"context"
 	"encoding/json"
 	"github.com/redis/go-redis/v9"
@@ -15,7 +15,7 @@ func NewBroker(client *redis.Client) *Broker {
 	return &Broker{client: client}
 }
 
-func (r *Broker) Subscribe(ctx context.Context, topic string, handleMessage func(m *models.Message) error) error {
+func (r *Broker) Subscribe(ctx context.Context, topic string, ch chan<- *dto.Message) error {
 	sub := r.client.Subscribe(ctx, topic)
 
 	for {
@@ -23,19 +23,17 @@ func (r *Broker) Subscribe(ctx context.Context, topic string, handleMessage func
 		case <-ctx.Done():
 			return nil
 		case msg := <-sub.Channel():
-			m := &models.Message{}
+			m := &dto.Message{}
 
 			if err := json.Unmarshal([]byte(msg.Payload), &m); err != nil {
 				return err
 			}
 
-			if err := handleMessage(m); err != nil {
-				return err
-			}
+			ch <- m
 		}
 	}
 }
 
-func (r *Broker) Publish(ctx context.Context, topic string, message *models.MessageDto) error {
+func (r *Broker) Publish(ctx context.Context, topic string, message *dto.Message) error {
 	return r.client.Publish(ctx, topic, message).Err()
 }

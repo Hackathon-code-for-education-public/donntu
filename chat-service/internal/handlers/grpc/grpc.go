@@ -2,18 +2,20 @@ package grpc
 
 import (
 	"chat-service/api/chat"
+	"chat-service/internal/dto"
 	"chat-service/internal/entity"
+	"chat-service/internal/models"
 	"context"
+	"log/slog"
 )
 
 type Service interface {
-	Send(context.Context, *entity.Message) error
-
-	Attach(ctx context.Context, chatId string, ch chan *entity.Message) error
+	Send(ctx context.Context, message *entity.Message) error
+	Attach(ctx context.Context, chatId string, ch chan<- *dto.Message) error
 
 	CreateChat(ctx context.Context, ch *entity.Chat) error
-	ListChat(ctx context.Context, userId string) ([]*entity.Chat, error)
-	GetHistory(ctx context.Context, chatId string) ([]*entity.Message, error)
+	ListChat(ctx context.Context, userId string) ([]*dto.Chat, error)
+	GetHistory(ctx context.Context, chatId string) ([]*models.Message, error)
 }
 
 type Handler struct {
@@ -32,8 +34,29 @@ func (h Handler) Send(ctx context.Context, request *chat.Message) (*chat.Empty, 
 	return &chat.Empty{}, h.service.Send(ctx, message)
 }
 
-func (h Handler) Attach(request *chat.AttachRequest, server chat.Chat_AttachServer) error {
+func (h Handler) Attach(request *chat.AttachRequest, stream chat.Chat_AttachServer) error {
+	ctx := stream.Context()
 
+	msgCh := make(chan *dto.Message)
+
+	if err := h.service.Attach(ctx, request.ChatId, msgCh); err != nil {
+		return err
+	}
+
+	for {
+		select {
+		case <-ctx.Done():
+			close(msgCh)
+			return nil
+		case m := <-msgCh:
+			if err := stream.Send(&chat.IncomingMessage{
+				Text: m.Text,
+			}); err != nil {
+				slog.Error("failed to send", slog.String("err", err.Error()))
+				return err
+			}
+		}
+	}
 }
 
 func (h Handler) Create(ctx context.Context, request *chat.CreateRequest) (*chat.CreateResponse, error) {

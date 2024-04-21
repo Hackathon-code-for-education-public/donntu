@@ -30,6 +30,7 @@ func (c ChatStorage) Create(ctx context.Context, id string, userId string, targe
 		Insert("chats").
 		Columns("chat_id").
 		Values(id).
+		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
 		slog.Error("failed build insert into chats error", slog.String("err", err.Error()))
@@ -46,6 +47,7 @@ func (c ChatStorage) Create(ctx context.Context, id string, userId string, targe
 		Insert("users_to_chats").
 		Columns("chat_id", "user_id").
 		Values(id, userId).
+		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
 		slog.Error("failed build insert into users_to_chats error user_id", slog.String("err", err.Error()))
@@ -66,6 +68,7 @@ func (c ChatStorage) Create(ctx context.Context, id string, userId string, targe
 		Insert("users_to_chats").
 		Columns("chat_id", "user_id").
 		Values(id, targetId).
+		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
 		slog.Error("failed build insert into users_to_chats error target_id", slog.String("err", err.Error()))
@@ -105,6 +108,7 @@ func (c ChatStorage) ListChatByUserId(ctx context.Context, userId string) ([]*dt
 		Select("*").
 		From("users_to_chat uc").
 		Where(squirrel.Eq{"uc.user_id": userId}).
+		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
 		slog.Error("failed build sql", slog.String("err", err.Error()))
@@ -136,6 +140,7 @@ func (c ChatStorage) GetHistory(ctx context.Context, chatId string) ([]*models.M
 		Select("*").
 		From("messages").
 		Where(squirrel.Eq{"chat_id": chatId}).
+		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {
 		slog.Error("failed build sql", slog.String("err", err.Error()))
