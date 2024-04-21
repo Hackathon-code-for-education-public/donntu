@@ -35,6 +35,7 @@ message ListRequest {
 }
 
 message ChatEntity {
+  string userId = 1;
   string chatId = 2;
 }
 

@@ -29,6 +29,57 @@ func NewChatController(cfg *config.Config) *ChatController {
 	}
 }
 
+func (c *ChatController) GetHistory() fiber.Handler {
+	type message struct {
+		Message string `json:"message"`
+		SentAt  int64  `json:"sentAt"`
+		UserId  string `json:"userId"`
+	}
+	return func(ctx *fiber.Ctx) error {
+
+		l := slog.With(slog.String("handler", "ChatController.GetHistory"))
+
+		chatId := ctx.Params("id", "")
+		if chatId == "" {
+			l.Error("cant get chat id")
+			return bad("cant get chat id")
+		}
+
+		stream, err := c.client.GetMessageHistory(context.Background(), &chat.GetMessageHistoryRequest{
+			ChatId: chatId,
+		})
+		if err != nil {
+			return err
+		}
+
+		res := make([]*message, 0)
+
+		recv, err := stream.Recv()
+		if err != nil {
+			l.Error("stream cant received", slog.String("err", err.Error()))
+			return internal(err.Error())
+		}
+		for recv != nil {
+			res = append(res, &message{
+				Message: recv.Message,
+				SentAt:  recv.SentAt,
+				UserId:  recv.UserId,
+			})
+			recv, err = stream.Recv()
+			if err != nil {
+				if err == io.EOF {
+					l.Debug("stream closed")
+					break
+				}
+				l.Error("stream cant received", slog.String("err", err.Error()))
+				return internal(err.Error())
+			}
+		}
+
+		return ctx.JSON(res)
+	}
+}
+
 func (c *ChatController) GetChats() fiber.Handler {
 
 	type chats struct {
@@ -63,7 +114,7 @@ func (c *ChatController) GetChats() fiber.Handler {
 		}
 		for recv != nil {
 			res = append(res, &chats{
-				//UserId: recv.UserId,
+				UserId: recv.UserId,
 				ChatId: recv.ChatId,
 			})
 			recv, err = stream.Recv()

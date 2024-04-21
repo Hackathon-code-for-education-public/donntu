@@ -101,6 +101,7 @@ func (a *Application) Run() error {
 	chats.Post("/", a.authController.AuthRequiredV2(nil), a.chatController.CreateChat())
 	chats.Get("/:id", a.authController.AuthRequiredV2(nil), a.chatController.Attach())
 	chats.Post("/:id", a.authController.AuthRequiredV2(nil), a.chatController.SendMessage())
+	chats.Get("/history/:id", a.authController.AuthRequiredV2(nil), a.chatController.GetHistory())
 
 	go func() {
 		err := a.http2.Listen(fmt.Sprintf(":%d", a.cfg.HTTP.Port+1))

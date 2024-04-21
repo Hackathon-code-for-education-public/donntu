@@ -89,6 +89,7 @@ func (h Handler) List(request *chat.ListRequest, server chat.Chat_ListServer) er
 
 	for _, ch := range chats {
 		if err := server.Send(&chat.ChatEntity{
+			UserId: ch.UserId,
 			ChatId: ch.Id,
 		}); err != nil {
 			return err
