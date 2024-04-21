@@ -24,6 +24,8 @@ const _ = grpc.SupportPackageIsVersion7
 type ChatClient interface {
 	Send(ctx context.Context, in *Message, opts ...grpc.CallOption) (*Empty, error)
 	Attach(ctx context.Context, in *AttachRequest, opts ...grpc.CallOption) (Chat_AttachClient, error)
+	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
+	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (Chat_ListClient, error)
 }
 
 type chatClient struct {
@@ -75,12 +77,55 @@ func (x *chatAttachClient) Recv() (*IncomingMessage, error) {
 	return m, nil
 }
 
+func (c *chatClient) Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error) {
+	out := new(CreateResponse)
+	err := c.cc.Invoke(ctx, "/Chat/Create", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *chatClient) List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (Chat_ListClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Chat_ServiceDesc.Streams[1], "/Chat/List", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &chatListClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Chat_ListClient interface {
+	Recv() (*ChatEntity, error)
+	grpc.ClientStream
+}
+
+type chatListClient struct {
+	grpc.ClientStream
+}
+
+func (x *chatListClient) Recv() (*ChatEntity, error) {
+	m := new(ChatEntity)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // ChatServer is the server API for Chat service.
 // All implementations must embed UnimplementedChatServer
 // for forward compatibility
 type ChatServer interface {
 	Send(context.Context, *Message) (*Empty, error)
 	Attach(*AttachRequest, Chat_AttachServer) error
+	Create(context.Context, *CreateRequest) (*CreateResponse, error)
+	List(*ListRequest, Chat_ListServer) error
 	mustEmbedUnimplementedChatServer()
 }
 
@@ -93,6 +138,12 @@ func (UnimplementedChatServer) Send(context.Context, *Message) (*Empty, error) {
 }
 func (UnimplementedChatServer) Attach(*AttachRequest, Chat_AttachServer) error {
 	return status.Errorf(codes.Unimplemented, "method Attach not implemented")
+}
+func (UnimplementedChatServer) Create(context.Context, *CreateRequest) (*CreateResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Create not implemented")
+}
+func (UnimplementedChatServer) List(*ListRequest, Chat_ListServer) error {
+	return status.Errorf(codes.Unimplemented, "method List not implemented")
 }
 func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
 
@@ -146,6 +197,45 @@ func (x *chatAttachServer) Send(m *IncomingMessage) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Chat_Create_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ChatServer).Create(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/Chat/Create",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ChatServer).Create(ctx, req.(*CreateRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Chat_List_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(ListRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ChatServer).List(m, &chatListServer{stream})
+}
+
+type Chat_ListServer interface {
+	Send(*ChatEntity) error
+	grpc.ServerStream
+}
+
+type chatListServer struct {
+	grpc.ServerStream
+}
+
+func (x *chatListServer) Send(m *ChatEntity) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -157,11 +247,20 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Send",
 			Handler:    _Chat_Send_Handler,
 		},
+		{
+			MethodName: "Create",
+			Handler:    _Chat_Create_Handler,
+		},
 	},
 	Streams: []grpc.StreamDesc{
 		{
 			StreamName:    "Attach",
 			Handler:       _Chat_Attach_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "List",
+			Handler:       _Chat_List_Handler,
 			ServerStreams: true,
 		},
 	},

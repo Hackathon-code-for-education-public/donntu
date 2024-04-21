@@ -3,7 +3,7 @@ create table if not exists messages (
     chatId text not null,
     userId text not null,
     text text not null,
-    read boolean not null,
+    read boolean not null default false,
     createdAt timestamp not null
 );
 
