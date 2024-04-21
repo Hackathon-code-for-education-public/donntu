@@ -18,7 +18,7 @@ export interface ReviewWithReplies {
 
 const mockData: ReviewWithReplies = {
   review: {
-    id: "",
+    reviewId: "",
     authorStatus: "Некто",
     date: "",
     sentiment: "positive",

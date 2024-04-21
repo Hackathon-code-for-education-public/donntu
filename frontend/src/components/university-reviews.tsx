@@ -20,7 +20,7 @@ export function UniversityReviews({ universityId }: IProps) {
       </>}
       {data &&
         data.map((review) => {
-          return <Review key={review.id} review={review} />;
+          return <Review key={review.reviewId} review={review} />;
         })}
       <Button onClick={() => loadMore()} disabled={isLoading}>Загрузить больше</Button>
     </div>
