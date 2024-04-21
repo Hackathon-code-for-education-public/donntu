@@ -18,10 +18,12 @@ type AuthUseCase interface {
 	SignUp(ctx context.Context, user *entity.User) (*entity.Tokens, error)
 	SignIn(ctx context.Context, user *entity.User) (*entity.Tokens, error)
 	SingOut(ctx context.Context, accessToken string) error
-	Authenticate(ctx context.Context, accessToken string, role entity.Role) (*entity.UserClaims, error)
+	Authenticate(ctx context.Context, accessToken string, role *entity.Role) (*entity.UserClaims, error)
 	Refresh(ctx context.Context, refreshToken string) (*entity.Tokens, error)
 
 	PatchRole(ctx context.Context, userId string, role entity.Role) error
+
+	GetUser(ctx context.Context, userId string) (*entity.User, error)
 }
 
 type Server struct {
@@ -106,20 +108,24 @@ func (s *Server) SignOut(ctx context.Context, request *auth.SignOutRequest) (*au
 
 func (s *Server) Auth(ctx context.Context, request *auth.AuthRequest) (*auth.AuthResponse, error) {
 
-	claims, err := s.uc.Authenticate(ctx, request.AccessToken, entity.Role(request.Role))
+	var role *entity.Role
+
+	if request.Role != nil {
+		r := entity.Role(*request.Role)
+		role = &r
+	}
+
+	claims, err := s.uc.Authenticate(ctx, request.AccessToken, role)
 	if err != nil {
 		if errors.Is(err, usecase.ErrTokenExpired) {
 			return nil, status.Error(codes.Unauthenticated, "token expired")
 		}
-
 		if errors.Is(err, usecase.ErrInvalidRole) {
 			return nil, status.Error(codes.PermissionDenied, "invalid role")
 		}
-
 		if errors.Is(err, usecase.ErrSessionNotFound) {
 			return nil, status.Error(codes.NotFound, "session not found")
 		}
-
 		if errors.Is(err, usecase.ErrInvalidToken) {
 			return nil, status.Error(codes.InvalidArgument, "invalid token")
 		}
@@ -170,4 +176,23 @@ func (s *Server) PatchRole(ctx context.Context, request *auth.PatchRoleRequest) 
 	}
 
 	return &auth.Empty{}, nil
+}
+
+func (s *Server) GetUser(ctx context.Context, request *auth.GetUserRequest) (*auth.GetUserResponse, error) {
+
+	id := request.Id
+
+	u, err := s.uc.GetUser(ctx, id)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, "user not found")
+	}
+
+	return &auth.GetUserResponse{
+		Id:         u.Id,
+		LastName:   u.LastName,
+		FirstName:  u.FirstName,
+		MiddleName: u.MiddleName,
+		Email:      u.Email,
+		Role:       auth.Role(u.Role),
+	}, nil
 }

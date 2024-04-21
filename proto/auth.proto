@@ -29,7 +29,7 @@ message SignOutRequest {
 
 message AuthRequest {
   string accessToken = 1;
-  Role role = 2;
+  optional Role role = 2;
 }
 
 message AuthResponse {
@@ -51,6 +51,19 @@ message PatchRoleRequest {
   Role newRole = 2;
 }
 
+message GetUserRequest {
+  string id = 1;
+}
+
+message GetUserResponse {
+  string id = 1;
+  string lastName = 2;
+  string firstName = 3;
+  string middleName = 4;
+  string email = 5;
+  Role role = 6;
+}
+
 service Auth {
   rpc SignIn(SignInRequest) returns (Tokens);
   rpc SignUp(SignUpRequest) returns (Tokens);
@@ -60,4 +73,5 @@ service Auth {
   rpc Refresh(RefreshRequest) returns (Tokens);
 
   rpc PatchRole(PatchRoleRequest) returns (Empty);
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
 }

@@ -57,6 +57,11 @@ func (a *Application) Run() error {
 	au.Post("/sign-out", a.authController.SignOut())
 	au.Post("/refresh", a.authController.Refresh())
 
+	v1.Get("/profile", a.authController.GetProfile(), a.authController.AuthRequired(nil))
+
+	users := v1.Group("/users")
+	users.Get("/:id", a.authController.GetUser())
+
 	u := v1.Group("/universities")
 	u.Get("/open", a.universityController.GetOpenDays())
 

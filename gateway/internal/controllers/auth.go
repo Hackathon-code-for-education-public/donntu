@@ -133,7 +133,7 @@ func (a *AuthController) Refresh() fiber.Handler {
 	}
 }
 
-func (a *AuthController) AuthRequired(role domain.UserRole) fiber.Handler {
+func (a *AuthController) AuthRequired(role *domain.UserRole) fiber.Handler {
 	return func(ctx fiber.Ctx) error {
 		auth := ctx.Get("Authorization")
 		s := strings.Split(auth, " ")
@@ -144,7 +144,9 @@ func (a *AuthController) AuthRequired(role domain.UserRole) fiber.Handler {
 
 		accessToken := s[1]
 
-		u, err := a.authService.Verify(ctx.Context(), accessToken, string(role))
+		a.log.Info("auth-required request", slog.Any("accessToken", accessToken))
+
+		u, err := a.authService.Verify(ctx.Context(), accessToken, role)
 		if err != nil {
 			if errors.Is(err, services.ErrUnauthorized) {
 				a.log.Error("unauthorized", slog.Any("err", err))
@@ -173,5 +175,37 @@ func (a *AuthController) AuthRequired(role domain.UserRole) fiber.Handler {
 		ctx.Locals("user", u)
 
 		return ctx.Next()
+	}
+}
+func (a *AuthController) GetUser() fiber.Handler {
+	return func(c fiber.Ctx) error {
+
+		userId := c.Params("id", "")
+		if userId == "" {
+			return bad("invalid user id")
+		}
+
+		user, err := a.authService.GetUser(c.Context(), userId)
+		if err != nil {
+			return err
+		}
+
+		return ok(c, user)
+	}
+}
+
+func (a *AuthController) GetProfile() fiber.Handler {
+	return func(c fiber.Ctx) error {
+		user, k := c.Locals("user").(*domain.UserClaims)
+		if !k {
+			return internal("cannot parse locals")
+		}
+
+		u, err := a.authService.GetUser(c.Context(), user.Id)
+		if err != nil {
+			return internal(err.Error())
+		}
+
+		return ok(c, u)
 	}
 }
