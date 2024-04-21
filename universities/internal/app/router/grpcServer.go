@@ -81,15 +81,24 @@ func (s *UniversitiesService) CreateReview(ctx context.Context, req *universitie
 	}, nil
 }
 
-func (s *UniversitiesService) GetReplies(ctx context.Context, id *universities.UniversityId) (*universities.Reviews, error) {
+func (s *UniversitiesService) GetReplies(ctx context.Context, id *universities.UniversityId) (*universities.GetRepliesResponse, error) {
 	s.log.Info("get_replies request received", slog.String("university_id", id.Id))
-	reviews, err := s.service.GetReplies(ctx, id.Id)
+	reviews, parenReview, err := s.service.GetReplies(ctx, id.Id)
 	if err != nil {
 		return nil, err
 	}
 
-	return &universities.Reviews{
-		Reviews: lo.Map(reviews, func(review *domain.Review, _ int) *universities.Review {
+	return &universities.GetRepliesResponse{
+		Review: &universities.Review{
+			ReviewId:     parenReview.Id,
+			Sentiment:    string(parenReview.Sentiment),
+			RepliesCount: int32(parenReview.RepliesCount),
+			AuthorStatus: string(parenReview.AuthorStatus),
+			Text:         parenReview.Text,
+			Date:         parenReview.Date.Unix(),
+			UniversityId: parenReview.UniversityId,
+		},
+		Replies: lo.Map(reviews, func(review *domain.Review, _ int) *universities.Review {
 			return &universities.Review{
 				ReviewId:     review.Id,
 				Sentiment:    string(review.Sentiment),

@@ -38,7 +38,7 @@ type UniversitiesClient interface {
 	GetOpenDays(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*OpenDays, error)
 	CreateReview(ctx context.Context, in *CreateReviewRequest, opts ...grpc.CallOption) (*Review, error)
 	GetReviews(ctx context.Context, in *GetReviewsRequest, opts ...grpc.CallOption) (*Reviews, error)
-	GetReplies(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*Reviews, error)
+	GetReplies(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*GetRepliesResponse, error)
 	CreatePanorama(ctx context.Context, in *CreatePanoramaRequest, opts ...grpc.CallOption) (*Panorama, error)
 	GetPanoramas(ctx context.Context, in *GetPanoramasRequest, opts ...grpc.CallOption) (*Panoramas, error)
 	GetUniversity(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*University, error)
@@ -82,8 +82,8 @@ func (c *universitiesClient) GetReviews(ctx context.Context, in *GetReviewsReque
 	return out, nil
 }
 
-func (c *universitiesClient) GetReplies(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*Reviews, error) {
-	out := new(Reviews)
+func (c *universitiesClient) GetReplies(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*GetRepliesResponse, error) {
+	out := new(GetRepliesResponse)
 	err := c.cc.Invoke(ctx, Universities_GetReplies_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -152,7 +152,7 @@ type UniversitiesServer interface {
 	GetOpenDays(context.Context, *UniversityId) (*OpenDays, error)
 	CreateReview(context.Context, *CreateReviewRequest) (*Review, error)
 	GetReviews(context.Context, *GetReviewsRequest) (*Reviews, error)
-	GetReplies(context.Context, *UniversityId) (*Reviews, error)
+	GetReplies(context.Context, *UniversityId) (*GetRepliesResponse, error)
 	CreatePanorama(context.Context, *CreatePanoramaRequest) (*Panorama, error)
 	GetPanoramas(context.Context, *GetPanoramasRequest) (*Panoramas, error)
 	GetUniversity(context.Context, *UniversityId) (*University, error)
@@ -175,7 +175,7 @@ func (UnimplementedUniversitiesServer) CreateReview(context.Context, *CreateRevi
 func (UnimplementedUniversitiesServer) GetReviews(context.Context, *GetReviewsRequest) (*Reviews, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetReviews not implemented")
 }
-func (UnimplementedUniversitiesServer) GetReplies(context.Context, *UniversityId) (*Reviews, error) {
+func (UnimplementedUniversitiesServer) GetReplies(context.Context, *UniversityId) (*GetRepliesResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetReplies not implemented")
 }
 func (UnimplementedUniversitiesServer) CreatePanorama(context.Context, *CreatePanoramaRequest) (*Panorama, error) {
