@@ -4,8 +4,6 @@
 package app
 
 import (
-	"chat-service/internal/handlers/grpc"
-	"chat-service/internal/storage/api"
 	"fmt"
 	"github.com/google/wire"
 	"github.com/jmoiron/sqlx"
@@ -26,18 +24,18 @@ func Init() (*App, func(), error) {
 			wire.NewSet(config.New),
 			wire.NewSet(initLogger),
 			wire.NewSet(initDB),
-
-			wire.NewSet(pg.NewReasonStorage),
-			wire.NewSet(pg.NewRequestStorage),
-			wire.NewSet(api.NewAuthService),
-			wire.NewSet(services.New),
-
-			wire.Bind(new(services.ReasonStorage), new(*pg.ReasonStorage)),
-			wire.Bind(new(services.RequestStorage), new(*pg.RequestStorage)),
-			wire.Bind(new(services.RoleUpdater), new(*api.AuthService)),
-
-			wire.Bind(new(grpc.Service), new(*services.Service)),
-			wire.NewSet(grpc.New),
+			//
+			//wire.NewSet(pg.NewReasonStorage),
+			//wire.NewSet(pg.NewRequestStorage),
+			//wire.NewSet(api.NewAuthService),
+			//wire.NewSet(services.New),
+			//
+			//wire.Bind(new(services.ReasonStorage), new(*pg.ReasonStorage)),
+			//wire.Bind(new(services.RequestStorage), new(*pg.RequestStorage)),
+			//wire.Bind(new(services.RoleUpdater), new(*api.AuthService)),
+			//
+			//wire.Bind(new(grpc.Service), new(*services.Service)),
+			//wire.NewSet(grpc.New),
 		),
 	)
 }

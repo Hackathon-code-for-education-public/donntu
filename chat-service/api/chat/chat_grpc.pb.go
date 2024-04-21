@@ -26,6 +26,7 @@ type ChatClient interface {
 	Attach(ctx context.Context, in *AttachRequest, opts ...grpc.CallOption) (Chat_AttachClient, error)
 	Create(ctx context.Context, in *CreateRequest, opts ...grpc.CallOption) (*CreateResponse, error)
 	List(ctx context.Context, in *ListRequest, opts ...grpc.CallOption) (Chat_ListClient, error)
+	GetMessageHistory(ctx context.Context, in *GetMessageHistoryRequest, opts ...grpc.CallOption) (Chat_GetMessageHistoryClient, error)
 }
 
 type chatClient struct {
@@ -118,6 +119,38 @@ func (x *chatListClient) Recv() (*ChatEntity, error) {
 	return m, nil
 }
 
+func (c *chatClient) GetMessageHistory(ctx context.Context, in *GetMessageHistoryRequest, opts ...grpc.CallOption) (Chat_GetMessageHistoryClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Chat_ServiceDesc.Streams[2], "/Chat/GetMessageHistory", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &chatGetMessageHistoryClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Chat_GetMessageHistoryClient interface {
+	Recv() (*GetMessageHistoryItem, error)
+	grpc.ClientStream
+}
+
+type chatGetMessageHistoryClient struct {
+	grpc.ClientStream
+}
+
+func (x *chatGetMessageHistoryClient) Recv() (*GetMessageHistoryItem, error) {
+	m := new(GetMessageHistoryItem)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // ChatServer is the server API for Chat service.
 // All implementations must embed UnimplementedChatServer
 // for forward compatibility
@@ -126,6 +159,7 @@ type ChatServer interface {
 	Attach(*AttachRequest, Chat_AttachServer) error
 	Create(context.Context, *CreateRequest) (*CreateResponse, error)
 	List(*ListRequest, Chat_ListServer) error
+	GetMessageHistory(*GetMessageHistoryRequest, Chat_GetMessageHistoryServer) error
 	mustEmbedUnimplementedChatServer()
 }
 
@@ -144,6 +178,9 @@ func (UnimplementedChatServer) Create(context.Context, *CreateRequest) (*CreateR
 }
 func (UnimplementedChatServer) List(*ListRequest, Chat_ListServer) error {
 	return status.Errorf(codes.Unimplemented, "method List not implemented")
+}
+func (UnimplementedChatServer) GetMessageHistory(*GetMessageHistoryRequest, Chat_GetMessageHistoryServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetMessageHistory not implemented")
 }
 func (UnimplementedChatServer) mustEmbedUnimplementedChatServer() {}
 
@@ -236,6 +273,27 @@ func (x *chatListServer) Send(m *ChatEntity) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _Chat_GetMessageHistory_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetMessageHistoryRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ChatServer).GetMessageHistory(m, &chatGetMessageHistoryServer{stream})
+}
+
+type Chat_GetMessageHistoryServer interface {
+	Send(*GetMessageHistoryItem) error
+	grpc.ServerStream
+}
+
+type chatGetMessageHistoryServer struct {
+	grpc.ServerStream
+}
+
+func (x *chatGetMessageHistoryServer) Send(m *GetMessageHistoryItem) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // Chat_ServiceDesc is the grpc.ServiceDesc for Chat service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -261,6 +319,11 @@ var Chat_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "List",
 			Handler:       _Chat_List_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "GetMessageHistory",
+			Handler:       _Chat_GetMessageHistory_Handler,
 			ServerStreams: true,
 		},
 	},
