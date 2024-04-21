@@ -30,3 +30,19 @@ func (s *universityService) CreatePanorama(ctx context.Context, panorama *domain
 func (s *universityService) GetPanoramas(ctx context.Context, universityID string, category string) ([]*domain.Panorama, error) {
 	return s.universityRepo.GetPanoramas(ctx, universityID, category)
 }
+
+func (s *universityService) GetUniversitiesTop(ctx context.Context, n int) ([]*domain.University, error) {
+	return s.universityRepo.GetUniversitiesTop(ctx, n)
+}
+
+func (s *universityService) GetUniversities(ctx context.Context, offset, limit int) ([]*domain.University, error) {
+	return s.universityRepo.GetUniversities(ctx, offset, limit)
+}
+
+func (s *universityService) GetUniversity(ctx context.Context, universityID string) (*domain.University, error) {
+	return s.universityRepo.GetUniversity(ctx, universityID)
+}
+
+func (s *universityService) SearchUniversities(ctx context.Context, name string) ([]*domain.University, error) {
+	return s.universityRepo.SearchUniversities(ctx, name)
+}
