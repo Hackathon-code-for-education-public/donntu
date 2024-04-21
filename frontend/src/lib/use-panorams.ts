@@ -1,6 +1,5 @@
 import useSWR from "swr";
 import { fetcherWithData } from "./fetcher";
-import { University } from "@/api/university";
 import { Panorama } from "@/api/panorama";
 
 export function usePanorams(id: string) {
