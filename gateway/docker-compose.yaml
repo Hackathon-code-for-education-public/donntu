@@ -8,3 +8,4 @@ services:
       - .env
     ports:
       - "8080:${HTTP_PORT}"
+      - "8081:9001"

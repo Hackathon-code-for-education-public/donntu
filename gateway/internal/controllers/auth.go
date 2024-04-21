@@ -6,6 +6,7 @@ import (
 	"gateway/internal/domain"
 	"gateway/internal/services"
 	"github.com/go-playground/validator/v10"
+	fiberv2 "github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v3"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -142,6 +143,51 @@ func (a *AuthController) Refresh() fiber.Handler {
 		}
 
 		return ok(ctx, tokens)
+	}
+}
+
+func (a *AuthController) AuthRequiredV2(role domain.UserRole) fiberv2.Handler {
+	return func(ctx *fiberv2.Ctx) error {
+		auth := ctx.Get("Authorization")
+		s := strings.Split(auth, " ")
+		if len(s) != 2 {
+			a.log.Error("Authorization not found")
+			return bad("Authorization not found")
+		}
+
+		accessToken := s[1]
+
+		a.log.Info("auth-required request", slog.Any("accessToken", accessToken))
+
+		u, err := a.authService.Verify(ctx.Context(), accessToken, role)
+		if err != nil {
+			if errors.Is(err, services.ErrUnauthorized) {
+				a.log.Error("unauthorized", slog.Any("err", err))
+				return unauthorized(err.Error())
+			}
+			if errors.Is(err, services.ErrForbidden) {
+				a.log.Error("forbidden", slog.Any("err", err))
+
+				return forbidden(err.Error())
+			}
+			if errors.Is(err, services.ErrNotFound) {
+				a.log.Error("not found", slog.Any("err", err))
+				return notFound(err.Error())
+			}
+
+			if errors.Is(err, services.ErrInvalidRequest) {
+				a.log.Error("invalid request", slog.Any("err", err))
+				return bad(err.Error())
+			}
+
+			a.log.Error("internal error", slog.Any("err", err))
+			return internal(err.Error())
+		}
+
+		ctx.Locals("accessToken", accessToken)
+		ctx.Locals("user", u)
+
+		return ctx.Next()
 	}
 }
 
