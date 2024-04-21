@@ -4,7 +4,7 @@ import { Panorama } from "@/api/panorama";
 
 export function usePanorams(id: string) {
   const { data, error, isLoading, mutate } = useSWR<Panorama[]>(
-    id && `/api/v1/panoramas?universityId=${id}&category=Прочее`,
+    id && `/api/v1/panoramas?universityId=${id}`,
     fetcherWithData
   );
 
