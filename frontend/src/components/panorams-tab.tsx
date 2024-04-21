@@ -9,6 +9,7 @@ import {
 
 import dynamic from "next/dynamic";
 import { useUser } from "@/lib/use-user";
+import RoleProtected from "./RoleProtected";
 
 const PanoramaView = dynamic(
   () => import("@/components/panorama").then((module) => module) as any,
@@ -43,7 +44,7 @@ export function PanoramsTab({ universityId }) {
         ))}
       </Accordion>
       {
-        !loggedOut && <PanoramaForm universityId={universityId} />
+        !loggedOut && <RoleProtected requiredRoles={"UNIVERSITY"}><PanoramaForm universityId={universityId} /></RoleProtected>
       }
     </>
   );

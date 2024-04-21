@@ -18,7 +18,7 @@ export function MainNavigation() {
   const { user, loading, loggedOut } = useUser();
 
   return (
-    <header className="flex justify-around p-2">
+    <header className="flex justify-around p-2 border border-b-1">
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>

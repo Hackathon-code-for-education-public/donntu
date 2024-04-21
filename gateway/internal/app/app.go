@@ -104,7 +104,7 @@ func (a *Application) Run() error {
 	au.Post("/sign-in", a.authController.SignIn())
 	au.Post("/students/sign-up", a.authController.SignUp(domain.UserRoleStudent))
 	au.Post("/applicant/sign-up", a.authController.SignUp(domain.UserRoleApplicant))
-	au.Post("/university/sign-up", a.authController.SignUp(domain.UserRoleStudent))
+	au.Post("/university/sign-up", a.authController.SignUp(domain.UserRoleManager))
 	au.Post("/manager/sign-up", a.authController.SignUp(domain.UserRoleManager))
 	au.Post("/sign-out", a.authController.SignOut(), a.authController.AuthRequired(domain.UserRoleAny))
 	au.Post("/refresh", a.authController.Refresh())
