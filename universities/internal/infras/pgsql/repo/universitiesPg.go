@@ -47,6 +47,7 @@ func (u *universitiesPg) GetReviews(ctx context.Context, universityID string, li
 
 	reviews := lo.Map(results, func(item postgresql.UniversityReview, _ int) *domain.Review {
 		return &domain.Review{
+			Id:           item.ReviewID,
 			UniversityId: item.UniversityID,
 			Date:         item.Date,
 			Text:         item.Text,

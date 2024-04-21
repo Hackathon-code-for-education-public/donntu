@@ -20,6 +20,7 @@ var (
 )
 
 type Review struct {
+	Id           string       `json:"id"`
 	UniversityId string       `json:"universityId"`
 	AuthorStatus AuthorStatus `json:"authorStatus"`
 	Sentiment    Sentiment    `json:"sentiment"`

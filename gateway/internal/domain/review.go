@@ -3,6 +3,7 @@ package domain
 import "time"
 
 type Review struct {
+	ReviewId     string    `json:"reviewId"`
 	UniversityId string    `json:"universityId"`
 	AuthorStatus string    `json:"authorStatus"`
 	Sentiment    string    `json:"sentiment"`

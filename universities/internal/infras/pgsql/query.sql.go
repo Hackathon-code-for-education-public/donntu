@@ -135,7 +135,7 @@ func (q *Queries) GetPanoramas(ctx context.Context, arg GetPanoramasParams) ([]U
 }
 
 const getReviews = `-- name: GetReviews :many
-select university_id, author_status, sentiment, date, text, repliescount
+select university_id, author_status, sentiment, date, text, repliescount, review_id
 from university_reviews ur
 where ur.university_id = $3
 offset $1 limit $2
@@ -163,6 +163,7 @@ func (q *Queries) GetReviews(ctx context.Context, arg GetReviewsParams) ([]Unive
 			&i.Date,
 			&i.Text,
 			&i.Repliescount,
+			&i.ReviewID,
 		); err != nil {
 			return nil, err
 		}

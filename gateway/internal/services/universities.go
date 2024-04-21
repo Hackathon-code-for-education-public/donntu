@@ -70,6 +70,7 @@ func (s *UniversityService) GetReviews(ctx context.Context, universityId string,
 	reviews := make([]*domain.Review, len(res.Reviews))
 	for i, review := range res.Reviews {
 		reviews[i] = &domain.Review{
+			ReviewId:     review.ReviewId,
 			UniversityId: universityId,
 			Date:         time.UnixMilli(review.Date),
 			Text:         review.Text,

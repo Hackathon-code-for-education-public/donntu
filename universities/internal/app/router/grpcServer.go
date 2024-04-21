@@ -61,6 +61,7 @@ func (s *UniversitiesService) GetReviews(ctx context.Context, request *universit
 	return &universities.Reviews{
 		Reviews: lo.Map(reviews, func(review *domain.Review, _ int) *universities.Review {
 			return &universities.Review{
+				ReviewId:     review.Id,
 				Sentiment:    string(review.Sentiment),
 				RepliesCount: int32(review.RepliesCount),
 				AuthorStatus: string(review.AuthorStatus),

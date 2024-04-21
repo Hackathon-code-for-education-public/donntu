@@ -37,6 +37,7 @@ message Review {
   int64 date = 4;
   string text = 5;
   int32 repliesCount = 6;
+  string reviewId = 7;
 }
 
 message Reviews {

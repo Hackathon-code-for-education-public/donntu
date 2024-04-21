@@ -224,4 +224,5 @@ type UniversityReview struct {
 	Date         time.Time  `json:"date"`
 	Text         string     `json:"text"`
 	Repliescount int32      `json:"repliescount"`
+	ReviewID     string     `json:"review_id"`
 }
