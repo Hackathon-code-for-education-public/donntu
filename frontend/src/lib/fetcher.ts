@@ -31,3 +31,5 @@ export const fetcher = async (url: string) => {
     throw new Error((error as Error).message);
   }
 };
+
+export const fetcherWithData = (url: string) => fetcher(url).then(r => r.data);

@@ -17,6 +17,9 @@ type User struct {
 	Email    string `json:"email" db:"email"`
 	Password string `json:"password" db:"password"`
 	Role
+	LastName   string `json:"lastName" db:"lastName"`
+	FirstName  string `json:"firstName" db:"firstName"`
+	MiddleName string `json:"middleName" db:"middleName"`
 }
 
 func (u User) GetClaims() *UserClaims {

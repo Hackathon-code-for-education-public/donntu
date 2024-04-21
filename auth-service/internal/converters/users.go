@@ -19,18 +19,24 @@ func UserFromModelToEntity(model *models.User) *entity.User {
 	}
 
 	return &entity.User{
-		Id:       model.Id,
-		Email:    model.Email,
-		Password: model.Password,
-		Role:     role,
+		Id:         model.Id,
+		Email:      model.Email,
+		Password:   model.Password,
+		Role:       role,
+		LastName:   model.LastName,
+		FirstName:  model.FirstName,
+		MiddleName: model.MiddleName,
 	}
 }
 
 func UserFromEntityToModel(entity *entity.User) *models.User {
 	return &models.User{
-		Id:       entity.Id,
-		Email:    entity.Email,
-		Password: entity.Password,
-		Role:     entity.Role.String(),
+		Id:         entity.Id,
+		Email:      entity.Email,
+		Password:   entity.Password,
+		Role:       entity.Role.String(),
+		LastName:   entity.LastName,
+		FirstName:  entity.FirstName,
+		MiddleName: entity.MiddleName,
 	}
 }

@@ -58,9 +58,12 @@ func (s *AuthService) SignIn(ctx context.Context, credentials *domain.Credential
 
 func (s *AuthService) SignUp(ctx context.Context, user *domain.User, password string) (*domain.Tokens, error) {
 	req := &auth.SignUpRequest{
-		Email:    user.Email,
-		Password: password,
-		Role:     user.ConvertRole(),
+		Email:      user.Email,
+		Password:   password,
+		Role:       user.ConvertRole(),
+		LastName:   user.LastName,
+		FirstName:  user.FirstName,
+		MiddleName: user.MiddleName,
 	}
 	fmt.Println(req)
 
@@ -103,10 +106,17 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (*domain
 	}, nil
 }
 
-func (s *AuthService) Verify(ctx context.Context, accessToken string, role string) (*domain.UserClaims, error) {
+func (s *AuthService) Verify(ctx context.Context, accessToken string, role *domain.UserRole) (*domain.UserClaims, error) {
+
+	var gr *auth.Role
+	if role != nil {
+		grr := domain.ConvertRoleToGrpc(*role)
+		gr = &grr
+	}
+
 	req := &auth.AuthRequest{
 		AccessToken: accessToken,
-		Role:        domain.ConvertUserRole(role),
+		Role:        gr,
 	}
 
 	res, err := s.client.Auth(ctx, req)
@@ -133,4 +143,23 @@ func (s *AuthService) Verify(ctx context.Context, accessToken string, role strin
 		Id:   res.UserId,
 		Role: domain.ConvertUserRoleFromGrpc(res.Role),
 	}, nil
+}
+
+func (s *AuthService) GetUser(ctx context.Context, userId string) (*domain.User, error) {
+	req := &auth.GetUserRequest{
+		Id: userId,
+	}
+
+	res, err := s.client.GetUser(ctx, req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.User{
+		Email:      res.Email,
+		LastName:   res.LastName,
+		FirstName:  res.FirstName,
+		MiddleName: res.MiddleName,
+		Role:       domain.ConvertUserRoleFromGrpc(res.Role),
+	}, err
 }

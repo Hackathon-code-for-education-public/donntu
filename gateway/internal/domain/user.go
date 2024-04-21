@@ -12,8 +12,11 @@ const (
 )
 
 type User struct {
-	Email string   `json:"email"`
-	Role  UserRole `json:"role"`
+	Email      string   `json:"email"`
+	LastName   string   `json:"lastName"`
+	FirstName  string   `json:"firstName"`
+	MiddleName string   `json:"middleName"`
+	Role       UserRole `json:"role"`
 }
 
 type UserClaims struct {
@@ -36,6 +39,19 @@ func (u *User) ConvertRole() auth.Role {
 }
 
 func ConvertUserRole(role string) auth.Role {
+	switch role {
+	case "MANAGER":
+		return auth.Role_manager
+	case "APPLICANT":
+		return auth.Role_applicant
+	case "STUDENT":
+		return auth.Role_student
+	}
+
+	return auth.Role_applicant
+}
+
+func ConvertRoleToGrpc(role UserRole) auth.Role {
 	switch role {
 	case "MANAGER":
 		return auth.Role_manager
