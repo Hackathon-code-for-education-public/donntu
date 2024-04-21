@@ -6,6 +6,7 @@ export class AuthAPI {
   }
 
   static setAccessToken(token: string): void {
+    console.log('setAccessToken')
     localStorage.setItem("accessToken", token);
   }
 
@@ -14,6 +15,7 @@ export class AuthAPI {
   }
 
   static setRefreshToken(token: string): void {
+    console.log('setRefreshToken')
     localStorage.setItem("refreshToken", token);
   }
 
@@ -34,11 +36,12 @@ export class AuthAPI {
   static async register(
     email: string,
     password: string,
+    role: string,
     lastName: string,
     firstName: string,
     middleName: string
   ): Promise<any> {
-    const endpoint = `${API_HOST}/api/v1/auth/sign-up`;
+    const endpoint = `${API_HOST}/api/v1/auth/${role}/sign-up`;
   
     try {
       const data = await this.fetch(endpoint, "POST", {
@@ -81,7 +84,7 @@ export class AuthAPI {
       console.log("Sign out successful");
     } catch (error) {
       console.error("Sign out failed:", (error as Error).message);
-      throw error;
+      // throw error;
     } finally {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");

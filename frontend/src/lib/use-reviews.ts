@@ -1,5 +1,5 @@
 import useSWRInfinite from "swr/infinite";
-import { fetcher } from "./fetcher";
+import { fetcher, fetcherWithData } from "./fetcher";
 import { API_HOST } from "./auth";
 
 export type ReviewData = {
@@ -11,9 +11,6 @@ export type ReviewData = {
   repliesCount: number;
 };
 
-// const fetcher = (url: string) => fetch(url).then((r) => r.json());
-
-const fetcherWithData = (url: string) => fetcher(url).then(r => r.data);
 
 export function useReviewsByUniversity(universityId: string) {
   const getKey = (pageIndex: number, previousPageData: []) => {

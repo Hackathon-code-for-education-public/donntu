@@ -57,3 +57,42 @@ func (u *universitiesPg) GetReviews(ctx context.Context, universityID string, li
 
 	return reviews, nil
 }
+
+func (u *universitiesPg) CreatePanorama(ctx context.Context, p *domain.Panorama) (*domain.Panorama, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	_, err := querier.AddPanorama(ctx,
+		postgresql.AddPanoramaParams{
+			Type:           postgresql.PanoramaTypes(p.Type),
+			UniversityID:   p.UniversityId,
+			Address:        p.Address,
+			Name:           p.Name,
+			Firstlocation:  p.FirstLocation,
+			Secondlocation: p.LastLocation})
+	if err != nil {
+		return nil, err
+	}
+
+	return p, nil
+}
+
+func (u *universitiesPg) GetPanoramas(ctx context.Context, universityID string, category string) ([]*domain.Panorama, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	panoramas, err := querier.GetPanoramas(ctx, postgresql.GetPanoramasParams{
+		UniversityID: universityID,
+		Type:         postgresql.PanoramaTypes(category),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return lo.Map(panoramas, func(item postgresql.UniversityPanorama, _ int) *domain.Panorama {
+		return &domain.Panorama{
+			UniversityId:  item.UniversityID,
+			Address:       item.Address,
+			Name:          item.Name,
+			FirstLocation: item.Firstlocation,
+			LastLocation:  item.Secondlocation,
+			Type:          string(item.Type),
+		}
+	}), nil
+}

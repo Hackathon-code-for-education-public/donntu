@@ -1,4 +1,5 @@
 import useSWR from "swr";
+import { fetcherWithData } from "./fetcher";
 
 export type UserData = {
   id: string;
@@ -8,36 +9,20 @@ export type UserData = {
   lastName: string;
 };
 
-// Mock fetcher function
-const mockFetcher = async (url: string): Promise<UserData | null> => {
-  // Simulate network delay
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-
-  // Optionally, you can use the URL to differentiate responses if needed
-  
-  return {
-    id: '1',
-    role: 'applicant',
-    firstName: 'Test',
-    middleName: 'Test',
-    lastName: 'Test',
-  };
-
-  /*
-  const error = new Error('An error occurred while fetching the data.')
-  error.status = 401;
-  throw error
-  */
-};
-
 export function useUser() {
-  const { data, mutate, error, isLoading } = useSWR("/api/v1/user", mockFetcher);
+  const { data, mutate, error, isLoading } = useSWR("/api/v1/profile", fetcherWithData);
 
   // const loading = !data && !error;
-  const loggedOut = error && error.status === 401;
+  // const loggedOut = error && error.status === 401;
+
+  // const loggedOut = !data && !error && !isLoading;
+
+  const loggedOut = !data //&& !isLoading;
+
+  const loading = !data && !error;
 
   return {
-    loading: isLoading,
+    loading,
     loggedOut,
     user: data,
     mutate,

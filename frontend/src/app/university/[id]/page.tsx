@@ -1,7 +1,6 @@
 "use client";
 
 import { Panorama } from "@/api/panorama";
-import PanoramaView from "@/components/panorama";
 import { PanoramaForm } from "@/components/panorama-form";
 import {
   Accordion,
@@ -14,11 +13,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniversityOpenDays } from "@/components/university-open-days";
 import { UniversityReviews } from "@/components/university-reviews";
-import { PanoramaAPI } from "@/lib/panoramas";
 import { useUniversity } from "@/lib/use-university";
+import dynamic from "next/dynamic";
+
 interface Params {
   id: string;
 }
+
+const PanoramaView = dynamic(
+  () => import("@/components/panorama").then((module) => module) as any,
+  { ssr: false }
+) as any;
 
 const mokPanoramas: Panorama[] = [
   {
@@ -171,7 +176,7 @@ export default function Page({ params }: { params: Params }) {
                 </AccordionItem>
               ))}
             </Accordion>
-            <PanoramaForm universityId={params.id}/>
+            <PanoramaForm universityId={params.id} />
           </TabsContent>
         </Tabs>
       </div>

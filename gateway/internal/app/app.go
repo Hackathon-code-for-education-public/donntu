@@ -54,14 +54,23 @@ func (a *Application) Run() error {
 	au.Post("/applicant/sign-up", a.authController.SignUp(domain.UserRoleApplicant))
 	au.Post("/university/sign-up", a.authController.SignUp(domain.UserRoleStudent))
 	au.Post("/manager/sign-up", a.authController.SignUp(domain.UserRoleManager))
-	au.Post("/sign-out", a.authController.SignOut())
+	au.Post("/sign-out", a.authController.SignOut(), a.authController.AuthRequired(nil))
 	au.Post("/refresh", a.authController.Refresh())
+
+	v1.Get("/profile", a.authController.GetProfile(), a.authController.AuthRequired(nil))
+
+	users := v1.Group("/users")
+	users.Get("/:id", a.authController.GetUser())
 
 	u := v1.Group("/universities")
 	u.Get("/open", a.universityController.GetOpenDays())
 
 	r := v1.Group("/reviews")
 	r.Get("/", a.universityController.GetReviews())
+
+	p := v1.Group("/panoramas")
+	p.Get("/", a.universityController.GetPanorama())
+	p.Post("/", a.universityController.CreatePanorama())
 
 	return a.http.Listen(fmt.Sprintf(":%d", a.cfg.HTTP.Port))
 }

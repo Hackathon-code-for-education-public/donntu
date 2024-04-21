@@ -11,13 +11,13 @@ export default function isAuth(Component: any) {
 
     useEffect(() => {
       if (!loading && !user) {
-        return redirect("/");
+        return redirect("/authorization");
       }
     }, [loading, user]);
 
 
     if (loading) {
-        return null;
+        return <main className="flex min-h-screen flex-col items-center"></main>;
     }
 
     return <Component {...props} />;
