@@ -1,0 +1,32 @@
+version: "4.5"
+
+services:
+  verification-service:
+    container_name: verification-service
+    build:
+      context: .
+    env_file:
+      - .env.prod
+    environment:
+      WAIT_HOSTS: verf-postgres:5434
+    depends_on:
+      - verf-postgres
+    ports:
+      - "5254:5254"
+
+  verf-postgres:
+    image: postgres:16.2-alpine3.19
+    restart: always
+    volumes:
+      - verfdata:/var/lib/postgresql/data
+    env_file:
+      - .env.pg
+    command:
+      - "postgres"
+      - "-c"
+      - "port=5434"
+    ports:
+      - "5439:5434"
+
+volumes:
+  verfdata:
