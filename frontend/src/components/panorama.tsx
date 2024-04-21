@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 
 // @ts-ignore
 import { Pannellum } from "pannellum-react";
@@ -11,7 +11,7 @@ interface PanoramaProps {
 }
 
 export default function PannellumReact({ panorama }: PanoramaProps) {
-  const [currentPanorama, setCurrentPanorama] = useState(panorama.loc1);
+  const [currentPanorama, setCurrentPanorama] = useState(panorama.firstLocation);
 
   return (
     <div>
@@ -33,7 +33,7 @@ export default function PannellumReact({ panorama }: PanoramaProps) {
           yaw={-120}
           handleClick={(evt: Event, name: string) =>
             setCurrentPanorama(
-              currentPanorama !== panorama.loc1 ? panorama.loc1 : panorama.loc2
+              currentPanorama !== panorama.firstLocation ? panorama.firstLocation : panorama.secondLocation
             )
           }
         />

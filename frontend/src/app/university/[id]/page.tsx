@@ -2,20 +2,20 @@
 
 import { Panorama } from "@/api/panorama";
 import PanoramaView from "@/components/panorama";
+import { PanoramaForm } from "@/components/panorama-form";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniversityOpenDays } from "@/components/university-open-days";
 import { UniversityReviews } from "@/components/university-reviews";
+import { PanoramaAPI } from "@/lib/panoramas";
 import { useUniversity } from "@/lib/use-university";
-import { Salad } from "lucide-react";
-import Image from "next/image";
-
 interface Params {
   id: string;
 }
@@ -24,32 +24,34 @@ const mokPanoramas: Panorama[] = [
   {
     name: "Главный корпус",
     address: "г. Донецк, ул. Пушкина, д.1",
-    type: "Корпус",
-    loc1: "/room.jpg",
-    loc2: "/mus.jpg",
+    type: "Корпуса",
+    firstLocation: "/room.jpg",
+    secondLocation: "/mus.jpg",
   },
   {
     name: "Корпус №8",
     address: "г. Донецк, ул. Артема, д.2",
-    type: "Корпус",
-    loc1: "/alma.jpg",
-    loc2: "/lib.jpg",
+    type: "Корпуса",
+    firstLocation: "/alma.jpg",
+    secondLocation: "/lib.jpg",
   },
   {
     name: "Общежитие №3",
     address: "г. Донецк, ул. И. Ткаченко, д.3",
-    type: "Общежитие",
-    loc1: "/mus.jpg",
-    loc2: "/lib.jpg",
+    type: "Общежития",
+    firstLocation: "/mus.jpg",
+    secondLocation: "/lib.jpg",
   },
   {
     name: "Стадион №3",
     address: "г. Донецк, ул. Университетская, д.3",
     type: "Прочее",
-    loc1: "/mus.jpg",
-    loc2: "/lib.jpg",
+    firstLocation: "/mus.jpg",
+    secondLocation: "/lib.jpg",
   },
 ];
+
+const categories: string[] = ["Общежития", "Корпуса", "Столовые", "Прочее"];
 
 export default function Page({ params }: { params: Params }) {
   const { data, isLoading, error } = useUniversity(params.id);
@@ -156,50 +158,20 @@ export default function Page({ params }: { params: Params }) {
           </TabsContent>
           <TabsContent value="panorams">
             <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>Корпуса</AccordionTrigger>
-                <AccordionContent>
-                  {mokPanoramas
-                    .filter((item) => item.type === "Корпус")
-                    .map((panorama) => (
-                      <PanoramaView panorama={panorama} />
-                    ))}
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>Общежития</AccordionTrigger>
-                <AccordionContent>
-                  {mokPanoramas
-                    .filter((item) => item.type === "Общежитие")
-                    .map((panorama) => (
-                      <PanoramaView panorama={panorama} />
-                    ))}
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3">
-                <AccordionTrigger>Столовые</AccordionTrigger>
-                <AccordionContent>
-                  {mokPanoramas
-                    .filter((item) => item.type === "Столовая")
-                    .map((panorama) => (
-                      <PanoramaView panorama={panorama} />
-                    ))}
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-4">
-                <AccordionTrigger>Прочее</AccordionTrigger>
-                <AccordionContent>
-                  {mokPanoramas
-                    .filter((item) => item.type === "Прочее")
-                    .map((panorama) => (
-                      <PanoramaView panorama={panorama} />
-                    ))}
-                </AccordionContent>
-              </AccordionItem>
+              {categories.map((category, categoryIndex) => (
+                <AccordionItem key={categoryIndex} value={category}>
+                  <AccordionTrigger>{category}</AccordionTrigger>
+                  <AccordionContent>
+                    {mokPanoramas
+                      .filter((item) => item.type === category)
+                      .map((panorama, panoramaIndex) => (
+                        <PanoramaView key={panoramaIndex} panorama={panorama} />
+                      ))}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
             </Accordion>
-            {/* {mokPanoramas.map((panorama) => (
-              <PanoramaView panorama={panorama} />
-            ))} */}
+            <PanoramaForm universityId={params.id}/>
           </TabsContent>
         </Tabs>
       </div>
