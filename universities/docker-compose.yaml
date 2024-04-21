@@ -25,6 +25,8 @@ services:
     container_name: 'universities'
     env_file:
       - .env
+    environment:
+      WAIT_HOSTS: ${UNIVERSITY_DATABASE_HOST}:${UNIVERSITY_DATABASE_PORT}
     ports:
       - "8090:${UNIVERSITY_SERVICE_PORT}"
 

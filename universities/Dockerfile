@@ -1,18 +1,30 @@
-FROM golang:1.22.0-alpine3.19 AS builder
+FROM golang:1.22.0-alpine3.19 as builder
 
 ENV GOPROXY=https://goproxy.io,direct
 RUN apk update --no-cache
-WORKDIR /usr/local/go/src
-COPY . /usr/local/go/src
+WORKDIR /app
+COPY . /app
 RUN go clean --modcache
-RUN go build -mod=readonly -o app cmd/app.go
+RUN go build -mod=readonly -o app cmd/service/app.go
+RUN go build -mod=readonly -o migrator cmd/migrator/migrator.go
+
+RUN ls -la && pwd && ls -la /app/db/migrations
 
 FROM alpine
 
 RUN apk update --no-cache
-
 WORKDIR /app
+COPY --from=builder /app/app ./app
+COPY --from=builder /app/migrator ./migrator
+COPY --from=builder /app/db/migrations ./migrations
 
-COPY --from=builder /usr/local/go/src/app /app
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.1/wait /app/wait
+RUN chmod +x /app/wait
 
-CMD ./app
+RUN ls -la && pwd && ls -la /
+
+CMD  ./wait \
+    && ./migrator -dir /app/migrations \
+    && ./app
+
+
