@@ -7,12 +7,14 @@ package postgresql
 
 import (
 	"context"
+	"database/sql"
 	"time"
 )
 
 const addPanorama = `-- name: AddPanorama :one
 insert into university_panoramas (university_id, address, name, firstlocation, secondlocation, type)
-values ($1, $2, $3, $4, $5, $6) returning university_id, address, name, firstlocation, secondlocation, type
+values ($1, $2, $3, $4, $5, $6)
+returning university_id, address, name, firstlocation, secondlocation, type
 `
 
 type AddPanoramaParams struct {
@@ -41,6 +43,48 @@ func (q *Queries) AddPanorama(ctx context.Context, arg AddPanoramaParams) (Unive
 		&i.Firstlocation,
 		&i.Secondlocation,
 		&i.Type,
+	)
+	return i, err
+}
+
+const createReview = `-- name: CreateReview :one
+insert into university_reviews(university_id,
+                               author_status,
+                               sentiment, date,
+                               text, review_id, parent_review_id)
+values ($1, $2, $3, $4, $5, $6, $7)
+returning university_id, author_status, sentiment, date, text, review_id, parent_review_id
+`
+
+type CreateReviewParams struct {
+	UniversityID   string         `json:"university_id"`
+	AuthorStatus   Statuses       `json:"author_status"`
+	Sentiment      Sentiments     `json:"sentiment"`
+	Date           time.Time      `json:"date"`
+	Text           string         `json:"text"`
+	ReviewID       string         `json:"review_id"`
+	ParentReviewID sql.NullString `json:"parent_review_id"`
+}
+
+func (q *Queries) CreateReview(ctx context.Context, arg CreateReviewParams) (UniversityReview, error) {
+	row := q.db.QueryRowContext(ctx, createReview,
+		arg.UniversityID,
+		arg.AuthorStatus,
+		arg.Sentiment,
+		arg.Date,
+		arg.Text,
+		arg.ReviewID,
+		arg.ParentReviewID,
+	)
+	var i UniversityReview
+	err := row.Scan(
+		&i.UniversityID,
+		&i.AuthorStatus,
+		&i.Sentiment,
+		&i.Date,
+		&i.Text,
+		&i.ReviewID,
+		&i.ParentReviewID,
 	)
 	return i, err
 }
@@ -91,7 +135,11 @@ func (q *Queries) GetOpenDays(ctx context.Context, id string) ([]GetOpenDaysRow,
 }
 
 const getPanoramas = `-- name: GetPanoramas :many
-select university_id, address, name, firstlocation, secondlocation, type from university_panoramas p where university_id = $1 and type = $2 order by p.name
+select university_id, address, name, firstlocation, secondlocation, type
+from university_panoramas p
+where university_id = $1
+  and type = $2
+order by p.name
 `
 
 type GetPanoramasParams struct {
@@ -129,10 +177,50 @@ func (q *Queries) GetPanoramas(ctx context.Context, arg GetPanoramasParams) ([]U
 	return items, nil
 }
 
+const getReview = `-- name: GetReview :one
+select r.university_id, r.author_status, r.sentiment, r.date, r.text, r.review_id, r.parent_review_id, (select count(*) from university_reviews where parent_review_id = r.review_id) as reply_count
+from university_reviews r
+where r.review_id = $1
+limit 1
+`
+
+type GetReviewRow struct {
+	UniversityID   string         `json:"university_id"`
+	AuthorStatus   Statuses       `json:"author_status"`
+	Sentiment      Sentiments     `json:"sentiment"`
+	Date           time.Time      `json:"date"`
+	Text           string         `json:"text"`
+	ReviewID       string         `json:"review_id"`
+	ParentReviewID sql.NullString `json:"parent_review_id"`
+	ReplyCount     int64          `json:"reply_count"`
+}
+
+func (q *Queries) GetReview(ctx context.Context, reviewID string) (GetReviewRow, error) {
+	row := q.db.QueryRowContext(ctx, getReview, reviewID)
+	var i GetReviewRow
+	err := row.Scan(
+		&i.UniversityID,
+		&i.AuthorStatus,
+		&i.Sentiment,
+		&i.Date,
+		&i.Text,
+		&i.ReviewID,
+		&i.ParentReviewID,
+		&i.ReplyCount,
+	)
+	return i, err
+}
+
 const getReviews = `-- name: GetReviews :many
-select university_id, author_status, sentiment, date, text, repliescount
-from university_reviews ur
-where ur.university_id = $3
+select r.university_id, r.author_status, r.sentiment, r.date, r.text, r.review_id, r.parent_review_id,
+       (select count(*)
+        from university_reviews
+        where parent_review_id = r.review_id) as reply_count
+from university_reviews r
+where r.university_id = $3
+  and r.parent_review_id is null
+group by r.review_id, r.date
+order by r.date
 offset $1 limit $2
 `
 
@@ -142,8 +230,58 @@ type GetReviewsParams struct {
 	UniversityID string `json:"university_id"`
 }
 
-func (q *Queries) GetReviews(ctx context.Context, arg GetReviewsParams) ([]UniversityReview, error) {
+type GetReviewsRow struct {
+	UniversityID   string         `json:"university_id"`
+	AuthorStatus   Statuses       `json:"author_status"`
+	Sentiment      Sentiments     `json:"sentiment"`
+	Date           time.Time      `json:"date"`
+	Text           string         `json:"text"`
+	ReviewID       string         `json:"review_id"`
+	ParentReviewID sql.NullString `json:"parent_review_id"`
+	ReplyCount     int64          `json:"reply_count"`
+}
+
+func (q *Queries) GetReviews(ctx context.Context, arg GetReviewsParams) ([]GetReviewsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getReviews, arg.Offset, arg.Limit, arg.UniversityID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetReviewsRow
+	for rows.Next() {
+		var i GetReviewsRow
+		if err := rows.Scan(
+			&i.UniversityID,
+			&i.AuthorStatus,
+			&i.Sentiment,
+			&i.Date,
+			&i.Text,
+			&i.ReviewID,
+			&i.ParentReviewID,
+			&i.ReplyCount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getReviewsByParent = `-- name: GetReviewsByParent :many
+select university_id, author_status, sentiment, date, text, review_id, parent_review_id
+from university_reviews r
+where r.parent_review_id = $1
+order by r.date
+`
+
+func (q *Queries) GetReviewsByParent(ctx context.Context, parentReviewID sql.NullString) ([]UniversityReview, error) {
+	rows, err := q.db.QueryContext(ctx, getReviewsByParent, parentReviewID)
 	if err != nil {
 		return nil, err
 	}
@@ -157,7 +295,163 @@ func (q *Queries) GetReviews(ctx context.Context, arg GetReviewsParams) ([]Unive
 			&i.Sentiment,
 			&i.Date,
 			&i.Text,
-			&i.Repliescount,
+			&i.ReviewID,
+			&i.ParentReviewID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTopOfUniversities = `-- name: GetTopOfUniversities :many
+select id, name, long_name, logo, rating, region, budget_places, type, study_fields
+from universities u
+order by u.rating desc
+limit $1
+`
+
+func (q *Queries) GetTopOfUniversities(ctx context.Context, limit int32) ([]University, error) {
+	rows, err := q.db.QueryContext(ctx, getTopOfUniversities, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []University
+	for rows.Next() {
+		var i University
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.LongName,
+			&i.Logo,
+			&i.Rating,
+			&i.Region,
+			&i.BudgetPlaces,
+			&i.Type,
+			&i.StudyFields,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUniversities = `-- name: GetUniversities :many
+select id, name, long_name, logo, rating, region, budget_places, type, study_fields
+from universities u
+order by u.name
+offset $1 limit $2
+`
+
+type GetUniversitiesParams struct {
+	Offset int32 `json:"offset"`
+	Limit  int32 `json:"limit"`
+}
+
+func (q *Queries) GetUniversities(ctx context.Context, arg GetUniversitiesParams) ([]University, error) {
+	rows, err := q.db.QueryContext(ctx, getUniversities, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []University
+	for rows.Next() {
+		var i University
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.LongName,
+			&i.Logo,
+			&i.Rating,
+			&i.Region,
+			&i.BudgetPlaces,
+			&i.Type,
+			&i.StudyFields,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUniversity = `-- name: GetUniversity :one
+select id, name, long_name, logo, rating, region, budget_places, type, study_fields
+from universities
+where id = $1
+limit 1
+`
+
+func (q *Queries) GetUniversity(ctx context.Context, id string) (University, error) {
+	row := q.db.QueryRowContext(ctx, getUniversity, id)
+	var i University
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.LongName,
+		&i.Logo,
+		&i.Rating,
+		&i.Region,
+		&i.BudgetPlaces,
+		&i.Type,
+		&i.StudyFields,
+	)
+	return i, err
+}
+
+const searchUniversities = `-- name: SearchUniversities :many
+select id, name, long_name, logo, rating, region, budget_places, type, study_fields
+from universities
+where name ilike $1
+   or long_name ilike $2
+order by name
+`
+
+type SearchUniversitiesParams struct {
+	Name     string `json:"name"`
+	LongName string `json:"long_name"`
+}
+
+func (q *Queries) SearchUniversities(ctx context.Context, arg SearchUniversitiesParams) ([]University, error) {
+	rows, err := q.db.QueryContext(ctx, searchUniversities, arg.Name, arg.LongName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []University
+	for rows.Next() {
+		var i University
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.LongName,
+			&i.Logo,
+			&i.Rating,
+			&i.Region,
+			&i.BudgetPlaces,
+			&i.Type,
+			&i.StudyFields,
 		); err != nil {
 			return nil, err
 		}

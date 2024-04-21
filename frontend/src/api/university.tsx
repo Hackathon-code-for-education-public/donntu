@@ -1,6 +1,11 @@
-export interface Univercity {
+export interface University {
     id: string;
     name: string;
     longName: string;
-    logoUrl: string;
+    logo: string;
+    rating: number;
+    region: string;
+    type: string;
+    studyFields: number;
+    budgetPlaces: number;
 }

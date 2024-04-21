@@ -105,7 +105,7 @@ export function Review({ review, type = "small" }: IProps) {
           {type === "small" && (
             <div className="flex items-center justify-between mt-6">
               <div className="flex items-center space-x-2">
-                <Link href={`/review/${review.id}`} legacyBehavior passHref>
+                <Link href={`/review/${review.reviewId}`} legacyBehavior passHref>
                   <Button className="text-sm" variant="ghost">
                     Ответов
                     <ReplyIcon className="w-4 h-4 ml-1" />
@@ -113,7 +113,7 @@ export function Review({ review, type = "small" }: IProps) {
                   </Button>
                 </Link>
               </div>
-              <Link href={`/review/${review.id}`} legacyBehavior passHref>
+              <Link href={`/review/${review.reviewId}`} legacyBehavior passHref>
                 <Button variant="ghost">
                   <ShareIcon className="w-5 h-5" />
                 </Button>

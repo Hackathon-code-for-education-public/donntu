@@ -1,4 +1,4 @@
-export const API_HOST = "http://mzhn.fun:8080";
+import { API_HOST } from "./config";
 
 export class AuthAPI {
   static getAccessToken(): string | null {
@@ -6,6 +6,7 @@ export class AuthAPI {
   }
 
   static setAccessToken(token: string): void {
+    console.log('setAccessToken')
     localStorage.setItem("accessToken", token);
   }
 
@@ -14,6 +15,7 @@ export class AuthAPI {
   }
 
   static setRefreshToken(token: string): void {
+    console.log('setRefreshToken')
     localStorage.setItem("refreshToken", token);
   }
 
@@ -82,7 +84,7 @@ export class AuthAPI {
       console.log("Sign out successful");
     } catch (error) {
       console.error("Sign out failed:", (error as Error).message);
-      throw error;
+      // throw error;
     } finally {
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");

@@ -17,9 +17,18 @@ type (
 
 	UniversityService interface {
 		GetOpenDays(ctx context.Context, universityId string) ([]*OpenDay, error)
+
 		GetReviews(ctx context.Context, universityId string, offset int, limit int) ([]*Review, error)
+		CreateReview(ctx context.Context, review *Review) (*Review, error)
+		GetReplies(ctx context.Context, reviewID string) ([]*Review, *Review, error)
+
 		CreatePanorama(ctx context.Context, panorama *Panorama) (*Panorama, error)
 		GetPanoramas(ctx context.Context, universityId string, category string) ([]*Panorama, error)
+
+		GetUniversitiesTop(ctx context.Context, n int) ([]*University, error)
+		GetUniversities(ctx context.Context, offset, limit int) ([]*University, error)
+		GetUniversity(ctx context.Context, universityID string) (*University, error)
+		SearchUniversities(ctx context.Context, name string) ([]*University, error)
 	}
 
 	FileService interface {

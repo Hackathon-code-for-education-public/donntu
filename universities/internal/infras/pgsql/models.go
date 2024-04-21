@@ -5,6 +5,7 @@
 package postgresql
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"time"
@@ -141,11 +142,58 @@ func (ns NullStatuses) Value() (driver.Value, error) {
 	return string(ns.Statuses), nil
 }
 
+type UniversityType string
+
+const (
+	UniversityTypeValue0 UniversityType = "Государственный"
+	UniversityTypeValue1 UniversityType = "Частный"
+)
+
+func (e *UniversityType) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = UniversityType(s)
+	case string:
+		*e = UniversityType(s)
+	default:
+		return fmt.Errorf("unsupported scan type for UniversityType: %T", src)
+	}
+	return nil
+}
+
+type NullUniversityType struct {
+	UniversityType UniversityType `json:"university_type"`
+	Valid          bool           `json:"valid"` // Valid is true if UniversityType is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullUniversityType) Scan(value interface{}) error {
+	if value == nil {
+		ns.UniversityType, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.UniversityType.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullUniversityType) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.UniversityType), nil
+}
+
 type University struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	LongName string `json:"long_name"`
-	Logo     string `json:"logo"`
+	ID           string         `json:"id"`
+	Name         string         `json:"name"`
+	LongName     string         `json:"long_name"`
+	Logo         string         `json:"logo"`
+	Rating       float64        `json:"rating"`
+	Region       string         `json:"region"`
+	BudgetPlaces int32          `json:"budget_places"`
+	Type         UniversityType `json:"type"`
+	StudyFields  int32          `json:"study_fields"`
 }
 
 type UniversityOpenDay struct {
@@ -171,10 +219,11 @@ type UniversityPanorama struct {
 }
 
 type UniversityReview struct {
-	UniversityID string     `json:"university_id"`
-	AuthorStatus Statuses   `json:"author_status"`
-	Sentiment    Sentiments `json:"sentiment"`
-	Date         time.Time  `json:"date"`
-	Text         string     `json:"text"`
-	Repliescount int32      `json:"repliescount"`
+	UniversityID   string         `json:"university_id"`
+	AuthorStatus   Statuses       `json:"author_status"`
+	Sentiment      Sentiments     `json:"sentiment"`
+	Date           time.Time      `json:"date"`
+	Text           string         `json:"text"`
+	ReviewID       string         `json:"review_id"`
+	ParentReviewID sql.NullString `json:"parent_review_id"`
 }
