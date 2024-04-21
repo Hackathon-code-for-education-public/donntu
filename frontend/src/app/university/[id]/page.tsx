@@ -8,7 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniversityOpenDays } from "@/components/university-open-days";
 import { UniversityReviews } from "@/components/university-reviews";
-import RoleProtected from "@/hoc/RoleProtected";
+import RoleProtected from "@/components/RoleProtected";
 import { useUniversity } from "@/lib/use-university";
 import Link from "next/link";
 
