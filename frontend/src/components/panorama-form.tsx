@@ -1,5 +1,5 @@
 "use client";
-
+import { z } from "zod";
 import { Panorama } from "@/api/panorama";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +25,7 @@ import { useState } from "react";
 interface PanoramaFormProps {
   universityId: string;
 }
+
 
 export function PanoramaForm({ universityId }: PanoramaFormProps) {
   const [panoramaToPost, setPanoramaToPost] = useState<Panorama>({
