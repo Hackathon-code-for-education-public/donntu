@@ -7,7 +7,8 @@ import { useChats } from "@/lib/use-chats";
 import { useMessages } from "@/lib/use-messages";
 import { useUser } from "@/lib/use-user";
 import { PlusIcon } from "lucide-react";
-import { useState } from "react";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 
 interface Message {
   sender: string;
@@ -17,7 +18,7 @@ interface Message {
 
 // Define props types for components
 interface ChatHistoryProps {
-  setActiveChatId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setActiveChatId: (str: string) => void;
 }
 
 interface ChatSectionProps {
@@ -72,7 +73,7 @@ const ChatSection: React.FC<ChatSectionProps> = ({ activeChatId }) => {
 
   const onSendMessage = async (message: string) => {
     await API.sendChatMessage(activeChatId!, message);
-    mutate(undefined)
+    mutate(undefined);
   };
 
   if (!activeChatId) {
@@ -94,9 +95,19 @@ const ChatSection: React.FC<ChatSectionProps> = ({ activeChatId }) => {
         <div className="space-y-4">
           {messages.map((msg, index) => {
             /** @ts-ignore */
-            const isYou = msg.userId === user?.id
+            const isYou = msg.userId === user?.id;
             /** @ts-ignore */
-            return <MessageBubble key={index} message={{ ...msg, isYou, sender: isYou ? user?.firstName : "Кавырлик" }} />
+            return (
+              <MessageBubble
+                key={index}
+                message={{
+                  ...msg,
+                  isYou,
+                  /** @ts-ignore */
+                  sender: isYou ? user?.firstName : "Кавырлик",
+                }}
+              />
+            );
           })}
         </div>
       </div>
@@ -104,8 +115,6 @@ const ChatSection: React.FC<ChatSectionProps> = ({ activeChatId }) => {
     </div>
   );
 };
-
-
 
 interface Message {
   sender: string;
@@ -124,8 +133,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => (
     <div className={`space-y-1 ${message.isYou ? "text-right" : ""}`}>
       <p className="text-sm font-medium">{message.sender}</p>
       <p
-        className={`text-sm rounded-lg ${message.isYou ? "bg-slate-100" : "bg-gray-100"
-          } p-4`}
+        className={`text-sm rounded-lg ${
+          message.isYou ? "bg-slate-100" : "bg-gray-100"
+        } p-4`}
       >
         {/** @ts-ignore */}
         {message.message}
@@ -134,14 +144,18 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => (
   </div>
 );
 
-const InputArea = ({ onSendChatCallback }: { onSendChatCallback: (message: string) => void }) => {
+const InputArea = ({
+  onSendChatCallback,
+}: {
+  onSendChatCallback: (message: string) => void;
+}) => {
   const [message, setMessage] = useState("");
 
   const onSendChat = async (message: string) => {
     if (message.length < 1) return;
 
-    onSendChatCallback(message)
-  }
+    onSendChatCallback(message);
+  };
 
   return (
     <div className="border-t bg-gray-100/40 px-6 py-4 dark:bg-gray-800/40">
@@ -152,19 +166,46 @@ const InputArea = ({ onSendChatCallback }: { onSendChatCallback: (message: strin
           onChange={(e) => setMessage(e.target.value)}
           placeholder="Введите ваше сообщение..."
         />
-        <Button onClick={(e) => onSendChat(message)} disabled={message.length < 1}>Отправить</Button>
+        <Button
+          onClick={(e) => onSendChat(message)}
+          disabled={message.length < 1}
+        >
+          Отправить
+        </Button>
       </div>
     </div>
   );
-}
+};
 
-export default function Page() {
-  const [activeChatId, setActiveChatId] = useState<string | undefined>(undefined);
+function Page() {
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { replace } = useRouter();
+
+  const setActiveChatId = (chatId?: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (chatId) {
+      params.set('chatId', chatId);
+    } else {
+      params.delete('chatId');
+    }
+    replace(`${pathname}?${params.toString()}`);
+  }
+
+  const activeChatId = searchParams.get('chatId') || undefined;
 
   return (
     <div className="grid min-h-screen w-full grid-cols-[300px_1fr] overflow-hidden">
       <ChatHistory setActiveChatId={setActiveChatId} />
       <ChatSection activeChatId={activeChatId} />
     </div>
+  );
+}
+
+export default function PPage() {
+  return (
+    <Suspense>
+      <Page />
+    </Suspense>
   );
 }
