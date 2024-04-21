@@ -6,15 +6,5 @@ include:
   - gateway/docker-compose.yaml
   - universities/docker-compose.yaml
   - verification-service/docker-compose.yaml
-
-# services:
-  # auth-service:
-  #   extends:
-  #     file: auth-service/docker-compose.yml
-  #     name: auth-service
-  
-  # file-service:
-  #   extends:
-  #     file: file-service/docker-compose.yml
-  #     name: file-service
+  - chat-service/docker-compose.yaml
 

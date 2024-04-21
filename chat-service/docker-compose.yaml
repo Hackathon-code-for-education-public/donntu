@@ -1,0 +1,46 @@
+version: "4.5"
+
+services:
+  chat-service:
+    container_name: chat-service
+    build:
+      context: .
+    env_file:
+      - .env
+    environment:
+      WAIT_HOSTS: ${DB_HOST}:${DB_PORT}, ${REDIS_HOST}:${REDIS_PORT}
+    depends_on:
+      - chat-postgres
+      - chat-redis
+    ports:
+      - "5256:5256"
+
+  chat-postgres:
+    image: postgres:16.2-alpine3.19
+    restart: always
+    volumes:
+      - chatpgdata:/var/lib/postgresql/data
+    env_file:
+      - .env.pg
+    command:
+      - "postgres"
+      - "-c"
+      - "port=5435"
+    ports:
+      - "5440:5435"
+
+  chat-redis:
+    image: redis:7.2.4-alpine
+    restart: always
+    env_file:
+      - .env.redis
+    command:
+      - --port ${REDIS_PORT}
+    ports:
+      - "6380:${REDIS_PORT}"
+    volumes:
+      - chatredisdata:/data
+
+volumes:
+  chatpgdata:
+  chatredisdata:
