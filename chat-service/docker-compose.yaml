@@ -1,32 +1,32 @@
 version: "4.5"
 
 services:
-  verification-service:
-    container_name: verification-service
+  chat-service:
+    container_name: chat-service
     build:
       context: .
     env_file:
       - .env.prod
     environment:
-      WAIT_HOSTS: verf-postgres:5434
+      WAIT_HOSTS: chat-postgres:5435
     depends_on:
-      - verf-postgres
+      - chat-postgres
     ports:
       - "5254:5254"
 
-  verf-postgres:
+  chat-postgres:
     image: postgres:16.2-alpine3.19
     restart: always
     volumes:
-      - verfdata:/var/lib/postgresql/data
+      - chatdata:/var/lib/postgresql/data
     env_file:
       - .env.pg
     command:
       - "postgres"
       - "-c"
-      - "port=5434"
+      - "port=5435"
     ports:
-      - "5439:5434"
+      - "5440:5435"
 
 volumes:
-  verfdata:
+  chatdata:
