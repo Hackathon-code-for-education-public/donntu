@@ -5,7 +5,7 @@ create table if not exists messages
     user_id    text      not null,
     text       text      not null,
     read       boolean   not null default false,
-    created_at timestamp not null
+    created_at timestamp not null default now()
 );
 
 create table if not exists chats

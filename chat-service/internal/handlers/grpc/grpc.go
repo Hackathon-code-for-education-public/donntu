@@ -47,18 +47,21 @@ func (h Handler) Attach(request *chat.AttachRequest, stream chat.Chat_AttachServ
 		return err
 	}
 
+	slog.Debug("waiting for messages", slog.Any("chatId", request.ChatId))
 	for {
 		select {
 		case <-ctx.Done():
-			close(msgCh)
+			slog.Debug("grpc context done")
 			return nil
 		case m := <-msgCh:
+			slog.Debug("message received", slog.Any("message", m))
 			if err := stream.Send(&chat.IncomingMessage{
 				Text: m.Text,
 			}); err != nil {
 				slog.Error("failed to send", slog.String("err", err.Error()))
 				return err
 			}
+			slog.Debug("message sent", slog.Any("message", m))
 		}
 	}
 }

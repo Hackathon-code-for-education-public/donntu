@@ -16,6 +16,7 @@ type ChatStorage interface {
 	Create(ctx context.Context, id string, userId string, targetId string) error
 	ListChatByUserId(ctx context.Context, userId string) ([]*dto.Chat, error)
 	GetHistory(ctx context.Context, chatId string) ([]*models.Message, error)
+	GetUnreadMessages(ctx context.Context, chatId string) ([]*models.Message, error)
 }
 
 type MessageStorage interface {
@@ -78,19 +79,37 @@ func (s Service) Attach(ctx context.Context, chatId string, ch chan<- *dto.Messa
 			case <-ctx.Done():
 				close(tch)
 			case msg := <-tch:
-				if err := s.messageStorage.MarkAsRead(ctx, msg.Id); err != nil {
-					slog.Error("error mark as read", slog.String("err", err.Error()))
-					return
-				}
+				//if err := s.messageStorage.MarkAsRead(ctx, msg.Id); err != nil {
+				//	slog.Error("error mark as read", slog.String("err", err.Error()))
+				//	return
+				//}
 				ch <- msg
 			}
 		}
 	}()
 
-	if err := s.broker.Subscribe(ctx, chatId, ch); err != nil {
+	if err := s.broker.Subscribe(ctx, chatId, tch); err != nil {
 		slog.Error("error subscribe", slog.String("err", err.Error()))
 		return err
 	}
+
+	slog.Info("subscribed", slog.String("chatId", chatId))
+	unread, err := s.chatStorage.GetUnreadMessages(ctx, chatId)
+	if err != nil {
+		slog.Error("error get unread messages", slog.String("err", err.Error()))
+		return err
+	}
+
+	slog.Info("unread messages", slog.Int("count", len(unread)))
+	go func() {
+		for _, msg := range unread {
+			tch <- &dto.Message{
+				Id:     msg.Id,
+				UserId: msg.UserId,
+				Text:   msg.Text,
+			}
+		}
+	}()
 
 	return nil
 }

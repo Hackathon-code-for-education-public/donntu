@@ -30,11 +30,6 @@ type Config struct {
 		Pass string `env:"REDIS_PASS" env-required:"true"`
 		DB   int    `env:"REDIS_DB" env-required:"true"`
 	}
-
-	AuthService struct {
-		Host string `env:"AUTH_SERVICE_HOST" env-required:"true"`
-		Port int    `env:"AUTH_SERVICE_PORT" env-required:"true"`
-	}
 }
 
 func New() *Config {

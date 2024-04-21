@@ -19,8 +19,8 @@ func NewMessageStorage(db *sqlx.DB) *MessageStorage {
 func (m MessageStorage) Save(ctx context.Context, msg *models.Message) error {
 	sql, args, err := squirrel.
 		Insert("messages").
-		Columns("id", "user_id", "chat_id", "text").
-		Values(msg.Id, msg.UserId, msg.ChatId, msg.Text).
+		Columns("user_id", "chat_id", "text").
+		Values(msg.UserId, msg.ChatId, msg.Text).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
 	if err != nil {

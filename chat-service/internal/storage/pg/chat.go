@@ -28,7 +28,7 @@ func (c ChatStorage) Create(ctx context.Context, id string, userId string, targe
 
 	sql, args, err := squirrel.
 		Insert("chats").
-		Columns("chat_id").
+		Columns("id").
 		Values(id).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
@@ -119,8 +119,8 @@ func (c ChatStorage) ListChatByUserId(ctx context.Context, userId string) ([]*dt
 
 	rows := make([]*row, 0)
 
-	if err := c.db.Select(rows, sql, args...); err != nil {
-		slog.Error("failed executing sql", slog.String("sql", sql))
+	if err := c.db.Select(&rows, sql, args...); err != nil {
+		slog.Error("failed executing sql", slog.String("sql", sql), slog.Any("args", args), slog.String("err", err.Error()))
 		return nil, err
 	}
 
@@ -148,8 +148,30 @@ func (c ChatStorage) GetHistory(ctx context.Context, chatId string) ([]*models.M
 	}
 	slog.Debug("executing sql", slog.String("sql", sql))
 	rows := make([]*models.Message, 0)
-	if err := c.db.Select(rows, sql, args...); err != nil {
-		slog.Error("failed executing sql", slog.String("sql", sql))
+	if err := c.db.Select(&rows, sql, args...); err != nil {
+		slog.Error("failed executing sql", slog.String("sql", sql), slog.Any("args", args), slog.String("err", err.Error()))
+		return nil, err
+	}
+
+	return rows, nil
+}
+func (c ChatStorage) GetUnreadMessages(ctx context.Context, chatId string) ([]*models.Message, error) {
+	sql, args, err := squirrel.
+		Select("*").
+		From("messages").
+		Where(squirrel.Eq{"chat_id": chatId}).
+		Where(squirrel.NotEq{"read": true}).
+		PlaceholderFormat(squirrel.Dollar).
+		ToSql()
+	if err != nil {
+		slog.Error("failed build sql", slog.String("err", err.Error()))
+		return nil, err
+	}
+
+	slog.Debug("executing sql", slog.String("sql", sql), slog.Any("args", args))
+	rows := make([]*models.Message, 0)
+	if err := c.db.Select(&rows, sql, args...); err != nil {
+		slog.Error("failed executing sql", slog.String("sql", sql), slog.Any("args", args), slog.String("err", err.Error()))
 		return nil, err
 	}
 
