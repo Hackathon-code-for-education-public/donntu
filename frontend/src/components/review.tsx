@@ -8,6 +8,8 @@ import { ReviewDataFull } from "@/lib/use-review";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { API } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import { useUser } from "@/lib/use-user";
 
 export function ReviewSkeleton() {
   return (
@@ -59,15 +61,19 @@ export function Review({ review, type = "small" }: IProps) {
     review.sentiment === "positive"
       ? "bg-green-100"
       : review.sentiment === "negative"
-        ? "bg-red-100"
-        : "";
-  reviewClass = ""
+      ? "bg-red-100"
+      : "";
+  reviewClass = "";
 
   const [showFullReview, setShowFullReview] = useState(false);
 
+  const router = useRouter();
+
   const onCreateChat = async (reviewId: string) => {
-    await API.createChat(reviewId);
-  }
+    const { data } = await API.createChat(reviewId);
+
+    router.push(`/chat?chatId=${data.id}`);
+  };
 
   return (
     <div
@@ -109,7 +115,12 @@ export function Review({ review, type = "small" }: IProps) {
             )}
           </div>
           <div className="flex justify-between items-center mt-6">
-            <Button variant={"outline"} onClick={() => onCreateChat(review.reviewId)}>Написать сообщение</Button>
+            <Button
+              variant={"outline"}
+              onClick={() => onCreateChat(review.reviewId)}
+            >
+              Написать сообщение
+            </Button>
             {type === "small" && (
               <Link href={`/review/${review.reviewId}`} legacyBehavior passHref>
                 <Button className="text-sm" variant={"outline"}>
