@@ -18,7 +18,7 @@ export function MainNavigation() {
   const { user, loading, loggedOut } = useUser();
 
   return (
-    <header className="flex justify-between p-2">
+    <header className="flex justify-around p-2">
       <NavigationMenu>
         <NavigationMenuList>
           <NavigationMenuItem>
@@ -29,12 +29,12 @@ export function MainNavigation() {
             </Link>
           </NavigationMenuItem>
           <NavigationMenuItem>
-              <Link href="/university" legacyBehavior passHref>
-                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-                  Университеты
-                </NavigationMenuLink>
-              </Link>
-            </NavigationMenuItem>
+            <Link href="/university" legacyBehavior passHref>
+              <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                Университеты
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
           {user && (
             <NavigationMenuItem>
               <Link href="/account" legacyBehavior passHref>

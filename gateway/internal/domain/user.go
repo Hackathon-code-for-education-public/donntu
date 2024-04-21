@@ -9,6 +9,7 @@ const (
 	UserRoleUniversity UserRole = "UNIVERSITY"
 	UserRoleApplicant  UserRole = "APPLICANT"
 	UserRoleStudent    UserRole = "STUDENT"
+	UserRoleAny        UserRole = "ANY"
 )
 
 type User struct {
