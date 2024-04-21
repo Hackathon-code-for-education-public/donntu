@@ -1,0 +1,7 @@
+api.mzhn.fun {
+    reverse_proxy gateway:8080
+}
+
+chat-api.mzhn.fun {
+    reverse_proxy gateway:8081
+}
