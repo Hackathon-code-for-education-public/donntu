@@ -1,10 +1,10 @@
 import useSWR from "swr";
 import { fetcherWithData } from "./fetcher";
-import { Univercity } from "@/api/university";
+import { University } from "@/api/university";
 
 export function useUniversity(id: string) {
-  const { data, error, isLoading } = useSWR<Univercity>(
-    `/api/v1/universities/${id}`,
+  const { data, error, isLoading } = useSWR<University>(
+    id && `/api/v1/universities/${id}`,
     fetcherWithData
   );
   // TODO
