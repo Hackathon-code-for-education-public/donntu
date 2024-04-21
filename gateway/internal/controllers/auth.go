@@ -70,8 +70,11 @@ func (a *AuthController) SignUp(role domain.UserRole) fiber.Handler {
 		a.log.Debug("sign-up request", slog.Any("req", req))
 
 		u := &domain.User{
-			Role:  role,
-			Email: req.Email,
+			Email:      req.Email,
+			LastName:   req.LastName,
+			FirstName:  req.FirstName,
+			MiddleName: req.MiddleName,
+			Role:       role,
 		}
 
 		tokens, err := a.authService.SignUp(ctx.Context(), u, req.Password)

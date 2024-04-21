@@ -18,14 +18,6 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-
-const (
-	Universities_GetOpenDays_FullMethodName    = "/universities.Universities/GetOpenDays"
-	Universities_GetReviews_FullMethodName     = "/universities.Universities/GetReviews"
-	Universities_CreatePanorama_FullMethodName = "/universities.Universities/CreatePanorama"
-	Universities_GetPanoramas_FullMethodName   = "/universities.Universities/GetPanoramas"
-)
-
 // UniversitiesClient is the client API for Universities service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
@@ -64,7 +56,7 @@ func (c *universitiesClient) GetReviews(ctx context.Context, in *GetReviewsReque
 
 func (c *universitiesClient) CreatePanorama(ctx context.Context, in *CreatePanoramaRequest, opts ...grpc.CallOption) (*Panorama, error) {
 	out := new(Panorama)
-	err := c.cc.Invoke(ctx, Universities_CreatePanorama_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/universities.Universities/CreatePanorama", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -73,7 +65,7 @@ func (c *universitiesClient) CreatePanorama(ctx context.Context, in *CreatePanor
 
 func (c *universitiesClient) GetPanoramas(ctx context.Context, in *GetPanoramasRequest, opts ...grpc.CallOption) (*Panoramas, error) {
 	out := new(Panoramas)
-	err := c.cc.Invoke(ctx, Universities_GetPanoramas_FullMethodName, in, out, opts...)
+	err := c.cc.Invoke(ctx, "/universities.Universities/GetPanoramas", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +158,7 @@ func _Universities_CreatePanorama_Handler(srv interface{}, ctx context.Context, 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Universities_CreatePanorama_FullMethodName,
+		FullMethod: "/universities.Universities/CreatePanorama",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UniversitiesServer).CreatePanorama(ctx, req.(*CreatePanoramaRequest))
@@ -184,7 +176,7 @@ func _Universities_GetPanoramas_Handler(srv interface{}, ctx context.Context, de
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Universities_GetPanoramas_FullMethodName,
+		FullMethod: "/universities.Universities/GetPanoramas",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UniversitiesServer).GetPanoramas(ctx, req.(*GetPanoramasRequest))

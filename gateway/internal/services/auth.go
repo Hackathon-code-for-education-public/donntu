@@ -58,9 +58,12 @@ func (s *AuthService) SignIn(ctx context.Context, credentials *domain.Credential
 
 func (s *AuthService) SignUp(ctx context.Context, user *domain.User, password string) (*domain.Tokens, error) {
 	req := &auth.SignUpRequest{
-		Email:    user.Email,
-		Password: password,
-		Role:     user.ConvertRole(),
+		Email:      user.Email,
+		Password:   password,
+		Role:       user.ConvertRole(),
+		LastName:   user.LastName,
+		FirstName:  user.FirstName,
+		MiddleName: user.MiddleName,
 	}
 	fmt.Println(req)
 
