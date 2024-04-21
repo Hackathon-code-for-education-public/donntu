@@ -42,7 +42,7 @@ func (u *universitiesPg) GetOpenDays(ctx context.Context, universityID string) (
 	return days, nil
 }
 
-func (u *universitiesPg) CreateReview(ctx context.Context, review *domain.Review) (*domain.Review, error) {
+func (u *universitiesPg) CreateReview(ctx context.Context, review *domain.Review, authorId string) (*domain.Review, error) {
 	querier := postgresql.New(u.pg.GetDB())
 	params := postgresql.CreateReviewParams{
 		ReviewID:     review.Id,
@@ -51,6 +51,7 @@ func (u *universitiesPg) CreateReview(ctx context.Context, review *domain.Review
 		Sentiment:    postgresql.Sentiments(review.Sentiment),
 		Date:         time.Now(),
 		Text:         review.Text,
+		UserID:       authorId,
 	}
 	if review.ParentId != nil {
 		params.ParentReviewID = sql.NullString{
@@ -266,6 +267,7 @@ func (u *universitiesPg) GetReplies(ctx context.Context, reviewID string) ([]*do
 				Date:         item.Date,
 				Sentiment:    domain.Sentiment(item.Sentiment),
 				AuthorStatus: domain.AuthorStatus(item.AuthorStatus),
+				AuthorId:     item.UserID,
 			}
 		}),
 		&domain.Review{
@@ -276,5 +278,6 @@ func (u *universitiesPg) GetReplies(ctx context.Context, reviewID string) ([]*do
 			Sentiment:    domain.Sentiment(parentReview.Sentiment),
 			AuthorStatus: domain.AuthorStatus(parentReview.AuthorStatus),
 			RepliesCount: int(parentReview.ReplyCount),
+			AuthorId:     parentReview.UserID,
 		}, nil
 }

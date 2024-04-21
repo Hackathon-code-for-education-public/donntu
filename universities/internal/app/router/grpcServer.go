@@ -60,7 +60,7 @@ func (s *UniversitiesService) CreateReview(ctx context.Context, req *universitie
 		Sentiment:    domain.Sentiment(req.Review.Sentiment),
 		Text:         req.Review.Text,
 		ParentId:     req.ParentReviewId,
-	})
+	}, req.AuthorId)
 	if err != nil {
 		s.log.Error("failed to create review", slog.String("university_id", req.Review.UniversityId))
 		if errors.Is(err, errors.New("not found")) {
@@ -97,6 +97,7 @@ func (s *UniversitiesService) GetReplies(ctx context.Context, id *universities.U
 			Text:         parenReview.Text,
 			Date:         parenReview.Date.Unix(),
 			UniversityId: parenReview.UniversityId,
+			AuthorId:     parenReview.AuthorId,
 		},
 		Replies: lo.Map(reviews, func(review *domain.Review, _ int) *universities.Review {
 			return &universities.Review{
@@ -107,6 +108,7 @@ func (s *UniversitiesService) GetReplies(ctx context.Context, id *universities.U
 				Text:         review.Text,
 				Date:         review.Date.Unix(),
 				UniversityId: review.UniversityId,
+				AuthorId:     review.AuthorId,
 			}
 		}),
 	}, nil

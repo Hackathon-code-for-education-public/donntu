@@ -38,6 +38,7 @@ message Review {
   string text = 5;
   int32 repliesCount = 6;
   string reviewId = 7;
+  string authorId = 8;
 }
 
 message Reviews {
@@ -106,6 +107,7 @@ message GetTopOfUniversitiesRequest {
 message CreateReviewRequest {
   Review review = 1;
   optional string parent_review_id = 2;
+  string authorId = 3;
 }
 
 message GetRepliesResponse {

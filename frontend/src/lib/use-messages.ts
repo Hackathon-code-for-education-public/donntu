@@ -1,5 +1,6 @@
 "use client";
 import useSWR from "swr";
+import { fetcher, fetcherWithData } from "./fetcher";
 
 export type Message = {
   sender: string;
@@ -21,14 +22,14 @@ const mockData: Message[] = [
 ];
 
 const mockFetcher = async (url: string): Promise<Message[]> => {
-  await new Promise((resolve) => setTimeout(resolve, 1000));  
+  await new Promise((resolve) => setTimeout(resolve, 1000));
   return mockData;
 };
 
 export function useMessages(chatId?: string) {
-  const { data, error, isLoading } = useSWR<Message[]>(
-    chatId && `/api/v1/messages/${chatId}`,
-    mockFetcher
+  const { data, error, isLoading, mutate } = useSWR<Message[]>(
+    chatId && `/api/v1/chats/history/${chatId}`,
+    fetcher
   );
   // TODO
 
@@ -36,5 +37,6 @@ export function useMessages(chatId?: string) {
     data,
     isLoading,
     error,
+    mutate
   };
 }
