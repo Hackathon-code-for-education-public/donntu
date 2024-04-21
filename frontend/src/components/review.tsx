@@ -7,6 +7,7 @@ import { ReviewData } from "@/lib/use-reviews";
 import { ReviewDataFull } from "@/lib/use-review";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
+import { API } from "@/lib/api";
 
 export function ReviewSkeleton() {
   return (
@@ -64,6 +65,10 @@ export function Review({ review, type = "small" }: IProps) {
 
   const [showFullReview, setShowFullReview] = useState(false);
 
+  const onCreateChat = async (reviewId: string) => {
+    await API.createChat(reviewId);
+  }
+
   return (
     <div
       className={`max-w-4xl mx-auto p-6 rounded-lg shadow-md border border-h-1 w-full ${reviewClass}`}
@@ -104,7 +109,7 @@ export function Review({ review, type = "small" }: IProps) {
             )}
           </div>
           <div className="flex justify-between items-center mt-6">
-            <Button variant={"outline"}>Написать сообщение</Button>
+            <Button variant={"outline"} onClick={() => onCreateChat(review.reviewId)}>Написать сообщение</Button>
             {type === "small" && (
               <Link href={`/review/${review.reviewId}`} legacyBehavior passHref>
                 <Button className="text-sm" variant={"outline"}>
