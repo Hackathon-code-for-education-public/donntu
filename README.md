@@ -9,20 +9,21 @@
 В корне репозитория:
   1. ```mzhn team.pptx``` - PPTX презентация;
   2. ```mzhn team.pdf``` - PDF презентация;
-  3. ```mzhn team.mp4``` - MP4 демонстрация работы проэкта;
+  3. ```mzhn team.mp4``` - MP4 демонстрация работы проекта;
 
-## Развёртывание проэкта
+## Развёртывание проекта
 
-### Как поднять наш фронт
+### Как поднять
 
-ENV переменные Next Js приложения:
-  - ```NEXT_PUBLIC_API_HOST``` - Основное API
-  - ```NEXT_PUBLIC_API_HOST2``` - API чатов
-  - ```NEXT_PUBLIC_S3_HOST``` - S3
+```
+# docker --version
+Docker version 26.0.0, build 2ae903e
+# docker compose version
+Docker Compose version v2.25.0
+```
 
-### Как поднять наш бек:
   1. ```docker compose -d —build```
-  2. [Readme руководство нашего файлового сервиса](file-service/README.md)
+  2. [Readme руководство нашего файлового сервиса](file-service/README.md)  
 
 ## Как выглядит
 
