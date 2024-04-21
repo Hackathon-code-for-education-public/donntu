@@ -20,13 +20,13 @@ export default function Page() {
 
   return (
     <main className="flex min-h-screen justify-around">
-      <div className="flex items-center flex-col">
+      <div className="flex items-center mt-10 flex-col">
         <SelectUniversity
           onSelect={(uni) => handleSelectUniversity(uni, "first")}
         />
         {first && <UniversityBlock universityId={first} />}
       </div>
-      <div className="flex items-center flex-col">
+      <div className="flex items-center mt-10 flex-col">
         <SelectUniversity
           onSelect={(uni) => handleSelectUniversity(uni, "second")}
         />

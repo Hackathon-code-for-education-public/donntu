@@ -54,18 +54,19 @@ export function Review({ review, type = "small" }: IProps) {
   const fullReviewText = review.text;
   const isLongReview = fullReviewText.length > 300;
 
-  const reviewClass =
+  let reviewClass =
     review.sentiment === "positive"
       ? "bg-green-100"
       : review.sentiment === "negative"
-      ? "bg-red-100"
-      : "";
+        ? "bg-red-100"
+        : "";
+  reviewClass = ""
 
   const [showFullReview, setShowFullReview] = useState(false);
 
   return (
     <div
-      className={`max-w-4xl mx-auto p-6 rounded-lg shadow-md w-full ${reviewClass}`}
+      className={`max-w-4xl mx-auto p-6 rounded-lg shadow-md border border-h-1 w-full ${reviewClass}`}
     >
       <div className="flex items-start space-x-4">
         <Avatar>
@@ -73,14 +74,14 @@ export function Review({ review, type = "small" }: IProps) {
             alt="User Avatar"
             src="/placeholder.svg?height=50&width=50"
           />
-          <AvatarFallback>CN</AvatarFallback>
+          <AvatarFallback>N</AvatarFallback>
         </Avatar>
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Badge variant="secondary">{review.authorStatus}</Badge>
               <span className="text-sm text-muted-foreground">
-                {review.date}
+                {new Date(Date.parse(review.date)).toLocaleDateString()}
               </span>
             </div>
           </div>
@@ -102,27 +103,17 @@ export function Review({ review, type = "small" }: IProps) {
               </>
             )}
           </div>
-          {type === "small" && (
-            <div className="flex items-center justify-between mt-6">
-              <div className="flex items-center space-x-2">
-                <Link href={`/review/${review.reviewId}`} legacyBehavior passHref>
-                  <Button className="text-sm" variant="ghost">
-                    Ответов
-                    <ReplyIcon className="w-4 h-4 ml-1" />
-                    <span className="font-semibold">{review.repliesCount}</span>
-                  </Button>
-                </Link>
-              </div>
+          <div className="flex justify-between items-center mt-6">
+            <Button variant={"outline"}>Написать сообщение</Button>
+            {type === "small" && (
               <Link href={`/review/${review.reviewId}`} legacyBehavior passHref>
-                <Button variant="ghost">
-                  <ShareIcon className="w-5 h-5" />
+                <Button className="text-sm" variant={"outline"}>
+                  Ответов
+                  <ReplyIcon className="w-4 h-4 ml-1" />
+                  <span className="font-semibold">{review.repliesCount}</span>
                 </Button>
               </Link>
-            </div>
-          )}
-          <div className="text-xs text-muted-foreground mt-2">
-            Отзыв является личным мнением автора и может не совпадать с
-            действительностью.
+            )}
           </div>
         </div>
       </div>

@@ -106,17 +106,15 @@ func (s *AuthService) Refresh(ctx context.Context, refreshToken string) (*domain
 	}, nil
 }
 
-func (s *AuthService) Verify(ctx context.Context, accessToken string, role *domain.UserRole) (*domain.UserClaims, error) {
-
-	var gr *auth.Role
-	if role != nil {
-		grr := domain.ConvertRoleToGrpc(*role)
-		gr = &grr
-	}
+func (s *AuthService) Verify(ctx context.Context, accessToken string, role domain.UserRole) (*domain.UserClaims, error) {
 
 	req := &auth.AuthRequest{
 		AccessToken: accessToken,
-		Role:        gr,
+	}
+
+	if role != domain.UserRoleAny {
+		r := domain.ConvertRoleToGrpc(role)
+		req.Role = &r
 	}
 
 	res, err := s.client.Auth(ctx, req)

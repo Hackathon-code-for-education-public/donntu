@@ -2,8 +2,10 @@ package controllers
 
 import (
 	"errors"
+	"fmt"
 	"gateway/internal/domain"
 	"gateway/internal/services"
+	"github.com/go-playground/validator/v10"
 	fiberv2 "github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v3"
 	"google.golang.org/grpc/codes"
@@ -15,12 +17,15 @@ import (
 type AuthController struct {
 	authService domain.AuthService
 	log         *slog.Logger
+	validator   *validator.Validate
 }
 
 func NewAuthController(authService domain.AuthService, log *slog.Logger) *AuthController {
+	var val = validator.New()
 	return &AuthController{
 		authService: authService,
 		log:         log,
+		validator:   val,
 	}
 }
 
@@ -56,7 +61,7 @@ func (a *AuthController) SignIn() fiber.Handler {
 
 func (a *AuthController) SignUp(role domain.UserRole) fiber.Handler {
 	type request struct {
-		Email      string `json:"email" validate:"required,len=11"`
+		Email      string `json:"email" validate:"required,email"`
 		Password   string `json:"password" validate:"required"`
 		FirstName  string `json:"firstName" validate:"required"`
 		LastName   string `json:"lastName" validate:"required"`
@@ -76,6 +81,10 @@ func (a *AuthController) SignUp(role domain.UserRole) fiber.Handler {
 			FirstName:  req.FirstName,
 			MiddleName: req.MiddleName,
 			Role:       role,
+		}
+
+		if errs := a.Validate(req); errs != "" {
+			return bad(errs)
 		}
 
 		tokens, err := a.authService.SignUp(ctx.Context(), u, req.Password)
@@ -137,7 +146,7 @@ func (a *AuthController) Refresh() fiber.Handler {
 	}
 }
 
-func (a *AuthController) AuthRequiredV2(role *domain.UserRole) fiberv2.Handler {
+func (a *AuthController) AuthRequiredV2(role domain.UserRole) fiberv2.Handler {
 	return func(ctx *fiberv2.Ctx) error {
 		auth := ctx.Get("Authorization")
 		s := strings.Split(auth, " ")
@@ -182,7 +191,7 @@ func (a *AuthController) AuthRequiredV2(role *domain.UserRole) fiberv2.Handler {
 	}
 }
 
-func (a *AuthController) AuthRequired(role *domain.UserRole) fiber.Handler {
+func (a *AuthController) AuthRequired(role domain.UserRole) fiber.Handler {
 	return func(ctx fiber.Ctx) error {
 		auth := ctx.Get("Authorization")
 		s := strings.Split(auth, " ")
@@ -257,4 +266,17 @@ func (a *AuthController) GetProfile() fiber.Handler {
 
 		return ok(c, u)
 	}
+}
+
+func (a *AuthController) Validate(data any) string {
+	sb := &strings.Builder{}
+
+	errs := a.validator.Struct(data)
+	if errs != nil {
+		for _, err := range errs.(validator.ValidationErrors) {
+			sb.WriteString(fmt.Sprintf("%s\n", err.Error()))
+		}
+	}
+
+	return sb.String()
 }

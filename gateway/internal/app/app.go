@@ -104,12 +104,12 @@ func (a *Application) Run() error {
 	au.Post("/sign-in", a.authController.SignIn())
 	au.Post("/students/sign-up", a.authController.SignUp(domain.UserRoleStudent))
 	au.Post("/applicant/sign-up", a.authController.SignUp(domain.UserRoleApplicant))
-	au.Post("/university/sign-up", a.authController.SignUp(domain.UserRoleStudent))
+	au.Post("/university/sign-up", a.authController.SignUp(domain.UserRoleManager))
 	au.Post("/manager/sign-up", a.authController.SignUp(domain.UserRoleManager))
-	au.Post("/sign-out", a.authController.SignOut(), a.authController.AuthRequired(nil))
+	au.Post("/sign-out", a.authController.SignOut(), a.authController.AuthRequired(domain.UserRoleAny))
 	au.Post("/refresh", a.authController.Refresh())
 
-	v1.Get("/profile", a.authController.GetProfile(), a.authController.AuthRequired(nil))
+	v1.Get("/profile", a.authController.GetProfile(), a.authController.AuthRequired(domain.UserRoleAny))
 
 	users := v1.Group("/users")
 	users.Get("/:id", a.authController.GetUser())
@@ -123,20 +123,20 @@ func (a *Application) Run() error {
 
 	r := v1.Group("/reviews")
 	r.Get("/", a.universityController.GetReviews())
-	r.Post("/", a.universityController.CreateReview())
+	r.Post("/", a.universityController.CreateReview(), a.authController.AuthRequired(domain.UserRoleStudent))
 	r.Get("/:id", a.universityController.GetReplies())
 
 	p := v1.Group("/panoramas")
 	p.Get("/", a.universityController.GetPanorama())
-	p.Post("/", a.universityController.CreatePanorama())
+	p.Post("/", a.universityController.CreatePanorama(), a.authController.AuthRequired(domain.UserRoleUniversity))
 
 	v1v2 := a.http2.Group("/api/v1")
 	chats := v1v2.Group("chats")
-	chats.Get("/", a.authController.AuthRequiredV2(nil), a.chatController.GetChats())
-	chats.Post("/", a.authController.AuthRequiredV2(nil), a.chatController.CreateChat())
-	chats.Get("/:id", a.authController.AuthRequiredV2(nil), a.chatController.Attach())
-	chats.Post("/:id", a.authController.AuthRequiredV2(nil), a.chatController.SendMessage())
-	chats.Get("/history/:id", a.authController.AuthRequiredV2(nil), a.chatController.GetHistory())
+	chats.Get("/", a.authController.AuthRequiredV2(domain.UserRoleAny), a.chatController.GetChats())
+	chats.Post("/", a.authController.AuthRequiredV2(domain.UserRoleAny), a.chatController.CreateChat())
+	chats.Get("/:id", a.authController.AuthRequiredV2(domain.UserRoleAny), a.chatController.Attach())
+	chats.Post("/:id", a.authController.AuthRequiredV2(domain.UserRoleAny), a.chatController.SendMessage())
+	chats.Get("/history/:id", a.authController.AuthRequiredV2(domain.UserRoleAny), a.chatController.GetHistory())
 
 	go func() {
 		err := a.http2.Listen(fmt.Sprintf(":%d", a.cfg.HTTP.Port+1))
