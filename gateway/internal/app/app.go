@@ -5,6 +5,9 @@ import (
 	"gateway/internal/config"
 	"gateway/internal/controllers"
 	"gateway/internal/domain"
+	fiberv2 "github.com/gofiber/fiber/v2"
+	corsv2 "github.com/gofiber/fiber/v2/middleware/cors"
+	loggerv2 "github.com/gofiber/fiber/v2/middleware/logger"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/logger"
@@ -12,8 +15,9 @@ import (
 )
 
 type Application struct {
-	cfg  *config.Config
-	http *fiber.App
+	cfg   *config.Config
+	http  *fiber.App
+	http2 *fiberv2.App
 
 	authController       *controllers.AuthController
 	universityController *controllers.UniversitiesController
@@ -28,9 +32,16 @@ func NewApplication(cfg *config.Config, universityController *controllers.Univer
 		BodyLimit:     10 << 20,
 	})
 
+	http2Server := fiberv2.New(fiberv2.Config{
+		AppName:       "gateway",
+		CaseSensitive: false,
+		BodyLimit:     10 << 20,
+	})
+
 	return &Application{
 		cfg:                  cfg,
 		http:                 httpServer,
+		http2:                http2Server,
 		log:                  log,
 		authController:       authController,
 		universityController: universityController,
@@ -38,10 +49,20 @@ func NewApplication(cfg *config.Config, universityController *controllers.Univer
 	}
 }
 
+// НЕИСПОЛЬЗУЙТЕ FIBER V3 НИКОГДА
 func (a *Application) Run() error {
 	a.http.Use(logger.New())
 
 	a.http.Use(cors.New(cors.Config{
+		AllowOrigins:     "*",
+		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH",
+		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
+		AllowCredentials: false,
+	}))
+
+	a.http2.Use(loggerv2.New())
+
+	a.http2.Use(corsv2.New(corsv2.Config{
 		AllowOrigins:     "*",
 		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH",
 		AllowHeaders:     "Origin, Content-Type, Accept, Authorization",
@@ -74,8 +95,18 @@ func (a *Application) Run() error {
 	p.Get("/", a.universityController.GetPanorama())
 	p.Post("/", a.universityController.CreatePanorama())
 
-	chats := v1.Group("chats")
-	chats.Get("/", a.chatController.GetChats(), a.authController.AuthRequired(nil))
+	v1v2 := a.http2.Group("/api/v1")
+	chats := v1v2.Group("chats")
+	chats.Get("/", a.authController.AuthRequiredV2(nil), a.chatController.GetChats())
+	chats.Post("/", a.authController.AuthRequiredV2(nil), a.chatController.CreateChat())
+	chats.Get("/:id", a.authController.AuthRequiredV2(nil), a.chatController.Attach())
+
+	go func() {
+		err := a.http2.Listen(fmt.Sprintf(":%d", a.cfg.HTTP.Port+1))
+		if err != nil {
+			slog.Error(err.Error())
+		}
+	}()
 
 	return a.http.Listen(fmt.Sprintf(":%d", a.cfg.HTTP.Port))
 }

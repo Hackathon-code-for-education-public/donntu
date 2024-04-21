@@ -5,9 +5,8 @@ import (
 	"gateway/api/chat"
 	"gateway/internal/config"
 	"gateway/internal/domain"
-	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/log"
-	"github.com/gorilla/websocket"
+	"github.com/gofiber/contrib/websocket"
+	"github.com/gofiber/fiber/v2"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"io"
@@ -15,8 +14,7 @@ import (
 )
 
 type ChatController struct {
-	client   chat.ChatClient
-	upgrader websocket.Upgrader
+	client chat.ChatClient
 }
 
 func NewChatController(cfg *config.Config) *ChatController {
@@ -26,10 +24,6 @@ func NewChatController(cfg *config.Config) *ChatController {
 	}
 
 	return &ChatController{
-		upgrader: websocket.Upgrader{
-			ReadBufferSize:  1024,
-			WriteBufferSize: 1024,
-		},
 		client: chat.NewChatClient(conn),
 	}
 }
@@ -41,7 +35,7 @@ func (c *ChatController) GetChats() fiber.Handler {
 		ChatId string `json:"chatId"`
 	}
 
-	return func(ctx fiber.Ctx) error {
+	return func(ctx *fiber.Ctx) error {
 
 		l := slog.With(slog.String("handler", "ChatController.GetChats"))
 
@@ -74,7 +68,7 @@ func (c *ChatController) GetChats() fiber.Handler {
 			recv, err = stream.Recv()
 			if err != nil {
 				if err == io.EOF {
-					log.Debug("stream closed")
+					l.Debug("stream closed")
 					break
 				}
 				l.Error("stream cant received", slog.String("err", err.Error()))
@@ -82,7 +76,9 @@ func (c *ChatController) GetChats() fiber.Handler {
 			}
 		}
 
-		return ok(ctx, res)
+		return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+			"data": res,
+		})
 	}
 }
 
@@ -92,11 +88,11 @@ func (c *ChatController) CreateChat() fiber.Handler {
 		TargetId string `json:"targetId"`
 	}
 
-	return func(ctx fiber.Ctx) error {
+	return func(ctx *fiber.Ctx) error {
 		l := slog.With(slog.String("handler", "ChatController.GetChats"))
 
 		var req request
-		if err := ctx.Bind().Body(&req); err != nil {
+		if err := ctx.BodyParser(&req); err != nil {
 			l.Error("cant parse request", slog.String("err", err.Error()))
 			return bad(err.Error())
 		}
@@ -116,19 +112,39 @@ func (c *ChatController) CreateChat() fiber.Handler {
 			return internal(err.Error())
 		}
 
-		return ok(ctx, res)
+		return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+			"data": res,
+		})
 	}
 }
 
 func (c *ChatController) Attach() fiber.Handler {
-	return func(ctx fiber.Ctx) error {
-		l := slog.With(slog.String("handler", "ChatController.Attach"))
 
-		u, okk := ctx.Locals("user").(*domain.UserClaims)
-		if !okk {
-			l.Error("cannot get user claims from context")
-			return internal("internal")
-		}
+	return websocket.New(
+		func(c *websocket.Conn) {
+			l := slog.With(slog.String("handler", "ChatController.Attach"))
+			_, okk := c.Locals("user").(*domain.UserClaims)
+			if !okk {
+				l.Error("cannot get user claims from context")
+			}
 
-	}
+			chatId := c.Params("id", "")
+			if chatId == "" {
+				l.Error("cant get chat id")
+				return
+			}
+
+			var (
+				err error
+			)
+
+			i := 0
+			for {
+				if err = c.WriteMessage(websocket.TextMessage, []byte(string(i))); err != nil {
+					break
+				}
+				i++
+			}
+		},
+	)
 }
