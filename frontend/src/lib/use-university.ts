@@ -1,15 +1,9 @@
 import useSWR from "swr";
 import { fetcherWithData } from "./fetcher";
-
-export type UniversityData = {
-  id: string;
-  name: string;
-  longName: string;
-  logo: string;
-};
+import { Univercity } from "@/api/university";
 
 export function useUniversity(id: string) {
-  const { data, error, isLoading } = useSWR<UniversityData>(
+  const { data, error, isLoading } = useSWR<Univercity>(
     `/api/v1/universities/${id}`,
     fetcherWithData
   );
