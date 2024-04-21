@@ -19,6 +19,6 @@ func InitApp() *Application {
 		wire.NewSet(services.NewAuthService),
 		wire.NewSet(controllers.NewAuthController),
 		wire.NewSet(services.NewUniversityService),
-		wire.NewSet(controllers.NewUniversityController),
-	))
+		wire.NewSet(services.NewFileService),
+		wire.NewSet(controllers.NewUniversityController)))
 }

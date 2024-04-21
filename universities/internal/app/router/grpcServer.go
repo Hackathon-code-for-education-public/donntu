@@ -69,3 +69,43 @@ func (s *UniversitiesService) GetReviews(ctx context.Context, request *universit
 		}),
 	}, nil
 }
+
+func (s *UniversitiesService) CreatePanorama(ctx context.Context, request *universities.CreatePanoramaRequest) (*universities.Panorama, error) {
+	s.log.Info("create_panorama request received", slog.String("university_id", request.Panorama.UniversityId))
+
+	_, err := s.service.CreatePanorama(ctx, &domain.Panorama{
+		UniversityId:  request.Panorama.UniversityId,
+		Address:       request.Panorama.Address,
+		Name:          request.Panorama.Name,
+		FirstLocation: request.Panorama.FirstLocation,
+		LastLocation:  request.Panorama.SecondLocation,
+		Type:          domain.ConvertPanoramaTypeFromGrpc(request.Panorama.Type),
+	})
+	if err != nil {
+		s.log.Error(err.Error())
+		return nil, err
+	}
+
+	return request.Panorama, nil
+}
+
+func (s *UniversitiesService) GetPanoramas(ctx context.Context, request *universities.GetPanoramasRequest) (*universities.Panoramas, error) {
+	s.log.Info("get_panoramas request received", slog.String("university_id", request.UniversityId))
+	panoramas, err := s.service.GetPanoramas(ctx, request.UniversityId, request.Category)
+	if err != nil {
+		return nil, err
+	}
+
+	return &universities.Panoramas{
+		Panoramas: lo.Map(panoramas, func(panorama *domain.Panorama, _ int) *universities.Panorama {
+			return &universities.Panorama{
+				UniversityId:   panorama.UniversityId,
+				Address:        panorama.Address,
+				Name:           panorama.Name,
+				FirstLocation:  panorama.FirstLocation,
+				SecondLocation: panorama.LastLocation,
+				Type:           domain.ConvertPanoramaToGrpc(panorama.Type),
+			}
+		}),
+	}, nil
+}

@@ -2,6 +2,7 @@ package domain
 
 import (
 	"context"
+	"gateway/pkg/file"
 )
 
 type (
@@ -17,5 +18,11 @@ type (
 	UniversityService interface {
 		GetOpenDays(ctx context.Context, universityId string) ([]*OpenDay, error)
 		GetReviews(ctx context.Context, universityId string, offset int, limit int) ([]*Review, error)
+		CreatePanorama(ctx context.Context, panorama *Panorama) (*Panorama, error)
+		GetPanoramas(ctx context.Context, universityId string, category string) ([]*Panorama, error)
+	}
+
+	FileService interface {
+		Upload(ctx context.Context, reader file.Reader) (string, error)
 	}
 )

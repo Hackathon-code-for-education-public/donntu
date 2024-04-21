@@ -10,6 +10,50 @@ import (
 	"time"
 )
 
+type PanoramaTypes string
+
+const (
+	PanoramaTypesValue0 PanoramaTypes = "Корпуса"
+	PanoramaTypesValue1 PanoramaTypes = "Общежития"
+	PanoramaTypesValue2 PanoramaTypes = "Столовые"
+	PanoramaTypesValue3 PanoramaTypes = "Прочее"
+)
+
+func (e *PanoramaTypes) Scan(src interface{}) error {
+	switch s := src.(type) {
+	case []byte:
+		*e = PanoramaTypes(s)
+	case string:
+		*e = PanoramaTypes(s)
+	default:
+		return fmt.Errorf("unsupported scan type for PanoramaTypes: %T", src)
+	}
+	return nil
+}
+
+type NullPanoramaTypes struct {
+	PanoramaTypes PanoramaTypes `json:"panorama_types"`
+	Valid         bool          `json:"valid"` // Valid is true if PanoramaTypes is not NULL
+}
+
+// Scan implements the Scanner interface.
+func (ns *NullPanoramaTypes) Scan(value interface{}) error {
+	if value == nil {
+		ns.PanoramaTypes, ns.Valid = "", false
+		return nil
+	}
+	ns.Valid = true
+	return ns.PanoramaTypes.Scan(value)
+}
+
+// Value implements the driver Valuer interface.
+func (ns NullPanoramaTypes) Value() (driver.Value, error) {
+	if !ns.Valid {
+		return nil, nil
+	}
+	return string(ns.PanoramaTypes), nil
+}
+
 type Sentiments string
 
 const (
@@ -115,6 +159,15 @@ type UniversityOpenDay struct {
 type UniversityOwner struct {
 	UniversityID string `json:"university_id"`
 	UserID       string `json:"user_id"`
+}
+
+type UniversityPanorama struct {
+	UniversityID   string        `json:"university_id"`
+	Address        string        `json:"address"`
+	Name           string        `json:"name"`
+	Firstlocation  string        `json:"firstlocation"`
+	Secondlocation string        `json:"secondlocation"`
+	Type           PanoramaTypes `json:"type"`
 }
 
 type UniversityReview struct {

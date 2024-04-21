@@ -19,8 +19,10 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Universities_GetOpenDays_FullMethodName = "/universities.Universities/GetOpenDays"
-	Universities_GetReviews_FullMethodName  = "/universities.Universities/GetReviews"
+	Universities_GetOpenDays_FullMethodName    = "/universities.Universities/GetOpenDays"
+	Universities_GetReviews_FullMethodName     = "/universities.Universities/GetReviews"
+	Universities_CreatePanorama_FullMethodName = "/universities.Universities/CreatePanorama"
+	Universities_GetPanoramas_FullMethodName   = "/universities.Universities/GetPanoramas"
 )
 
 // UniversitiesClient is the client API for Universities service.
@@ -29,6 +31,8 @@ const (
 type UniversitiesClient interface {
 	GetOpenDays(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*OpenDays, error)
 	GetReviews(ctx context.Context, in *GetReviewsRequest, opts ...grpc.CallOption) (*Reviews, error)
+	CreatePanorama(ctx context.Context, in *CreatePanoramaRequest, opts ...grpc.CallOption) (*Panorama, error)
+	GetPanoramas(ctx context.Context, in *GetPanoramasRequest, opts ...grpc.CallOption) (*Panoramas, error)
 }
 
 type universitiesClient struct {
@@ -57,12 +61,32 @@ func (c *universitiesClient) GetReviews(ctx context.Context, in *GetReviewsReque
 	return out, nil
 }
 
+func (c *universitiesClient) CreatePanorama(ctx context.Context, in *CreatePanoramaRequest, opts ...grpc.CallOption) (*Panorama, error) {
+	out := new(Panorama)
+	err := c.cc.Invoke(ctx, Universities_CreatePanorama_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *universitiesClient) GetPanoramas(ctx context.Context, in *GetPanoramasRequest, opts ...grpc.CallOption) (*Panoramas, error) {
+	out := new(Panoramas)
+	err := c.cc.Invoke(ctx, Universities_GetPanoramas_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UniversitiesServer is the server API for Universities service.
 // All implementations must embed UnimplementedUniversitiesServer
 // for forward compatibility
 type UniversitiesServer interface {
 	GetOpenDays(context.Context, *UniversityId) (*OpenDays, error)
 	GetReviews(context.Context, *GetReviewsRequest) (*Reviews, error)
+	CreatePanorama(context.Context, *CreatePanoramaRequest) (*Panorama, error)
+	GetPanoramas(context.Context, *GetPanoramasRequest) (*Panoramas, error)
 	mustEmbedUnimplementedUniversitiesServer()
 }
 
@@ -75,6 +99,12 @@ func (UnimplementedUniversitiesServer) GetOpenDays(context.Context, *UniversityI
 }
 func (UnimplementedUniversitiesServer) GetReviews(context.Context, *GetReviewsRequest) (*Reviews, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetReviews not implemented")
+}
+func (UnimplementedUniversitiesServer) CreatePanorama(context.Context, *CreatePanoramaRequest) (*Panorama, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreatePanorama not implemented")
+}
+func (UnimplementedUniversitiesServer) GetPanoramas(context.Context, *GetPanoramasRequest) (*Panoramas, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPanoramas not implemented")
 }
 func (UnimplementedUniversitiesServer) mustEmbedUnimplementedUniversitiesServer() {}
 
@@ -125,6 +155,42 @@ func _Universities_GetReviews_Handler(srv interface{}, ctx context.Context, dec 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Universities_CreatePanorama_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreatePanoramaRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UniversitiesServer).CreatePanorama(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Universities_CreatePanorama_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UniversitiesServer).CreatePanorama(ctx, req.(*CreatePanoramaRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Universities_GetPanoramas_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetPanoramasRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UniversitiesServer).GetPanoramas(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Universities_GetPanoramas_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UniversitiesServer).GetPanoramas(ctx, req.(*GetPanoramasRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Universities_ServiceDesc is the grpc.ServiceDesc for Universities service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -139,6 +205,14 @@ var Universities_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetReviews",
 			Handler:    _Universities_GetReviews_Handler,
+		},
+		{
+			MethodName: "CreatePanorama",
+			Handler:    _Universities_CreatePanorama_Handler,
+		},
+		{
+			MethodName: "GetPanoramas",
+			Handler:    _Universities_GetPanoramas_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
