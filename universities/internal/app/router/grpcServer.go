@@ -2,9 +2,13 @@ package router
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/samber/lo"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/reflection"
+	"google.golang.org/grpc/status"
 	"log/slog"
 	"universities/api/universities"
 	"universities/internal/domain"
@@ -48,6 +52,66 @@ func (s *UniversitiesService) GetOpenDays(ctx context.Context, uni *universities
 	}, nil
 }
 
+func (s *UniversitiesService) CreateReview(ctx context.Context, req *universities.CreateReviewRequest) (*universities.Review, error) {
+	s.log.Info("create_review request received", slog.String("university_id", req.Review.UniversityId))
+	item, err := s.service.CreateReview(ctx, &domain.Review{
+		UniversityId: req.Review.UniversityId,
+		AuthorStatus: domain.AuthorStatus(req.Review.AuthorStatus),
+		Sentiment:    domain.Sentiment(req.Review.Sentiment),
+		Text:         req.Review.Text,
+		ParentId:     req.ParentReviewId,
+	})
+	if err != nil {
+		s.log.Error("failed to create review", slog.String("university_id", req.Review.UniversityId))
+		if errors.Is(err, errors.New("not found")) {
+			return nil, status.Error(codes.NotFound, "parent review not found")
+		}
+
+		return nil, err
+	}
+	fmt.Println(item.Date)
+	return &universities.Review{
+		UniversityId: item.UniversityId,
+		AuthorStatus: string(item.AuthorStatus),
+		Sentiment:    string(item.Sentiment),
+		Text:         item.Text,
+		RepliesCount: int32(item.RepliesCount),
+		ReviewId:     item.Id,
+		Date:         item.Date.Unix(),
+	}, nil
+}
+
+func (s *UniversitiesService) GetReplies(ctx context.Context, id *universities.UniversityId) (*universities.GetRepliesResponse, error) {
+	s.log.Info("get_replies request received", slog.String("university_id", id.Id))
+	reviews, parenReview, err := s.service.GetReplies(ctx, id.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &universities.GetRepliesResponse{
+		Review: &universities.Review{
+			ReviewId:     parenReview.Id,
+			Sentiment:    string(parenReview.Sentiment),
+			RepliesCount: int32(parenReview.RepliesCount),
+			AuthorStatus: string(parenReview.AuthorStatus),
+			Text:         parenReview.Text,
+			Date:         parenReview.Date.Unix(),
+			UniversityId: parenReview.UniversityId,
+		},
+		Replies: lo.Map(reviews, func(review *domain.Review, _ int) *universities.Review {
+			return &universities.Review{
+				ReviewId:     review.Id,
+				Sentiment:    string(review.Sentiment),
+				RepliesCount: int32(review.RepliesCount),
+				AuthorStatus: string(review.AuthorStatus),
+				Text:         review.Text,
+				Date:         review.Date.Unix(),
+				UniversityId: review.UniversityId,
+			}
+		}),
+	}, nil
+}
+
 func (s *UniversitiesService) GetReviews(ctx context.Context, request *universities.GetReviewsRequest) (*universities.Reviews, error) {
 	s.log.Info("get_reviews request received", slog.String("university_id", request.UniversityId))
 
@@ -59,6 +123,7 @@ func (s *UniversitiesService) GetReviews(ctx context.Context, request *universit
 	return &universities.Reviews{
 		Reviews: lo.Map(reviews, func(review *domain.Review, _ int) *universities.Review {
 			return &universities.Review{
+				ReviewId:     review.Id,
 				Sentiment:    string(review.Sentiment),
 				RepliesCount: int32(review.RepliesCount),
 				AuthorStatus: string(review.AuthorStatus),
@@ -105,6 +170,98 @@ func (s *UniversitiesService) GetPanoramas(ctx context.Context, request *univers
 				FirstLocation:  panorama.FirstLocation,
 				SecondLocation: panorama.LastLocation,
 				Type:           domain.ConvertPanoramaToGrpc(panorama.Type),
+			}
+		}),
+	}, nil
+}
+
+func (s *UniversitiesService) GetUniversity(ctx context.Context, id *universities.UniversityId) (*universities.University, error) {
+	s.log.Info("get_university request received", slog.String("university_id", id.Id))
+	u, err := s.service.GetUniversity(ctx, id.Id)
+	if err != nil {
+		return nil, status.Error(codes.NotFound, err.Error())
+	}
+
+	return &universities.University{
+		Id:           u.Id,
+		Name:         u.Name,
+		LongName:     u.LongName,
+		Logo:         u.Logo,
+		Rating:       float32(u.Rating),
+		Region:       u.Region,
+		Type:         u.Type,
+		StudyFields:  int32(u.StudyFields),
+		BudgetPlaces: int32(u.BudgetPlaces),
+	}, nil
+}
+
+func (s *UniversitiesService) GetUniversities(ctx context.Context, params *universities.PageParams) (*universities.UniversitiesSchema, error) {
+	s.log.Info("get_universities request received")
+	us, err := s.service.GetUniversities(ctx, int(params.Offset), int(params.Limit))
+	if err != nil {
+		return nil, err
+	}
+
+	return &universities.UniversitiesSchema{
+		Universities: lo.Map(us, func(u *domain.University, _ int) *universities.University {
+			return &universities.University{
+				Id:           u.Id,
+				Name:         u.Name,
+				LongName:     u.LongName,
+				Logo:         u.Logo,
+				Rating:       float32(u.Rating),
+				Region:       u.Region,
+				Type:         u.Type,
+				StudyFields:  int32(u.StudyFields),
+				BudgetPlaces: int32(u.BudgetPlaces),
+			}
+		}),
+	}, nil
+}
+
+func (s *UniversitiesService) SearchUniversities(ctx context.Context, request *universities.SearchUniversitiesRequest) (*universities.UniversitiesSchema, error) {
+	s.log.Info("search_universities request received", slog.String("name", request.Name))
+	us, err := s.service.SearchUniversities(ctx, request.Name)
+	if err != nil {
+		return nil, err
+	}
+
+	return &universities.UniversitiesSchema{
+		Universities: lo.Map(us, func(u *domain.University, _ int) *universities.University {
+			return &universities.University{
+				Id:           u.Id,
+				Name:         u.Name,
+				LongName:     u.LongName,
+				Logo:         u.Logo,
+				Rating:       float32(u.Rating),
+				Region:       u.Region,
+				Type:         u.Type,
+				StudyFields:  int32(u.StudyFields),
+				BudgetPlaces: int32(u.BudgetPlaces),
+			}
+		}),
+	}, nil
+}
+
+func (s *UniversitiesService) GetTopOfUniversities(ctx context.Context, request *universities.GetTopOfUniversitiesRequest) (*universities.UniversitiesSchema, error) {
+	s.log.Info("get_top_of_universities request received")
+	us, err := s.service.GetUniversitiesTop(ctx, int(request.Count))
+	if err != nil {
+		return nil, err
+	}
+
+	return &universities.UniversitiesSchema{
+		Universities: lo.Map(us, func(u *domain.University, _ int) *universities.University {
+			return &universities.University{
+				Id:           u.Id,
+				Name:         u.Name,
+				LongName:     u.LongName,
+				Logo:         u.Logo,
+				Rating:       float32(u.Rating),
+				Region:       u.Region,
+				Type:         u.Type,
+				StudyFields:  int32(u.StudyFields),
+				BudgetPlaces: int32(u.BudgetPlaces),
 			}
 		}),
 	}, nil

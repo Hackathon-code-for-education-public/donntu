@@ -1,59 +1,19 @@
 "use client";
 
 import { Panorama } from "@/api/panorama";
-import dynamic from "next/dynamic";
+import { PanoramsTab } from "@/components/panorams-tab";
+import { Button } from "@/components/ui/button";
 
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniversityOpenDays } from "@/components/university-open-days";
 import { UniversityReviews } from "@/components/university-reviews";
 import { useUniversity } from "@/lib/use-university";
+import Link from "next/link";
 
 interface Params {
   id: string;
 }
-
-const PanoramaView = dynamic(
-  () => import('@/components/panorama').then(module => module) as any,
-  { ssr: false },
-) as any;
-
-const mokPanoramas: Panorama[] = [
-  {
-    name: "Главный корпус",
-    address: "г. Донецк, ул. Пушкина, д.1",
-    type: "Корпус",
-    loc1: "/room.jpg",
-    loc2: "/mus.jpg",
-  },
-  {
-    name: "Корпус №8",
-    address: "г. Донецк, ул. Артема, д.2",
-    type: "Корпус",
-    loc1: "/alma.jpg",
-    loc2: "/lib.jpg",
-  },
-  {
-    name: "Общежитие №3",
-    address: "г. Донецк, ул. И. Ткаченко, д.3",
-    type: "Общежитие",
-    loc1: "/mus.jpg",
-    loc2: "/lib.jpg",
-  },
-  {
-    name: "Стадион №3",
-    address: "г. Донецк, ул. Университетская, д.3",
-    type: "Прочее",
-    loc1: "/mus.jpg",
-    loc2: "/lib.jpg",
-  },
-];
 
 export default function Page({ params }: { params: Params }) {
   const { data, isLoading, error } = useUniversity(params.id);
@@ -70,7 +30,7 @@ export default function Page({ params }: { params: Params }) {
                 alt="Logo"
                 className="h-12 w-12 mr-3"
                 height="50"
-                src={data?.logoUrl}
+                src={data?.logo}
                 style={{
                   aspectRatio: "50/50",
                   objectFit: "contain",
@@ -119,36 +79,55 @@ export default function Page({ params }: { params: Params }) {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="about" className="m-5">
-            {/*
-              <div className="grid grid-cols-3 gap-4 text-center py-4 bg-gray-200 rounded-b-lg">
-              <div>
-                <div className="text-3xl font-bold">22</div>
-                <div className="text-sm">направлений подготовки</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold">59</div>
-                <div className="text-sm">образовательных программ</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold">1879</div>
-                <div className="text-sm">бюджетных мест</div>
-              </div>
-              <div className="col-span-3">
-                <div className="text-3xl font-bold">72.3</div>
-                <div className="text-sm">средневзвешенный проходной балл</div>
-              </div>
+            <div className="grid grid-cols-3 gap-4 text-center py-4 bg-gray-200 rounded-lg">
+              {isLoading ? (
+                <div className="flex justify-center items-center flex-col">
+                  <Skeleton className="h-6 w-1/4" />
+                  <Skeleton className="h-6 w-1/2 mt-2" />
+                </div>
+              ) : (
+                <div>
+                  <div className="text-3xl font-bold">{data?.rating.toFixed(2)}</div>
+                  <div className="text-sm">рейтинг</div>
+                </div>
+              )}
+              {isLoading ? (
+                <div className="flex justify-center items-center flex-col">
+                  <Skeleton className="h-6 w-1/4" />
+                  <Skeleton className="h-6 w-1/2 mt-2" />
+                </div>
+              ) : (
+                <div>
+                  <div className="text-3xl font-bold">{data?.studyFields}</div>
+                  <div className="text-sm">направлений подготовки</div>
+                </div>
+              )}
+              {isLoading ? (
+                <div className="flex justify-center items-center flex-col">
+                  <Skeleton className="h-6 w-1/4" />
+                  <Skeleton className="h-6 w-1/2 mt-2" />
+                </div>
+              ) : (
+                <div>
+                  <div className="text-3xl font-bold">{data?.budgetPlaces}</div>
+                  <div className="text-sm">бюджетных мест</div>
+                </div>
+              )}
             </div>
             <div className="mt-4 text-sm">
-              Результаты представленны самим ВУЗом.
+              Данные представленны самим ВУЗом.
             </div>
-            <div className="mt-4"></div>
-            </div>
-            </div>
-            */}
           </TabsContent>
           <TabsContent value="reviews" className="m-5">
-            <h2 className="text-lg">Отзывы</h2>
-            <UniversityReviews universityId={params.id} />
+            <div className="flex justify-between">
+              <h2 className="text-lg">Отзывы</h2>
+              <Link href={`/create-review?universityId=${params.id}`} passHref legacyBehavior>
+                <Button>Добавить отзыв</Button>
+              </Link>
+            </div>
+            <div className="pt-5">
+              <UniversityReviews universityId={params.id} />
+            </div>
           </TabsContent>
           <TabsContent value="open-day" className="m-5">
             {isLoading ? (
@@ -159,51 +138,7 @@ export default function Page({ params }: { params: Params }) {
             <UniversityOpenDays universityId={params.id} />
           </TabsContent>
           <TabsContent value="panorams">
-            <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1">
-                <AccordionTrigger>Корпуса</AccordionTrigger>
-                <AccordionContent>
-                  {mokPanoramas
-                    .filter((item) => item.type === "Корпус")
-                    .map((panorama) => (
-                      <PanoramaView panorama={panorama} />
-                    ))}
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-2">
-                <AccordionTrigger>Общежития</AccordionTrigger>
-                <AccordionContent>
-                  {mokPanoramas
-                    .filter((item) => item.type === "Общежитие")
-                    .map((panorama) => (
-                      <PanoramaView panorama={panorama} />
-                    ))}
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-3">
-                <AccordionTrigger>Столовые</AccordionTrigger>
-                <AccordionContent>
-                  {mokPanoramas
-                    .filter((item) => item.type === "Столовая")
-                    .map((panorama) => (
-                      <PanoramaView panorama={panorama} />
-                    ))}
-                </AccordionContent>
-              </AccordionItem>
-              <AccordionItem value="item-4">
-                <AccordionTrigger>Прочее</AccordionTrigger>
-                <AccordionContent>
-                  {mokPanoramas
-                    .filter((item) => item.type === "Прочее")
-                    .map((panorama) => (
-                      <PanoramaView panorama={panorama} />
-                    ))}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-            {/* {mokPanoramas.map((panorama) => (
-              <PanoramaView panorama={panorama} />
-            ))} */}
+            <PanoramsTab universityId={params.id} />
           </TabsContent>
         </Tabs>
       </div>

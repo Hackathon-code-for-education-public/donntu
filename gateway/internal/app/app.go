@@ -106,7 +106,7 @@ func (a *Application) Run() error {
 	au.Post("/applicant/sign-up", a.authController.SignUp(domain.UserRoleApplicant))
 	au.Post("/university/sign-up", a.authController.SignUp(domain.UserRoleStudent))
 	au.Post("/manager/sign-up", a.authController.SignUp(domain.UserRoleManager))
-	au.Post("/sign-out", a.authController.SignOut())
+	au.Post("/sign-out", a.authController.SignOut(), a.authController.AuthRequired(nil))
 	au.Post("/refresh", a.authController.Refresh())
 
 	v1.Get("/profile", a.authController.GetProfile(), a.authController.AuthRequired(nil))
@@ -116,9 +116,15 @@ func (a *Application) Run() error {
 
 	u := v1.Group("/universities")
 	u.Get("/open", a.universityController.GetOpenDays())
+	u.Get("/", a.universityController.GetUniversities())
+	u.Get("/search", a.universityController.SearchUniversities())
+	u.Get("/top", a.universityController.GetUniversitiesTop())
+	u.Get("/:id", a.universityController.GetUniversity())
 
 	r := v1.Group("/reviews")
 	r.Get("/", a.universityController.GetReviews())
+	r.Post("/", a.universityController.CreateReview())
+	r.Get("/:id", a.universityController.GetReplies())
 
 	p := v1.Group("/panoramas")
 	p.Get("/", a.universityController.GetPanorama())

@@ -1,4 +1,5 @@
-import { API_HOST, AuthAPI } from "./auth";
+import { AuthAPI } from "./auth";
+import { API_HOST } from "./config";
 
 export const fetcher = async (url: string) => {
   const getHeaders = (token: string | null) => ({
@@ -31,3 +32,5 @@ export const fetcher = async (url: string) => {
     throw new Error((error as Error).message);
   }
 };
+
+export const fetcherWithData = (url: string) => fetcher(url).then(r => r.data);

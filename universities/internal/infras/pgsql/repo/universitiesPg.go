@@ -2,7 +2,12 @@ package repo
 
 import (
 	"context"
+	"database/sql"
+	"errors"
+	"fmt"
+	"github.com/lib/pq"
 	"github.com/samber/lo"
+	"time"
 	"universities/internal/domain"
 	postgresql "universities/internal/infras/pgsql"
 	"universities/internal/services"
@@ -37,6 +42,44 @@ func (u *universitiesPg) GetOpenDays(ctx context.Context, universityID string) (
 	return days, nil
 }
 
+func (u *universitiesPg) CreateReview(ctx context.Context, review *domain.Review) (*domain.Review, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	params := postgresql.CreateReviewParams{
+		ReviewID:     review.Id,
+		UniversityID: review.UniversityId,
+		AuthorStatus: postgresql.Statuses(review.AuthorStatus),
+		Sentiment:    postgresql.Sentiments(review.Sentiment),
+		Date:         time.Now(),
+		Text:         review.Text,
+	}
+	if review.ParentId != nil {
+		params.ParentReviewID = sql.NullString{
+			String: *review.ParentId,
+			Valid:  true,
+		}
+	}
+	item, err := querier.CreateReview(ctx, params)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23503" {
+				return nil, errors.New("not found")
+			}
+			return nil, errors.New(pqErr.Message)
+		}
+		return nil, err
+	}
+
+	return &domain.Review{
+		Id:           item.ReviewID,
+		UniversityId: item.UniversityID,
+		Date:         item.Date,
+		Text:         item.Text,
+		AuthorStatus: domain.AuthorStatus(item.AuthorStatus),
+		RepliesCount: 0,
+		Sentiment:    domain.Sentiment(item.Sentiment),
+	}, nil
+}
+
 func (u *universitiesPg) GetReviews(ctx context.Context, universityID string, limit, offset int) ([]*domain.Review, error) {
 	querier := postgresql.New(u.pg.GetDB())
 	results, err := querier.GetReviews(ctx, postgresql.GetReviewsParams{Limit: int32(limit), Offset: int32(offset), UniversityID: universityID})
@@ -44,13 +87,14 @@ func (u *universitiesPg) GetReviews(ctx context.Context, universityID string, li
 		return nil, err
 	}
 
-	reviews := lo.Map(results, func(item postgresql.UniversityReview, _ int) *domain.Review {
+	reviews := lo.Map(results, func(item postgresql.GetReviewsRow, _ int) *domain.Review {
 		return &domain.Review{
+			Id:           item.ReviewID,
 			UniversityId: item.UniversityID,
 			Date:         item.Date,
 			Text:         item.Text,
 			AuthorStatus: domain.AuthorStatus(item.AuthorStatus),
-			RepliesCount: int(item.Repliescount),
+			RepliesCount: int(item.ReplyCount),
 			Sentiment:    domain.Sentiment(item.Sentiment),
 		}
 	})
@@ -76,23 +120,161 @@ func (u *universitiesPg) CreatePanorama(ctx context.Context, p *domain.Panorama)
 }
 
 func (u *universitiesPg) GetPanoramas(ctx context.Context, universityID string, category string) ([]*domain.Panorama, error) {
+	db := u.pg.GetDB()
+	query := fmt.Sprintf("select * from university_panoramas where university_id = $1")
+	if category != "" {
+		query += fmt.Sprintf(" and type = '%s'", category)
+	}
+	panoramas := make([]*domain.Panorama, 0)
+	rows, err := db.Query(query, universityID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var panorama domain.Panorama
+		if err := rows.Scan(&panorama.UniversityId,
+			&panorama.Address,
+			&panorama.Name,
+			&panorama.FirstLocation,
+			&panorama.LastLocation,
+			&panorama.Type,
+		); err != nil {
+			return nil, err
+		}
+		panoramas = append(panoramas, &panorama)
+	}
+
+	return panoramas, nil
+}
+
+func (u *universitiesPg) GetUniversitiesTop(ctx context.Context, n int) ([]*domain.University, error) {
 	querier := postgresql.New(u.pg.GetDB())
-	panoramas, err := querier.GetPanoramas(ctx, postgresql.GetPanoramasParams{
-		UniversityID: universityID,
-		Type:         postgresql.PanoramaTypes(category),
+	results, err := querier.GetTopOfUniversities(ctx, int32(n))
+	if err != nil {
+		return nil, err
+	}
+
+	return lo.Map(results, func(item postgresql.University, _ int) *domain.University {
+		return &domain.University{
+			Id:           item.ID,
+			Name:         item.Name,
+			LongName:     item.LongName,
+			Logo:         item.Logo,
+			Rating:       item.Rating,
+			Region:       item.Region,
+			Type:         string(item.Type),
+			StudyFields:  int(item.StudyFields),
+			BudgetPlaces: int(item.BudgetPlaces),
+		}
+	}), nil
+}
+
+func (u *universitiesPg) GetUniversities(ctx context.Context, offset, limit int) ([]*domain.University, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	results, err := querier.GetUniversities(ctx, postgresql.GetUniversitiesParams{
+		Offset: int32(offset),
+		Limit:  int32(limit),
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return lo.Map(panoramas, func(item postgresql.UniversityPanorama, _ int) *domain.Panorama {
-		return &domain.Panorama{
-			UniversityId:  item.UniversityID,
-			Address:       item.Address,
-			Name:          item.Name,
-			FirstLocation: item.Firstlocation,
-			LastLocation:  item.Secondlocation,
-			Type:          string(item.Type),
+	return lo.Map(results, func(item postgresql.University, _ int) *domain.University {
+		return &domain.University{
+			Id:           item.ID,
+			Name:         item.Name,
+			LongName:     item.LongName,
+			Logo:         item.Logo,
+			Rating:       item.Rating,
+			Region:       item.Region,
+			Type:         string(item.Type),
+			StudyFields:  int(item.StudyFields),
+			BudgetPlaces: int(item.BudgetPlaces),
 		}
 	}), nil
+}
+
+func (u *universitiesPg) GetUniversity(ctx context.Context, universityID string) (*domain.University, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	item, err := querier.GetUniversity(ctx, universityID)
+	if err != nil {
+
+	}
+	if len(item.ID) == 0 {
+		return nil, errors.New("not found")
+	}
+
+	return &domain.University{
+		Id:           item.ID,
+		Name:         item.Name,
+		LongName:     item.LongName,
+		Logo:         item.Logo,
+		Rating:       item.Rating,
+		Region:       item.Region,
+		Type:         string(item.Type),
+		StudyFields:  int(item.StudyFields),
+		BudgetPlaces: int(item.BudgetPlaces),
+	}, nil
+}
+
+func (u *universitiesPg) SearchUniversities(ctx context.Context, name string) ([]*domain.University, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	results, err := querier.SearchUniversities(ctx, postgresql.SearchUniversitiesParams{
+		LongName: "%" + name + "%",
+		Name:     "%" + name + "%",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return lo.Map(results, func(item postgresql.University, _ int) *domain.University {
+		return &domain.University{
+			Id:           item.ID,
+			Name:         item.Name,
+			LongName:     item.LongName,
+			Logo:         item.Logo,
+			Rating:       item.Rating,
+			Region:       item.Region,
+			Type:         string(item.Type),
+			StudyFields:  int(item.StudyFields),
+			BudgetPlaces: int(item.BudgetPlaces),
+		}
+	}), nil
+}
+
+func (u *universitiesPg) GetReplies(ctx context.Context, reviewID string) ([]*domain.Review, *domain.Review, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	results, err := querier.GetReviewsByParent(ctx, sql.NullString{
+		String: reviewID,
+		Valid:  true,
+	})
+	if err != nil {
+		return nil, nil, err
+	}
+
+	parentReview, err := querier.GetReview(ctx, reviewID)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	return lo.Map(results, func(item postgresql.UniversityReview, _ int) *domain.Review {
+			return &domain.Review{
+				Id:           item.ReviewID,
+				UniversityId: item.UniversityID,
+				Text:         item.Text,
+				Date:         item.Date,
+				Sentiment:    domain.Sentiment(item.Sentiment),
+				AuthorStatus: domain.AuthorStatus(item.AuthorStatus),
+			}
+		}),
+		&domain.Review{
+			Id:           parentReview.ReviewID,
+			UniversityId: parentReview.UniversityID,
+			Text:         parentReview.Text,
+			Date:         parentReview.Date,
+			Sentiment:    domain.Sentiment(parentReview.Sentiment),
+			AuthorStatus: domain.AuthorStatus(parentReview.AuthorStatus),
+			RepliesCount: int(parentReview.ReplyCount),
+		}, nil
 }

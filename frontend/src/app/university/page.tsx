@@ -94,7 +94,7 @@ export default function Page() {
                 id={uni.id}
                 name={uni.name}
                 longName={uni.longName}
-                logoUrl={uni.logoUrl}
+                logoUrl={uni.logo}
               />
             ))
           )}
