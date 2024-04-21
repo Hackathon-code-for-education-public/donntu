@@ -1,6 +1,7 @@
 package app
 
 import (
+	"errors"
 	"fmt"
 	"gateway/internal/config"
 	"gateway/internal/controllers"
@@ -30,12 +31,40 @@ func NewApplication(cfg *config.Config, universityController *controllers.Univer
 		AppName:       "gateway",
 		CaseSensitive: false,
 		BodyLimit:     10 << 20,
+		ErrorHandler: func(ctx fiber.Ctx, err error) error {
+			code := fiber.StatusInternalServerError
+
+			var e *fiber.Error
+			if errors.As(err, &e) {
+				code = e.Code
+			}
+
+			err = ctx.Status(code).JSON(fiber.Map{
+				"message": e.Message,
+			})
+
+			return nil
+		},
 	})
 
 	http2Server := fiberv2.New(fiberv2.Config{
 		AppName:       "gateway",
 		CaseSensitive: false,
 		BodyLimit:     10 << 20,
+		ErrorHandler: func(ctx *fiberv2.Ctx, err error) error {
+			code := fiber.StatusInternalServerError
+
+			var e *fiber.Error
+			if errors.As(err, &e) {
+				code = e.Code
+			}
+
+			err = ctx.Status(code).JSON(fiber.Map{
+				"message": e.Message,
+			})
+
+			return nil
+		},
 	})
 
 	return &Application{
