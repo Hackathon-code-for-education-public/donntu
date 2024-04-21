@@ -78,6 +78,19 @@ export class API {
     }
   }
 
+  static async createChat(reviewId: string): Promise<any> {
+    const url = `${API_HOST2}/api/v1/chats/`
+    const body = {
+      targetId: reviewId
+    }
+    try {
+      return await this.request(url, "POST", body);
+    } catch (error) {
+      console.error("create chat message failed:", error);
+      throw error;
+    }
+  }
+
   static async sendChatMessage(
     chatId: string,
     message: string
