@@ -20,7 +20,9 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	Universities_GetOpenDays_FullMethodName          = "/universities.Universities/GetOpenDays"
+	Universities_CreateReview_FullMethodName         = "/universities.Universities/CreateReview"
 	Universities_GetReviews_FullMethodName           = "/universities.Universities/GetReviews"
+	Universities_GetReplies_FullMethodName           = "/universities.Universities/GetReplies"
 	Universities_CreatePanorama_FullMethodName       = "/universities.Universities/CreatePanorama"
 	Universities_GetPanoramas_FullMethodName         = "/universities.Universities/GetPanoramas"
 	Universities_GetUniversity_FullMethodName        = "/universities.Universities/GetUniversity"
@@ -34,7 +36,9 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UniversitiesClient interface {
 	GetOpenDays(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*OpenDays, error)
+	CreateReview(ctx context.Context, in *CreateReviewRequest, opts ...grpc.CallOption) (*Review, error)
 	GetReviews(ctx context.Context, in *GetReviewsRequest, opts ...grpc.CallOption) (*Reviews, error)
+	GetReplies(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*Reviews, error)
 	CreatePanorama(ctx context.Context, in *CreatePanoramaRequest, opts ...grpc.CallOption) (*Panorama, error)
 	GetPanoramas(ctx context.Context, in *GetPanoramasRequest, opts ...grpc.CallOption) (*Panoramas, error)
 	GetUniversity(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*University, error)
@@ -60,9 +64,27 @@ func (c *universitiesClient) GetOpenDays(ctx context.Context, in *UniversityId, 
 	return out, nil
 }
 
+func (c *universitiesClient) CreateReview(ctx context.Context, in *CreateReviewRequest, opts ...grpc.CallOption) (*Review, error) {
+	out := new(Review)
+	err := c.cc.Invoke(ctx, Universities_CreateReview_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *universitiesClient) GetReviews(ctx context.Context, in *GetReviewsRequest, opts ...grpc.CallOption) (*Reviews, error) {
 	out := new(Reviews)
 	err := c.cc.Invoke(ctx, Universities_GetReviews_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *universitiesClient) GetReplies(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*Reviews, error) {
+	out := new(Reviews)
+	err := c.cc.Invoke(ctx, Universities_GetReplies_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -128,7 +150,9 @@ func (c *universitiesClient) GetTopOfUniversities(ctx context.Context, in *GetTo
 // for forward compatibility
 type UniversitiesServer interface {
 	GetOpenDays(context.Context, *UniversityId) (*OpenDays, error)
+	CreateReview(context.Context, *CreateReviewRequest) (*Review, error)
 	GetReviews(context.Context, *GetReviewsRequest) (*Reviews, error)
+	GetReplies(context.Context, *UniversityId) (*Reviews, error)
 	CreatePanorama(context.Context, *CreatePanoramaRequest) (*Panorama, error)
 	GetPanoramas(context.Context, *GetPanoramasRequest) (*Panoramas, error)
 	GetUniversity(context.Context, *UniversityId) (*University, error)
@@ -145,8 +169,14 @@ type UnimplementedUniversitiesServer struct {
 func (UnimplementedUniversitiesServer) GetOpenDays(context.Context, *UniversityId) (*OpenDays, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetOpenDays not implemented")
 }
+func (UnimplementedUniversitiesServer) CreateReview(context.Context, *CreateReviewRequest) (*Review, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateReview not implemented")
+}
 func (UnimplementedUniversitiesServer) GetReviews(context.Context, *GetReviewsRequest) (*Reviews, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetReviews not implemented")
+}
+func (UnimplementedUniversitiesServer) GetReplies(context.Context, *UniversityId) (*Reviews, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetReplies not implemented")
 }
 func (UnimplementedUniversitiesServer) CreatePanorama(context.Context, *CreatePanoramaRequest) (*Panorama, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreatePanorama not implemented")
@@ -197,6 +227,24 @@ func _Universities_GetOpenDays_Handler(srv interface{}, ctx context.Context, dec
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Universities_CreateReview_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateReviewRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UniversitiesServer).CreateReview(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Universities_CreateReview_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UniversitiesServer).CreateReview(ctx, req.(*CreateReviewRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Universities_GetReviews_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(GetReviewsRequest)
 	if err := dec(in); err != nil {
@@ -211,6 +259,24 @@ func _Universities_GetReviews_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UniversitiesServer).GetReviews(ctx, req.(*GetReviewsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Universities_GetReplies_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UniversityId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UniversitiesServer).GetReplies(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Universities_GetReplies_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UniversitiesServer).GetReplies(ctx, req.(*UniversityId))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -335,8 +401,16 @@ var Universities_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Universities_GetOpenDays_Handler,
 		},
 		{
+			MethodName: "CreateReview",
+			Handler:    _Universities_CreateReview_Handler,
+		},
+		{
 			MethodName: "GetReviews",
 			Handler:    _Universities_GetReviews_Handler,
+		},
+		{
+			MethodName: "GetReplies",
+			Handler:    _Universities_GetReplies_Handler,
 		},
 		{
 			MethodName: "CreatePanorama",

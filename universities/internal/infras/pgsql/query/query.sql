@@ -5,11 +5,30 @@ from university_open_days od
          join universities u on u.id = od.university_id
 where u.id = $1;
 
+-- name: CreateReview :one
+insert into university_reviews(university_id,
+                               author_status,
+                               sentiment, date,
+                               text, review_id, parent_review_id)
+values ($1, $2, $3, $4, $5, $6, $7)
+returning *;
+
 -- name: GetReviews :many
-select *
-from university_reviews ur
-where ur.university_id = $3
+select r.*,
+       (select count(*)
+        from university_reviews
+        where parent_review_id = r.review_id) as reply_count
+from university_reviews r
+where r.university_id = $3
+group by r.review_id, r.date
+order by r.date
 offset $1 limit $2;
+
+-- name: GetReviewsByParent :many
+select *
+from university_reviews r
+where r.parent_review_id = $1
+order by r.date;
 
 -- name: AddPanorama :one
 insert into university_panoramas (university_id, address, name, firstlocation, secondlocation, type)
@@ -27,7 +46,8 @@ order by p.name;
 select *
 from universities
 where name ilike $1
-   or long_name ilike $2 order by name;
+   or long_name ilike $2
+order by name;
 
 -- name: GetTopOfUniversities :many
 select *
@@ -46,4 +66,3 @@ select *
 from universities
 where id = $1
 limit 1;
-
