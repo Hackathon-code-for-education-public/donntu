@@ -76,8 +76,8 @@ func (u *UserStorage) Create(ctx context.Context, user *models.User) error {
 	log := ctx.Value("logger").(*slog.Logger).With("method", "Create")
 
 	query, args, err := squirrel.Insert(CREDENTIALS_TABLE).
-		Columns("id", "email", "password", "role").
-		Values(user.Id, user.Email, user.Password, user.Role).
+		Columns("id", "email", "password", "role", "last_name", "first_name", "middle_name").
+		Values(user.Id, user.Email, user.Password, user.Role, user.LastName, user.FirstName, user.MiddleName).
 		Suffix("RETURNING *").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
