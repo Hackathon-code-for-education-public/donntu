@@ -43,7 +43,38 @@ message Reviews {
   repeated Review reviews = 1;
 }
 
+enum PanoramaTypes {
+  Buildings = 0;
+  Dormitories = 1;
+  Canteens = 2;
+  Other = 3;
+}
+
+message Panorama {
+  string universityId = 1;
+  string address = 2;
+  string name = 3;
+  string firstLocation = 4;
+  string secondLocation = 5;
+  PanoramaTypes type = 6;
+}
+
+message Panoramas {
+  repeated Panorama panoramas = 1;
+}
+
+message CreatePanoramaRequest {
+  Panorama panorama = 1;
+}
+
+message GetPanoramasRequest {
+  string universityId = 1;
+  string category = 2;
+}
+
 service Universities {
   rpc GetOpenDays(UniversityId) returns (OpenDays);
   rpc GetReviews(GetReviewsRequest) returns (Reviews);
+  rpc CreatePanorama(CreatePanoramaRequest) returns (Panorama);
+  rpc GetPanoramas(GetPanoramasRequest) returns (Panoramas);
 }
