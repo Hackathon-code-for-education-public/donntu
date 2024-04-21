@@ -106,7 +106,7 @@ func (c ChatStorage) ListChatByUserId(ctx context.Context, userId string) ([]*dt
 
 	sql, args, err := squirrel.
 		Select("*").
-		From("users_to_chat uc").
+		From("users_to_chats uc").
 		Where(squirrel.Eq{"uc.user_id": userId}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()

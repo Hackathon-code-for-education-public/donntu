@@ -18,6 +18,10 @@ type GRPCServicesConfig struct {
 		Host string `env:"FILE_SERVICE_HOST"`
 		Port int    `env:"FILE_SERVICE_PORT"`
 	}
+	ChatService struct {
+		Host string `env:"CHAT_SERVICE_HOST"`
+		Port int    `env:"CHAT_SERVICE_PORT"`
+	}
 }
 type HTTPConfig struct {
 	Port int `env:"HTTP_PORT"`

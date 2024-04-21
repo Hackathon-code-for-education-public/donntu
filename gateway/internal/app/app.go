@@ -17,10 +17,11 @@ type Application struct {
 
 	authController       *controllers.AuthController
 	universityController *controllers.UniversitiesController
+	chatController       *controllers.ChatController
 	log                  *slog.Logger
 }
 
-func NewApplication(cfg *config.Config, universityController *controllers.UniversitiesController, authController *controllers.AuthController, log *slog.Logger) *Application {
+func NewApplication(cfg *config.Config, universityController *controllers.UniversitiesController, authController *controllers.AuthController, chatController *controllers.ChatController, log *slog.Logger) *Application {
 	httpServer := fiber.New(fiber.Config{
 		AppName:       "gateway",
 		CaseSensitive: false,
@@ -33,6 +34,7 @@ func NewApplication(cfg *config.Config, universityController *controllers.Univer
 		log:                  log,
 		authController:       authController,
 		universityController: universityController,
+		chatController:       chatController,
 	}
 }
 
@@ -71,6 +73,9 @@ func (a *Application) Run() error {
 	p := v1.Group("/panoramas")
 	p.Get("/", a.universityController.GetPanorama())
 	p.Post("/", a.universityController.CreatePanorama())
+
+	chats := v1.Group("chats")
+	chats.Get("/", a.chatController.GetChats(), a.authController.AuthRequired(nil))
 
 	return a.http.Listen(fmt.Sprintf(":%d", a.cfg.HTTP.Port))
 }

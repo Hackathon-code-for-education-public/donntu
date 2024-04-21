@@ -9,19 +9,49 @@ message Empty {
 message Message {
   string text = 1;
   string userId = 2;
-  string targetId = 3;
+  string chatId = 3;
 }
 
 message AttachRequest {
   string userId = 1;
-  string targetId = 2;
+  string chatId = 2;
 }
 
 message IncomingMessage {
   string text = 1;
 }
 
+message CreateRequest {
+  string userId = 1;
+  string targetId = 2;
+}
+
+message CreateResponse {
+  string id = 1;
+}
+
+message ListRequest {
+  string userId = 1;
+}
+
+message ChatEntity {
+  string chatId = 2;
+}
+
+message GetMessageHistoryRequest {
+  string chatId = 1;
+}
+
+message GetMessageHistoryItem {
+  string userId = 1;
+  string message = 2;
+  int64 sentAt = 3;
+}
+
 service Chat {
   rpc Send(Message) returns (Empty);
   rpc Attach(AttachRequest) returns (stream IncomingMessage);
+  rpc Create(CreateRequest) returns (CreateResponse);
+  rpc List(ListRequest) returns (stream ChatEntity);
+  rpc GetMessageHistory(GetMessageHistoryRequest) returns (stream GetMessageHistoryItem);
 }

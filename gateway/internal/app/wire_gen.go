@@ -23,6 +23,7 @@ func InitApp() *Application {
 	universitiesController := controllers.NewUniversityController(universityService, fileService, slogLogger)
 	authService := services.NewAuthService(configConfig)
 	authController := controllers.NewAuthController(authService, slogLogger)
-	application := NewApplication(configConfig, universitiesController, authController, slogLogger)
+	chatController := controllers.NewChatController(configConfig)
+	application := NewApplication(configConfig, universitiesController, authController, chatController, slogLogger)
 	return application
 }

@@ -5,6 +5,7 @@ go 1.22.0
 require (
 	github.com/gofiber/fiber/v3 v3.0.0-beta.2
 	github.com/google/wire v0.6.0
+	github.com/gorilla/websocket v1.5.1
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.33.0
