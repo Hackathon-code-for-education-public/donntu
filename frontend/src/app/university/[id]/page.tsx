@@ -70,7 +70,7 @@ export default function Page({ params }: { params: Params }) {
                 alt="Logo"
                 className="h-12 w-12 mr-3"
                 height="50"
-                src={data?.logoUrl}
+                src={data?.logo}
                 style={{
                   aspectRatio: "50/50",
                   objectFit: "contain",
