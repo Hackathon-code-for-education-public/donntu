@@ -121,7 +121,9 @@ func (s Service) CreateChat(ctx context.Context, ch *entity.Chat) error {
 		return err
 	}
 
-	if err := s.chatStorage.Create(ctx, id.String(), ch.Participants[0], ch.Participants[1]); err != nil {
+	ch.Id = id.String()
+
+	if err := s.chatStorage.Create(ctx, ch.Id, ch.Participants[0], ch.Participants[1]); err != nil {
 		return err
 	}
 
