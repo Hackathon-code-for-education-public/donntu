@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "api/chat";
+
+message Empty {
+
+}
+
+message Message {
+  string text = 1;
+  string userId = 2;
+  string targetId = 3;
+}
+
+message AttachRequest {
+  string userId = 1;
+  string targetId = 2;
+}
+
+message IncomingMessage {
+  string text = 1;
+}
+
+service Chat {
+  rpc Send(Message) returns (Empty);
+  rpc Attach(AttachRequest) returns (stream IncomingMessage);
+}
