@@ -2,7 +2,9 @@ create table if not exists messages (
     id bigserial NOT NULL primary key,
     chatId text not null,
     userId text not null,
-    text text not null
+    text text not null,
+    read boolean not null,
+    createdAt timestamp not null
 );
 
 create table if not exists chats (
