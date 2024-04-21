@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniversityOpenDays } from "@/components/university-open-days";
 import { UniversityReviews } from "@/components/university-reviews";
+import RoleProtected from "@/hoc/RoleProtected";
 import { useUniversity } from "@/lib/use-university";
 import Link from "next/link";
 
@@ -87,7 +88,9 @@ export default function Page({ params }: { params: Params }) {
                 </div>
               ) : (
                 <div>
-                  <div className="text-3xl font-bold">{data?.rating.toFixed(2)}</div>
+                  <div className="text-3xl font-bold">
+                    {data?.rating.toFixed(2)}
+                  </div>
                   <div className="text-sm">рейтинг</div>
                 </div>
               )}
@@ -121,9 +124,15 @@ export default function Page({ params }: { params: Params }) {
           <TabsContent value="reviews" className="m-5">
             <div className="flex justify-between">
               <h2 className="text-lg">Отзывы</h2>
-              <Link href={`/create-review?universityId=${params.id}`} passHref legacyBehavior>
-                <Button>Добавить отзыв</Button>
-              </Link>
+              <RoleProtected requiredRoles={"STUDENT"}>
+                <Link
+                  href={`/create-review?universityId=${params.id}`}
+                  passHref
+                  legacyBehavior
+                >
+                  <Button>Добавить отзыв</Button>
+                </Link>
+              </RoleProtected>
             </div>
             <div className="pt-5">
               <UniversityReviews universityId={params.id} />
