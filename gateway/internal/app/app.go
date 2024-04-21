@@ -63,5 +63,9 @@ func (a *Application) Run() error {
 	r := v1.Group("/reviews")
 	r.Get("/", a.universityController.GetReviews())
 
+	p := v1.Group("/panoramas")
+	p.Get("/", a.universityController.GetPanorama())
+	p.Post("/", a.universityController.CreatePanorama())
+
 	return a.http.Listen(fmt.Sprintf(":%d", a.cfg.HTTP.Port))
 }

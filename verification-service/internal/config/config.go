@@ -17,8 +17,8 @@ type Config struct {
 	}
 
 	DB struct {
-		User string `env:"VERIFICATION_SERVICE_DB_USER" env-required:"true"`
-		Pass string `env:"VERIFICATION_SERVICE_DB_PASS" env-required:"true"`
+		User string `env:"DB_USER" env-required:"true"`
+		Pass string `env:"DB_PASS" env-required:"true"`
 		Host string `env:"DB_HOST" env-required:"true"`
 		Port int    `env:"DB_PORT" env-required:"true"`
 		Name string `env:"DB_NAME" env-required:"true"`

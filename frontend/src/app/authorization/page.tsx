@@ -15,7 +15,7 @@ const items = [
     label: "Абитуриент",
   },
   {
-    value: "student",
+    value: "students",
     label: "Студент",
   },
   {
@@ -88,6 +88,7 @@ function RegisterForm() {
   const [middleName, setMiddleName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [accountType, setAccountType] = useState(items[0].value);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -100,6 +101,7 @@ function RegisterForm() {
       const data = await AuthAPI.register(
         email,
         password,
+        accountType,
         lastName,
         firstName,
         middleName
@@ -120,6 +122,9 @@ function RegisterForm() {
 
   return (
     <form className="space-y-4" onSubmit={handleRegister}>
+      <div className="space-y-2">
+        <ComboBox items={items} onChange={setAccountType} value={accountType} />
+      </div>
       <div className="space-y-2">
         <Label htmlFor="lastName">Фамилия</Label>
         <Input

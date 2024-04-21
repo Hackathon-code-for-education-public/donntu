@@ -35,3 +35,18 @@ create table if not exists university_reviews
     text          text                              not null,
     repliesCount  integer                           not null
 );
+
+create type panorama_types as enum ('Корпуса',
+    'Общежития',
+    'Столовые',
+    'Прочее');
+
+create table if not exists university_panoramas
+(
+    university_id  text references universities (id) not null,
+    address        text                              not null,
+    name           text                              not null,
+    firstLocation  text                              not null,
+    secondLocation text                              not null,
+    type           panorama_types                    not null
+);

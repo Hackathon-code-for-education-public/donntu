@@ -18,8 +18,9 @@ import (
 func InitApp() *Application {
 	configConfig := config.New()
 	universityService := services.NewUniversityService(configConfig)
+	fileService := services.NewFileService(configConfig)
 	slogLogger := logger.New()
-	universitiesController := controllers.NewUniversityController(universityService, slogLogger)
+	universitiesController := controllers.NewUniversityController(universityService, fileService, slogLogger)
 	authService := services.NewAuthService(configConfig)
 	authController := controllers.NewAuthController(authService, slogLogger)
 	application := NewApplication(configConfig, universitiesController, authController, slogLogger)
