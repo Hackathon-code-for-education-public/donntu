@@ -3,7 +3,6 @@
 import { SelectUniversity } from "@/components/select-university";
 import UniversityBlock from "@/components/university-block";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { useEffect } from "react";
 
 export default function Page() {
   const searchParams = useSearchParams();

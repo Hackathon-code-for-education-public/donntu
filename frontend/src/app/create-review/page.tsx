@@ -24,6 +24,7 @@ import { useUniversity } from "@/lib/use-university";
 import { Button } from "@/components/ui/button";
 import { API } from "@/lib/api";
 import { useState } from "react";
+import isAuth from "@/hoc/isAuth";
 
 const schema = z.object({
   sentiment: z.string({
@@ -121,4 +122,4 @@ function CreateReview({
   );
 }
 
-export default CreateReview;
+export default isAuth(CreateReview, 'STUDENT');

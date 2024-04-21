@@ -1,5 +1,5 @@
 import { AuthAPI } from "./auth";
-import { API_HOST } from "./config";
+import { API_HOST, API_HOST2 } from "./config";
 
 export const fetcher = async (url: string) => {
   const getHeaders = (token: string | null) => ({
@@ -9,7 +9,11 @@ export const fetcher = async (url: string) => {
 
   try {
     const accessToken = await AuthAPI.getAccessToken();
-    let response = await fetch(API_HOST + url , {
+    let host = API_HOST;
+    if (url.startsWith("/api/v1/chats")) {
+      host = API_HOST2
+    }
+    let response = await fetch(host + url , {
       headers: getHeaders(accessToken)
     });
 
