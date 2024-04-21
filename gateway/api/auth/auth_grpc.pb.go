@@ -18,6 +18,15 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
+const (
+	Auth_SignIn_FullMethodName    = "/auth.Auth/SignIn"
+	Auth_SignUp_FullMethodName    = "/auth.Auth/SignUp"
+	Auth_SignOut_FullMethodName   = "/auth.Auth/SignOut"
+	Auth_Auth_FullMethodName      = "/auth.Auth/Auth"
+	Auth_Refresh_FullMethodName   = "/auth.Auth/Refresh"
+	Auth_PatchRole_FullMethodName = "/auth.Auth/PatchRole"
+)
+
 // AuthClient is the client API for Auth service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
@@ -96,6 +105,15 @@ func (c *authClient) PatchRole(ctx context.Context, in *PatchRoleRequest, opts .
 func (c *authClient) GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error) {
 	out := new(GetUserResponse)
 	err := c.cc.Invoke(ctx, "/auth.Auth/GetUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *authClient) PatchRole(ctx context.Context, in *PatchRoleRequest, opts ...grpc.CallOption) (*Empty, error) {
+	out := new(Empty)
+	err := c.cc.Invoke(ctx, Auth_PatchRole_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}

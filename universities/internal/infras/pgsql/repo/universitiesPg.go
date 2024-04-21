@@ -2,6 +2,7 @@ package repo
 
 import (
 	"context"
+	"errors"
 	"github.com/samber/lo"
 	"universities/internal/domain"
 	postgresql "universities/internal/infras/pgsql"
@@ -93,6 +94,101 @@ func (u *universitiesPg) GetPanoramas(ctx context.Context, universityID string, 
 			FirstLocation: item.Firstlocation,
 			LastLocation:  item.Secondlocation,
 			Type:          string(item.Type),
+		}
+	}), nil
+}
+
+func (u *universitiesPg) GetUniversitiesTop(ctx context.Context, n int) ([]*domain.University, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	results, err := querier.GetTopOfUniversities(ctx, int32(n))
+	if err != nil {
+		return nil, err
+	}
+
+	return lo.Map(results, func(item postgresql.University, _ int) *domain.University {
+		return &domain.University{
+			Id:           item.ID,
+			Name:         item.Name,
+			LongName:     item.LongName,
+			Logo:         item.Logo,
+			Rating:       item.Rating,
+			Region:       item.Region,
+			Type:         string(item.Type),
+			StudyFields:  int(item.StudyFields),
+			BudgetPlaces: int(item.BudgetPlaces),
+		}
+	}), nil
+}
+
+func (u *universitiesPg) GetUniversities(ctx context.Context, offset, limit int) ([]*domain.University, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	results, err := querier.GetUniversities(ctx, postgresql.GetUniversitiesParams{
+		Offset: int32(offset),
+		Limit:  int32(limit),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return lo.Map(results, func(item postgresql.University, _ int) *domain.University {
+		return &domain.University{
+			Id:           item.ID,
+			Name:         item.Name,
+			LongName:     item.LongName,
+			Logo:         item.Logo,
+			Rating:       item.Rating,
+			Region:       item.Region,
+			Type:         string(item.Type),
+			StudyFields:  int(item.StudyFields),
+			BudgetPlaces: int(item.BudgetPlaces),
+		}
+	}), nil
+}
+
+func (u *universitiesPg) GetUniversity(ctx context.Context, universityID string) (*domain.University, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	item, err := querier.GetUniversity(ctx, universityID)
+	if err != nil {
+
+	}
+	if len(item.ID) == 0 {
+		return nil, errors.New("not found")
+	}
+
+	return &domain.University{
+		Id:           item.ID,
+		Name:         item.Name,
+		LongName:     item.LongName,
+		Logo:         item.Logo,
+		Rating:       item.Rating,
+		Region:       item.Region,
+		Type:         string(item.Type),
+		StudyFields:  int(item.StudyFields),
+		BudgetPlaces: int(item.BudgetPlaces),
+	}, nil
+}
+
+func (u *universitiesPg) SearchUniversities(ctx context.Context, name string) ([]*domain.University, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	results, err := querier.SearchUniversities(ctx, postgresql.SearchUniversitiesParams{
+		LongName: "%" + name + "%",
+		Name:     "%" + name + "%",
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return lo.Map(results, func(item postgresql.University, _ int) *domain.University {
+		return &domain.University{
+			Id:           item.ID,
+			Name:         item.Name,
+			LongName:     item.LongName,
+			Logo:         item.Logo,
+			Rating:       item.Rating,
+			Region:       item.Region,
+			Type:         string(item.Type),
+			StudyFields:  int(item.StudyFields),
+			BudgetPlaces: int(item.BudgetPlaces),
 		}
 	}), nil
 }

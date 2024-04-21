@@ -18,6 +18,16 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
+const (
+	Universities_GetOpenDays_FullMethodName          = "/universities.Universities/GetOpenDays"
+	Universities_GetReviews_FullMethodName           = "/universities.Universities/GetReviews"
+	Universities_CreatePanorama_FullMethodName       = "/universities.Universities/CreatePanorama"
+	Universities_GetPanoramas_FullMethodName         = "/universities.Universities/GetPanoramas"
+	Universities_GetUniversity_FullMethodName        = "/universities.Universities/GetUniversity"
+	Universities_GetUniversities_FullMethodName      = "/universities.Universities/GetUniversities"
+	Universities_SearchUniversities_FullMethodName   = "/universities.Universities/SearchUniversities"
+	Universities_GetTopOfUniversities_FullMethodName = "/universities.Universities/GetTopOfUniversities"
+)
 // UniversitiesClient is the client API for Universities service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
@@ -26,6 +36,10 @@ type UniversitiesClient interface {
 	GetReviews(ctx context.Context, in *GetReviewsRequest, opts ...grpc.CallOption) (*Reviews, error)
 	CreatePanorama(ctx context.Context, in *CreatePanoramaRequest, opts ...grpc.CallOption) (*Panorama, error)
 	GetPanoramas(ctx context.Context, in *GetPanoramasRequest, opts ...grpc.CallOption) (*Panoramas, error)
+	GetUniversity(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*University, error)
+	GetUniversities(ctx context.Context, in *PageParams, opts ...grpc.CallOption) (*UniversitiesSchema, error)
+	SearchUniversities(ctx context.Context, in *SearchUniversitiesRequest, opts ...grpc.CallOption) (*UniversitiesSchema, error)
+	GetTopOfUniversities(ctx context.Context, in *GetTopOfUniversitiesRequest, opts ...grpc.CallOption) (*UniversitiesSchema, error)
 }
 
 type universitiesClient struct {
@@ -72,6 +86,42 @@ func (c *universitiesClient) GetPanoramas(ctx context.Context, in *GetPanoramasR
 	return out, nil
 }
 
+func (c *universitiesClient) GetUniversity(ctx context.Context, in *UniversityId, opts ...grpc.CallOption) (*University, error) {
+	out := new(University)
+	err := c.cc.Invoke(ctx, Universities_GetUniversity_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *universitiesClient) GetUniversities(ctx context.Context, in *PageParams, opts ...grpc.CallOption) (*UniversitiesSchema, error) {
+	out := new(UniversitiesSchema)
+	err := c.cc.Invoke(ctx, Universities_GetUniversities_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *universitiesClient) SearchUniversities(ctx context.Context, in *SearchUniversitiesRequest, opts ...grpc.CallOption) (*UniversitiesSchema, error) {
+	out := new(UniversitiesSchema)
+	err := c.cc.Invoke(ctx, Universities_SearchUniversities_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *universitiesClient) GetTopOfUniversities(ctx context.Context, in *GetTopOfUniversitiesRequest, opts ...grpc.CallOption) (*UniversitiesSchema, error) {
+	out := new(UniversitiesSchema)
+	err := c.cc.Invoke(ctx, Universities_GetTopOfUniversities_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UniversitiesServer is the server API for Universities service.
 // All implementations must embed UnimplementedUniversitiesServer
 // for forward compatibility
@@ -80,6 +130,10 @@ type UniversitiesServer interface {
 	GetReviews(context.Context, *GetReviewsRequest) (*Reviews, error)
 	CreatePanorama(context.Context, *CreatePanoramaRequest) (*Panorama, error)
 	GetPanoramas(context.Context, *GetPanoramasRequest) (*Panoramas, error)
+	GetUniversity(context.Context, *UniversityId) (*University, error)
+	GetUniversities(context.Context, *PageParams) (*UniversitiesSchema, error)
+	SearchUniversities(context.Context, *SearchUniversitiesRequest) (*UniversitiesSchema, error)
+	GetTopOfUniversities(context.Context, *GetTopOfUniversitiesRequest) (*UniversitiesSchema, error)
 	mustEmbedUnimplementedUniversitiesServer()
 }
 
@@ -98,6 +152,18 @@ func (UnimplementedUniversitiesServer) CreatePanorama(context.Context, *CreatePa
 }
 func (UnimplementedUniversitiesServer) GetPanoramas(context.Context, *GetPanoramasRequest) (*Panoramas, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPanoramas not implemented")
+}
+func (UnimplementedUniversitiesServer) GetUniversity(context.Context, *UniversityId) (*University, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUniversity not implemented")
+}
+func (UnimplementedUniversitiesServer) GetUniversities(context.Context, *PageParams) (*UniversitiesSchema, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUniversities not implemented")
+}
+func (UnimplementedUniversitiesServer) SearchUniversities(context.Context, *SearchUniversitiesRequest) (*UniversitiesSchema, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SearchUniversities not implemented")
+}
+func (UnimplementedUniversitiesServer) GetTopOfUniversities(context.Context, *GetTopOfUniversitiesRequest) (*UniversitiesSchema, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTopOfUniversities not implemented")
 }
 func (UnimplementedUniversitiesServer) mustEmbedUnimplementedUniversitiesServer() {}
 
@@ -184,6 +250,78 @@ func _Universities_GetPanoramas_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Universities_GetUniversity_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UniversityId)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UniversitiesServer).GetUniversity(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Universities_GetUniversity_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UniversitiesServer).GetUniversity(ctx, req.(*UniversityId))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Universities_GetUniversities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(PageParams)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UniversitiesServer).GetUniversities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Universities_GetUniversities_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UniversitiesServer).GetUniversities(ctx, req.(*PageParams))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Universities_SearchUniversities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SearchUniversitiesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UniversitiesServer).SearchUniversities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Universities_SearchUniversities_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UniversitiesServer).SearchUniversities(ctx, req.(*SearchUniversitiesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Universities_GetTopOfUniversities_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTopOfUniversitiesRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UniversitiesServer).GetTopOfUniversities(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Universities_GetTopOfUniversities_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UniversitiesServer).GetTopOfUniversities(ctx, req.(*GetTopOfUniversitiesRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Universities_ServiceDesc is the grpc.ServiceDesc for Universities service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -206,6 +344,22 @@ var Universities_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetPanoramas",
 			Handler:    _Universities_GetPanoramas_Handler,
+		},
+		{
+			MethodName: "GetUniversity",
+			Handler:    _Universities_GetUniversity_Handler,
+		},
+		{
+			MethodName: "GetUniversities",
+			Handler:    _Universities_GetUniversities_Handler,
+		},
+		{
+			MethodName: "SearchUniversities",
+			Handler:    _Universities_SearchUniversities_Handler,
+		},
+		{
+			MethodName: "GetTopOfUniversities",
+			Handler:    _Universities_GetTopOfUniversities_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

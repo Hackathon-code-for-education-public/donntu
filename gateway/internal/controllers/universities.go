@@ -4,6 +4,8 @@ import (
 	"gateway/internal/domain"
 	"gateway/pkg/file"
 	"github.com/gofiber/fiber/v3"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 	"log/slog"
 )
 
@@ -159,5 +161,100 @@ func (a *UniversitiesController) GetPanorama() fiber.Handler {
 		}
 
 		return ok(ctx, panoramas)
+	}
+}
+
+func (a *UniversitiesController) GetUniversitiesTop() fiber.Handler {
+	type request struct {
+		Count int `query:"count"`
+	}
+
+	return func(ctx fiber.Ctx) error {
+		var req request
+		if err := ctx.Bind().Query(&req); err != nil {
+			a.log.Error("error while bind request: ", slog.Int("count", req.Count))
+			return bad(err.Error())
+		}
+
+		a.log.Info("get universities top request: ", slog.Int("count", req.Count))
+
+		universities, err := a.universityService.GetUniversitiesTop(ctx.Context(), req.Count)
+		if err != nil {
+			a.log.Error("error while get universities: ", slog.Int("count", req.Count))
+			return internal(err.Error())
+		}
+
+		return ok(ctx, universities)
+	}
+}
+
+func (a *UniversitiesController) SearchUniversities() fiber.Handler {
+	type request struct {
+		Name string `query:"name"`
+	}
+
+	return func(ctx fiber.Ctx) error {
+		var req request
+		if err := ctx.Bind().Query(&req); err != nil {
+			a.log.Error("error while bind request: ", slog.String("name", req.Name))
+			return bad(err.Error())
+		}
+		a.log.Info("get universities request: ")
+
+		universities, err := a.universityService.SearchUniversities(ctx.Context(), req.Name)
+		if err != nil {
+			a.log.Error("error while get universities: ")
+			return internal(err.Error())
+		}
+
+		return ok(ctx, universities)
+	}
+}
+
+func (a *UniversitiesController) GetUniversity() fiber.Handler {
+	return func(ctx fiber.Ctx) error {
+		uid := ctx.Params("id")
+		if uid == "" {
+			return bad("university id is required")
+		}
+
+		a.log.Info("get university request: ", slog.String("universityId", uid))
+		university, err := a.universityService.GetUniversity(ctx.Context(), uid)
+		if err != nil {
+			s, ok := status.FromError(err)
+			if ok {
+				switch s.Code() {
+				case codes.NotFound:
+					return notFound(err.Error())
+				}
+			}
+
+			return internal(err.Error())
+		}
+
+		return ok(ctx, university)
+	}
+}
+
+func (a *UniversitiesController) GetUniversities() fiber.Handler {
+	type request struct {
+		Offset int `query:"offset"`
+		Limit  int `query:"limit"`
+	}
+
+	return func(ctx fiber.Ctx) error {
+		var req request
+		if err := ctx.Bind().Query(&req); err != nil {
+			a.log.Error("error while bind request: ", slog.Int("offset", req.Offset), slog.Int("limit", req.Limit))
+			return bad(err.Error())
+		}
+		a.log.Info("get universities request: ", slog.Int("offset", req.Offset), slog.Int("limit", req.Limit))
+		universities, err := a.universityService.GetUniversities(ctx.Context(), req.Offset, req.Limit)
+		if err != nil {
+			a.log.Error("error while get universities: ", slog.Int("offset", req.Offset), slog.Int("limit", req.Limit))
+			return internal(err.Error())
+		}
+
+		return ok(ctx, universities)
 	}
 }
