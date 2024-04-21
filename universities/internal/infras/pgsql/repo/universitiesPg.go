@@ -98,10 +98,6 @@ func (u *universitiesPg) GetReviews(ctx context.Context, universityID string, li
 			Sentiment:    domain.Sentiment(item.Sentiment),
 		}
 	})
-	fmt.Println(reviews[0])
-	fmt.Println(reviews[1])
-	fmt.Println(reviews[2])
-	fmt.Println(reviews[3])
 
 	return reviews, nil
 }
