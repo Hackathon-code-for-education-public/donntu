@@ -177,13 +177,48 @@ func (q *Queries) GetPanoramas(ctx context.Context, arg GetPanoramasParams) ([]U
 	return items, nil
 }
 
+const getReview = `-- name: GetReview :one
+select r.university_id, r.author_status, r.sentiment, r.date, r.text, r.review_id, r.parent_review_id, (select count(*) from university_reviews where parent_review_id = r.review_id) as reply_count
+from university_reviews r
+where r.review_id = $1
+limit 1
+`
+
+type GetReviewRow struct {
+	UniversityID   string         `json:"university_id"`
+	AuthorStatus   Statuses       `json:"author_status"`
+	Sentiment      Sentiments     `json:"sentiment"`
+	Date           time.Time      `json:"date"`
+	Text           string         `json:"text"`
+	ReviewID       string         `json:"review_id"`
+	ParentReviewID sql.NullString `json:"parent_review_id"`
+	ReplyCount     int64          `json:"reply_count"`
+}
+
+func (q *Queries) GetReview(ctx context.Context, reviewID string) (GetReviewRow, error) {
+	row := q.db.QueryRowContext(ctx, getReview, reviewID)
+	var i GetReviewRow
+	err := row.Scan(
+		&i.UniversityID,
+		&i.AuthorStatus,
+		&i.Sentiment,
+		&i.Date,
+		&i.Text,
+		&i.ReviewID,
+		&i.ParentReviewID,
+		&i.ReplyCount,
+	)
+	return i, err
+}
+
 const getReviews = `-- name: GetReviews :many
 select r.university_id, r.author_status, r.sentiment, r.date, r.text, r.review_id, r.parent_review_id,
        (select count(*)
         from university_reviews
         where parent_review_id = r.review_id) as reply_count
 from university_reviews r
-where r.university_id = $3 and r.parent_review_id is null
+where r.university_id = $3
+  and r.parent_review_id is null
 group by r.review_id, r.date
 order by r.date
 offset $1 limit $2

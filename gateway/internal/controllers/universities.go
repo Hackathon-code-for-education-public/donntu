@@ -88,6 +88,12 @@ func (a *UniversitiesController) GetReviews() fiber.Handler {
 }
 
 func (a *UniversitiesController) GetReplies() fiber.Handler {
+
+	type response struct {
+		ParentReview *domain.Review   `json:"review"`
+		Replies      []*domain.Review `json:"replies"`
+	}
+
 	return func(ctx fiber.Ctx) error {
 		id := ctx.Params("id")
 		if id == "" {
@@ -96,13 +102,16 @@ func (a *UniversitiesController) GetReplies() fiber.Handler {
 		}
 
 		a.log.Info("get replies request: ", slog.String("id", id))
-		replies, err := a.universityService.GetReplies(ctx.Context(), id)
+		replies, parenReview, err := a.universityService.GetReplies(ctx.Context(), id)
 		if err != nil {
 			a.log.Error("error while get replies: ", slog.String("id", id))
 			return internal(err.Error())
 		}
 
-		return ok(ctx, replies)
+		return ok(ctx, &response{
+			ParentReview: parenReview,
+			Replies:      replies,
+		})
 	}
 }
 

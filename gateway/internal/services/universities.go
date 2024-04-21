@@ -109,14 +109,14 @@ func (s *UniversityService) CreateReview(ctx context.Context, review *domain.Rev
 	}, nil
 }
 
-func (s *UniversityService) GetReplies(ctx context.Context, reviewID string) ([]*domain.Review, error) {
+func (s *UniversityService) GetReplies(ctx context.Context, reviewID string) ([]*domain.Review, *domain.Review, error) {
 	res, err := s.client.GetReplies(ctx, &universities.UniversityId{Id: reviewID})
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	replies := make([]*domain.Review, len(res.Reviews))
-	for i, reply := range res.Reviews {
+	replies := make([]*domain.Review, len(res.Replies))
+	for i, reply := range res.Replies {
 		replies[i] = &domain.Review{
 			ReviewId:     reply.ReviewId,
 			UniversityId: reply.UniversityId,
@@ -128,7 +128,15 @@ func (s *UniversityService) GetReplies(ctx context.Context, reviewID string) ([]
 		}
 	}
 
-	return replies, nil
+	return replies, &domain.Review{
+		ReviewId:     res.Review.ReviewId,
+		UniversityId: res.Review.UniversityId,
+		Date:         time.Unix(res.Review.Date, 0).Local(),
+		Text:         res.Review.Text,
+		AuthorStatus: res.Review.AuthorStatus,
+		RepliesCount: int(res.Review.RepliesCount),
+		Sentiment:    res.Review.Sentiment,
+	}, nil
 }
 
 func (s *UniversityService) CreatePanorama(ctx context.Context, panorama *domain.Panorama) (*domain.Panorama, error) {
