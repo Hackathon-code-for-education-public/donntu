@@ -1,7 +1,8 @@
 "use client";
 
 import { Panorama } from "@/api/panorama";
-import PanoramaView from "@/components/panorama";
+import dynamic from "next/dynamic";
+
 import {
   Accordion,
   AccordionContent,
@@ -13,12 +14,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniversityOpenDays } from "@/components/university-open-days";
 import { UniversityReviews } from "@/components/university-reviews";
 import { useUniversity } from "@/lib/use-university";
-import { Salad } from "lucide-react";
-import Image from "next/image";
 
 interface Params {
   id: string;
 }
+
+const PanoramaView = dynamic(
+  () => import('@/components/panorama').then(module => module) as any,
+  { ssr: false },
+) as any;
 
 const mokPanoramas: Panorama[] = [
   {

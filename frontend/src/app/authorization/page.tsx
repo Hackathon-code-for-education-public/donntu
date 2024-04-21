@@ -8,6 +8,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ComboBox } from "@/components/combobox";
 import { AuthAPI } from "@/lib/auth";
+import withAuthRedirect from "@/hoc/withAuthRedirect";
+import { useUser } from "@/lib/use-user";
 
 const items = [
   {
@@ -25,6 +27,8 @@ const items = [
 ];
 
 function LoginForm() {
+  const { mutate } = useUser();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -39,6 +43,8 @@ function LoginForm() {
       const data = await AuthAPI.login(email, password);
       console.log("Logged in successfully:", data);
       setLoading(false);
+
+      mutate();
     } catch (error) {
       if (error instanceof Error) {
         console.error("Login failed:", error.message);
@@ -185,7 +191,7 @@ function RegisterForm() {
     </form>
   );
 }
-export default function Page() {
+function Page() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-gray-950 p-20">
       <Card className="mx-auto max-w-sm min-h-96 min-w-96">
@@ -211,3 +217,5 @@ export default function Page() {
     </main>
   );
 }
+
+export default withAuthRedirect(Page);

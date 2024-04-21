@@ -76,8 +76,8 @@ func (u *UserStorage) Create(ctx context.Context, user *models.User) error {
 	log := ctx.Value("logger").(*slog.Logger).With("method", "Create")
 
 	query, args, err := squirrel.Insert(CREDENTIALS_TABLE).
-		Columns("id", "email", "password", "role").
-		Values(user.Id, user.Email, user.Password, user.Role).
+		Columns("id", "email", "password", "role", "last_name", "first_name", "middle_name").
+		Values(user.Id, user.Email, user.Password, user.Role, user.LastName, user.FirstName, user.MiddleName).
 		Suffix("RETURNING *").
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
@@ -101,7 +101,7 @@ func (u *UserStorage) Create(ctx context.Context, user *models.User) error {
 func (u *UserStorage) Update(ctx context.Context, user *models.User) error {
 	log := ctx.Value("logger").(*slog.Logger).With("method", "Update")
 
-	query, args, err := squirrel.Update("users").
+	query, args, err := squirrel.Update(CREDENTIALS_TABLE).
 		Set("email", user.Email).
 		Set("password", user.Password).
 		Where(squirrel.Eq{"id": user.Id}).
@@ -122,9 +122,9 @@ func (u *UserStorage) Update(ctx context.Context, user *models.User) error {
 	return nil
 }
 
-func (u *UserStorage) Delete(ctx context.Context, id int) error {
+func (u *UserStorage) Delete(ctx context.Context, id string) error {
 	log := ctx.Value("logger").(*slog.Logger).With("method", "Delete")
-	query, args, err := squirrel.Delete("users").
+	query, args, err := squirrel.Delete(CREDENTIALS_TABLE).
 		Where(squirrel.Eq{"id": id}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
@@ -148,7 +148,7 @@ func (u *UserStorage) Delete(ctx context.Context, id int) error {
 func (u *UserStorage) PatchRole(ctx context.Context, id string, role string) error {
 	log := ctx.Value("logger").(*slog.Logger).With("method", "PatchRole")
 
-	query, args, err := squirrel.Update("users").
+	query, args, err := squirrel.Update(CREDENTIALS_TABLE).
 		Set("role", role).
 		Where(squirrel.Eq{"id": id}).
 		PlaceholderFormat(squirrel.Dollar).
