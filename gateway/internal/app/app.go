@@ -128,7 +128,7 @@ func (a *Application) Run() error {
 
 	p := v1.Group("/panoramas")
 	p.Get("/", a.universityController.GetPanorama())
-	p.Post("/", a.universityController.CreatePanorama(), a.authController.AuthRequired(domain.UserRoleUniversity))
+	p.Post("/", a.universityController.CreatePanorama(), a.authController.AuthRequired(domain.UserRoleManager))
 
 	v1v2 := a.http2.Group("/api/v1")
 	chats := v1v2.Group("chats")

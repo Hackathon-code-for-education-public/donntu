@@ -6,6 +6,12 @@ import { Table, TableBody, TableCell, TableRow } from "@/components/ui/table";
 import isAuth from "@/hoc/isAuth";
 import { useUser } from "@/lib/use-user";
 
+const roles: { [key: string]: string } = {
+  "STUDENT": "Студент",
+  "MANAGER": "Представитель университета",
+  "APPLICANT": "Абитуриент",
+}
+
 function Page() {
   const { user } = useUser();
 
@@ -44,7 +50,7 @@ function Page() {
             </TableRow>
             <TableRow>
               <TableCell className="font-medium">Роль</TableCell>
-              <TableCell className="text-right">{user?.role}</TableCell>
+              <TableCell className="text-right">{roles[user?.role!]}</TableCell>
             </TableRow>
           </TableBody>
         </Table>

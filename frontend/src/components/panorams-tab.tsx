@@ -44,7 +44,7 @@ export function PanoramsTab({ universityId }) {
         ))}
       </Accordion>
       {
-        !loggedOut && <RoleProtected requiredRoles={"UNIVERSITY"}><PanoramaForm universityId={universityId} /></RoleProtected>
+        !loggedOut && <RoleProtected requiredRoles={"MANAGER"}><PanoramaForm universityId={universityId} /></RoleProtected>
       }
     </>
   );

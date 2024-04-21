@@ -3,6 +3,7 @@ import { fetcherWithData } from "./fetcher";
 
 export type UserData = {
   id: string;
+  email: string;
   role: string;
   firstName: string;
   middleName: string;
@@ -10,7 +11,7 @@ export type UserData = {
 };
 
 export function useUser() {
-  const { data, mutate, error, isLoading } = useSWR("/api/v1/profile", fetcherWithData);
+  const { data, mutate, error, isLoading } = useSWR<UserData>("/api/v1/profile", fetcherWithData);
 
   // const loading = !data && !error;
   // const loggedOut = error && error.status === 401;
