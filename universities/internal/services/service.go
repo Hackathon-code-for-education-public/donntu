@@ -66,10 +66,10 @@ func (s *universityService) CreateReview(ctx context.Context, review *domain.Rev
 	return s.universityRepo.CreateReview(ctx, review)
 }
 
-func (s *universityService) GetReplies(ctx context.Context, reviewID string) ([]*domain.Review, error) {
+func (s *universityService) GetReplies(ctx context.Context, reviewID string) ([]*domain.Review, *domain.Review, error) {
 	reviewID = strings.TrimSpace(reviewID)
 	if reviewID == "" {
-		return nil, errors.New("reviewID is required")
+		return nil, nil, errors.New("reviewID is required")
 	}
 
 	return s.universityRepo.GetReplies(ctx, reviewID)

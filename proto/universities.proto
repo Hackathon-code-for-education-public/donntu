@@ -108,12 +108,17 @@ message CreateReviewRequest {
   optional string parent_review_id = 2;
 }
 
+message GetRepliesResponse {
+  Review review = 1;
+  repeated Review replies = 2;
+}
+
 service Universities {
   rpc GetOpenDays(UniversityId) returns (OpenDays);
 
   rpc CreateReview(CreateReviewRequest) returns (Review);
   rpc GetReviews(GetReviewsRequest) returns (Reviews);
-  rpc GetReplies(UniversityId) returns (Reviews);
+  rpc GetReplies(UniversityId) returns (GetRepliesResponse);
 
   rpc CreatePanorama(CreatePanoramaRequest) returns (Panorama);
   rpc GetPanoramas(GetPanoramasRequest) returns (Panoramas);
