@@ -183,7 +183,7 @@ select r.university_id, r.author_status, r.sentiment, r.date, r.text, r.review_i
         from university_reviews
         where parent_review_id = r.review_id) as reply_count
 from university_reviews r
-where r.university_id = $3
+where r.university_id = $3 and r.parent_review_id is null
 group by r.review_id, r.date
 order by r.date
 offset $1 limit $2
