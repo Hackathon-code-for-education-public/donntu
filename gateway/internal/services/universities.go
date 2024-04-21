@@ -83,7 +83,7 @@ func (s *UniversityService) GetReviews(ctx context.Context, universityId string,
 	return reviews, nil
 }
 
-func (s *UniversityService) CreateReview(ctx context.Context, review *domain.Review) (*domain.Review, error) {
+func (s *UniversityService) CreateReview(ctx context.Context, review *domain.Review, authorId string) (*domain.Review, error) {
 	item, err := s.client.CreateReview(ctx, &universities.CreateReviewRequest{
 		Review: &universities.Review{
 			UniversityId: review.UniversityId,
@@ -93,6 +93,7 @@ func (s *UniversityService) CreateReview(ctx context.Context, review *domain.Rev
 			Sentiment:    review.Sentiment,
 		},
 		ParentReviewId: review.ParentId,
+		AuthorId:       authorId,
 	})
 	if err != nil {
 		return nil, err
@@ -125,6 +126,7 @@ func (s *UniversityService) GetReplies(ctx context.Context, reviewID string) ([]
 			AuthorStatus: reply.AuthorStatus,
 			RepliesCount: int(reply.RepliesCount),
 			Sentiment:    reply.Sentiment,
+			AuthorId:     &reply.AuthorId,
 		}
 	}
 
@@ -136,6 +138,7 @@ func (s *UniversityService) GetReplies(ctx context.Context, reviewID string) ([]
 		AuthorStatus: res.Review.AuthorStatus,
 		RepliesCount: int(res.Review.RepliesCount),
 		Sentiment:    res.Review.Sentiment,
+		AuthorId:     &res.Review.AuthorId,
 	}, nil
 }
 

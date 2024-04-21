@@ -50,16 +50,17 @@ func (c *verificationClient) Send(ctx context.Context, in *VerificationRequest, 
 	return out, nil
 }
 
-func (c *verificationClient) Approve(ctx context.Context, in *ApproveRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *verificationClient) Approve(ctx context.Context, in *ApproveRequest, opts ...grpc.CallOption) (*Empty2, error) {
+	out := new(Empty2)
 	err := c.cc.Invoke(ctx, Verification_Approve_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
-func (c *verificationClient) Decline(ctx context.Context, in *DenialRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+
+func (c *verificationClient) Decline(ctx context.Context, in *DenialRequest, opts ...grpc.CallOption) (*Empty2, error) {
+	out := new(Empty2)
 	err := c.cc.Invoke(ctx, Verification_Decline_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err

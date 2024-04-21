@@ -142,7 +142,7 @@ func (c *ChatController) GetChats() fiber.Handler {
 	}
 }
 
-func (c *ChatController) CreateChat() fiber.Handler {
+func (c *ChatController) CreateChat(a *UniversitiesController) fiber.Handler {
 
 	type request struct {
 		TargetId string `json:"targetId"`
@@ -163,9 +163,14 @@ func (c *ChatController) CreateChat() fiber.Handler {
 			return internal("internal")
 		}
 
+		_, review, err := a.universityService.GetReplies(ctx.Context(), req.TargetId)
+		if err != nil {
+			return internal(err.Error())
+		}
+
 		res, err := c.client.Create(ctx.Context(), &chat.CreateRequest{
 			UserId:   u.Id,
-			TargetId: req.TargetId,
+			TargetId: *review.AuthorId,
 		})
 		if err != nil {
 			l.Error("cant create chat", slog.String("err", err.Error()))
