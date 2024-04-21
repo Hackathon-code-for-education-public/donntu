@@ -1,4 +1,4 @@
-export interface Univercity {
+export interface University {
     id: string;
     name: string;
     longName: string;

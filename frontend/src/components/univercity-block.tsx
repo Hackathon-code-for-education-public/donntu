@@ -1,5 +1,5 @@
 
-import { Univercity } from "@/api/university";
+import { University } from "@/api/university";
 import { API_HOST } from "@/lib/auth";
 import  Image  from "next/image";
 
@@ -19,7 +19,7 @@ export default async function UniversityBlock({
   universityId,
 }: UniversityBlockParams) {
   const response  = await getUniversity(universityId);
-  const univercity: Univercity = response.data
+  const univercity: University = response.data
   console.log(univercity);
   return (
     <div className="flex flex-col w-2/3 items-center bg-slate-100 p-20 m-20 rounded-xl">
