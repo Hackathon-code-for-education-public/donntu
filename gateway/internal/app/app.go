@@ -40,7 +40,7 @@ func NewApplication(cfg *config.Config, universityController *controllers.Univer
 			}
 
 			err = ctx.Status(code).JSON(fiber.Map{
-				"message": e.Message,
+				"message": e.Error(),
 			})
 
 			return nil
