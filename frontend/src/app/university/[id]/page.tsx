@@ -2,11 +2,18 @@
 
 import { Panorama } from "@/api/panorama";
 import PanoramaView from "@/components/panorama";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniversityOpenDays } from "@/components/university-open-days";
 import { UniversityReviews } from "@/components/university-reviews";
 import { useUniversity } from "@/lib/use-university";
+import { Salad } from "lucide-react";
 import Image from "next/image";
 
 interface Params {
@@ -17,18 +24,28 @@ const mokPanoramas: Panorama[] = [
   {
     name: "Главный корпус",
     address: "г. Донецк, ул. Пушкина, д.1",
+    type: "Корпус",
     loc1: "/room.jpg",
     loc2: "/mus.jpg",
   },
   {
     name: "Корпус №8",
     address: "г. Донецк, ул. Артема, д.2",
+    type: "Корпус",
     loc1: "/alma.jpg",
     loc2: "/lib.jpg",
   },
   {
-    name: "Корпус №3",
+    name: "Общежитие №3",
     address: "г. Донецк, ул. И. Ткаченко, д.3",
+    type: "Общежитие",
+    loc1: "/mus.jpg",
+    loc2: "/lib.jpg",
+  },
+  {
+    name: "Стадион №3",
+    address: "г. Донецк, ул. Университетская, д.3",
+    type: "Прочее",
     loc1: "/mus.jpg",
     loc2: "/lib.jpg",
   },
@@ -138,9 +155,51 @@ export default function Page({ params }: { params: Params }) {
             <UniversityOpenDays universityId={params.id} />
           </TabsContent>
           <TabsContent value="panorams">
-            <PanoramaView panorama={mokPanoramas[0]} />
-            <PanoramaView panorama={mokPanoramas[1]} />
-            <PanoramaView panorama={mokPanoramas[2]} />
+            <Accordion type="single" collapsible className="w-full">
+              <AccordionItem value="item-1">
+                <AccordionTrigger>Корпуса</AccordionTrigger>
+                <AccordionContent>
+                  {mokPanoramas
+                    .filter((item) => item.type === "Корпус")
+                    .map((panorama) => (
+                      <PanoramaView panorama={panorama} />
+                    ))}
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-2">
+                <AccordionTrigger>Общежития</AccordionTrigger>
+                <AccordionContent>
+                  {mokPanoramas
+                    .filter((item) => item.type === "Общежитие")
+                    .map((panorama) => (
+                      <PanoramaView panorama={panorama} />
+                    ))}
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-3">
+                <AccordionTrigger>Столовые</AccordionTrigger>
+                <AccordionContent>
+                  {mokPanoramas
+                    .filter((item) => item.type === "Столовая")
+                    .map((panorama) => (
+                      <PanoramaView panorama={panorama} />
+                    ))}
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="item-4">
+                <AccordionTrigger>Прочее</AccordionTrigger>
+                <AccordionContent>
+                  {mokPanoramas
+                    .filter((item) => item.type === "Прочее")
+                    .map((panorama) => (
+                      <PanoramaView panorama={panorama} />
+                    ))}
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+            {/* {mokPanoramas.map((panorama) => (
+              <PanoramaView panorama={panorama} />
+            ))} */}
           </TabsContent>
         </Tabs>
       </div>
