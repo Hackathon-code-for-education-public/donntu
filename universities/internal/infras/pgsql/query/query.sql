@@ -19,7 +19,8 @@ select r.*,
         from university_reviews
         where parent_review_id = r.review_id) as reply_count
 from university_reviews r
-where r.university_id = $3 and r.parent_review_id is null
+where r.university_id = $3
+  and r.parent_review_id is null
 group by r.review_id, r.date
 order by r.date
 offset $1 limit $2;
@@ -29,6 +30,12 @@ select *
 from university_reviews r
 where r.parent_review_id = $1
 order by r.date;
+
+-- name: GetReview :one
+select r.*, (select count(*) from university_reviews where parent_review_id = r.review_id) as reply_count
+from university_reviews r
+where r.review_id = $1
+limit 1;
 
 -- name: AddPanorama :one
 insert into university_panoramas (university_id, address, name, firstlocation, secondlocation, type)

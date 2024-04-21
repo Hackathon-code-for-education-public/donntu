@@ -1,73 +1,10 @@
 "use client";
 
-import { Input } from "@/components/ui/input";
+import { SearchInput } from "@/components/university/search-input";
+import { UniversityCard } from "@/components/university/university-card";
+import { UniversitySkeleton } from "@/components/university/university-skeleton";
 import { useUniversities } from "@/lib/use-universities";
-import { UniversityIcon } from "lucide-react";
-import Link from "next/link";
 import { useState } from "react";
-
-interface UniversityCardProps {
-  id: string;
-  name: string;
-  longName: string;
-  logoUrl?: string;
-}
-
-function UniversityCard({ id, name, longName, logoUrl }: UniversityCardProps) {
-  return (
-    <Link href={`/university/${id}`} passHref legacyBehavior>
-      <a className="bg-white rounded-md shadow-md p-4 flex items-start">
-        {logoUrl ? (
-          <img
-            alt="University Logo"
-            className="mr-4"
-            height={60}
-            src={logoUrl}
-            style={{
-              aspectRatio: "60/60",
-              objectFit: "contain",
-            }}
-            width={60}
-          />
-        ) : (
-          <div
-            className="mr-4 flex items-center justify-center"
-            style={{ width: 60, height: 60 }}
-          >
-            <UniversityIcon size="60px" />
-          </div>
-        )}
-        <div>
-          <h3 className="text-lg font-bold">{name}</h3>
-          <p className="text-gray-500 text-sm">{longName}</p>
-        </div>
-      </a>
-    </Link>
-  );
-}
-
-function UniversitySkeleton() {
-  return (
-    <div className="bg-white rounded-md shadow-md p-4 flex items-start animate-pulse">
-      <div className="mr-4 bg-gray-300" style={{ width: 60, height: 60 }}></div>
-      <div className="w-full">
-        <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
-        <div className="h-3 bg-gray-300 rounded w-5/6"></div>
-      </div>
-    </div>
-  );
-}
-
-function SearchInput({ onChange }: { onChange: (value: string) => void }) {
-  return (
-    <Input
-      className="w-full rounded-md py-2 px-4 border border-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-500"
-      placeholder="Название университета"
-      type="text"
-      onChange={(event) => onChange(event.target.value)}
-    />
-  );
-}
 
 export default function Page() {
   const [searchQuery, setSearchQuery] = useState("");

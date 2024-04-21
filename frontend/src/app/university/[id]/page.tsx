@@ -2,12 +2,15 @@
 
 import { Panorama } from "@/api/panorama";
 import { PanoramsTab } from "@/components/panorams-tab";
+import { Button } from "@/components/ui/button";
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { UniversityOpenDays } from "@/components/university-open-days";
 import { UniversityReviews } from "@/components/university-reviews";
+import RoleProtected from "@/components/RoleProtected";
 import { useUniversity } from "@/lib/use-university";
+import Link from "next/link";
 
 interface Params {
   id: string;
@@ -85,7 +88,9 @@ export default function Page({ params }: { params: Params }) {
                 </div>
               ) : (
                 <div>
-                  <div className="text-3xl font-bold">{data?.rating}</div>
+                  <div className="text-3xl font-bold">
+                    {data?.rating.toFixed(2)}
+                  </div>
                   <div className="text-sm">рейтинг</div>
                 </div>
               )}
@@ -117,8 +122,21 @@ export default function Page({ params }: { params: Params }) {
             </div>
           </TabsContent>
           <TabsContent value="reviews" className="m-5">
-            <h2 className="text-lg">Отзывы</h2>
-            <UniversityReviews universityId={params.id} />
+            <div className="flex justify-between">
+              <h2 className="text-lg">Отзывы</h2>
+              <RoleProtected requiredRoles={"STUDENT"}>
+                <Link
+                  href={`/create-review?universityId=${params.id}`}
+                  passHref
+                  legacyBehavior
+                >
+                  <Button>Добавить отзыв</Button>
+                </Link>
+              </RoleProtected>
+            </div>
+            <div className="pt-5">
+              <UniversityReviews universityId={params.id} />
+            </div>
           </TabsContent>
           <TabsContent value="open-day" className="m-5">
             {isLoading ? (

@@ -2,13 +2,13 @@ syntax = "proto3";
 
 option go_package="api/verification";
 
+message Empty2 {}
+
 service Verification {
   rpc Send(VerificationRequest) returns (SendRequestResponse);
-  rpc Approve(ApproveRequest) returns (Empty);
-  rpc Decline(DenialRequest) returns (Empty);
+  rpc Approve(ApproveRequest) returns (Empty2);
+  rpc Decline(DenialRequest) returns (Empty2);
 }
-
-message Empty {}
 
 message VerificationRequest {
   string userId = 1;

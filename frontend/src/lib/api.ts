@@ -1,5 +1,5 @@
 import { AuthAPI } from "./auth";
-import { API_HOST } from './config';
+import { API_HOST } from "./config";
 
 export class API {
   static async request(
@@ -74,6 +74,27 @@ export class API {
       return await this.requestWithFormData(url, "POST", formData);
     } catch (error) {
       console.error("Upload failed:", error);
+      throw error;
+    }
+  }
+
+  static async createReview(
+    universityId: string,
+    sentiment: string,
+    text: string
+  ): Promise<any> {
+    const url = `${API_HOST}/api/v1/reviews`;
+    const body = {
+      universityId,
+      sentiment,
+      text,
+    };
+
+    try {
+      // Make the request with the JSON body
+      return await this.request(url, "POST", body);
+    } catch (error) {
+      console.error("Create review failed:", error);
       throw error;
     }
   }
