@@ -23,7 +23,7 @@ export default async function UniversityBlock({
   console.log(univercity);
   return (
     <div className="flex flex-col w-2/3 items-center bg-slate-100 p-20 m-20 rounded-xl">
-      <Image src={univercity.logoUrl} width={100} height={100} className="rounded-full bg-slate-300 m-4" alt="logo"/>
+      <img src={univercity.logo} width={0} height={0} style={{width:'120px', height: "120px"}} className="rounded-full bg-slate-300 m-4 "alt="logo"/>
       <p className="text-4xl font-bold">{univercity.name}</p>
       <p className="">{univercity.longName}</p>
       <p className="">{univercity.region}</p>
