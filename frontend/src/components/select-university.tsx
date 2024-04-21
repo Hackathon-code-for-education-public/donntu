@@ -1,19 +1,29 @@
 "use client";
+import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useUniversities } from "@/lib/use-universities";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 
 import { SearchInput } from "@/components/university/search-input";
-import { UniversityCard } from "@/components/university/university-card";
-import { UniversitySkeleton } from "@/components/university/university-skeleton";
-import { useUniversities } from "@/lib/use-universities";
-import { useState } from "react";
+import { UniversitySkeleton } from "./university/university-skeleton";
+import { UniversityCard } from "./university/university-card";
 
-export default function Page() {
+export function SelectUniversity({ onSelect }) {
+  const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { data, error } = useUniversities(searchQuery);
 
+  const handleSelectUniversity = (university) => {
+    setOpen(false);
+    onSelect(university);
+  };
+
   return (
-    <main className="flex-1 py-8 px-6 min-h-screen">
-      <div className="max-w-xl mx-auto">
-        <h2 className="text-2xl font-bold mb-4">Поиск университета</h2>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button>Выберите университет</Button>
+      </DialogTrigger>
+      <DialogContent className="sm:max-w-[425px]">
         <div className="mb-8">
           <SearchInput onChange={setSearchQuery} />
         </div>
@@ -32,12 +42,13 @@ export default function Page() {
                 name={uni.name}
                 longName={uni.longName}
                 logoUrl={uni.logo}
+                onClick={() => handleSelectUniversity(uni)}
               />
             ))
           )}
           {error && <p>Ошибка загрузки данных.</p>}
         </div>
-      </div>
-    </main>
+      </DialogContent>
+    </Dialog>
   );
 }

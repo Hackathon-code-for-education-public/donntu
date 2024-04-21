@@ -25,8 +25,6 @@ const mockFetcher = async (url: string): Promise<Message[]> => {
   return mockData;
 };
 
-const fetcher = (url: string) => fetch(url).then((r) => r.json());
-
 export function useMessages(chatId?: string) {
   const { data, error, isLoading } = useSWR<Message[]>(
     chatId && `/api/v1/messages/${chatId}`,
