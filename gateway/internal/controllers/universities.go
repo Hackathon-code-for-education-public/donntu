@@ -136,13 +136,15 @@ func (a *UniversitiesController) CreateReview() fiber.Handler {
 			return bad(errs)
 		}
 
+		user := ctx.Locals("user").(*domain.UserClaims)
+
 		review, err := a.universityService.CreateReview(ctx.Context(), &domain.Review{
 			UniversityId: req.UniversityId,
 			AuthorStatus: "Некто",
 			Sentiment:    req.Sentiment,
 			Text:         req.Text,
 			ParentId:     req.ParentId,
-		})
+		}, user.Id)
 		if err != nil {
 			a.log.Error("error while create review: ", slog.String("universityId", req.UniversityId))
 			return internal(err.Error())

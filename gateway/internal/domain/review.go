@@ -11,4 +11,5 @@ type Review struct {
 	Text         string    `json:"text"`
 	RepliesCount int       `json:"repliesCount"`
 	ParentId     *string   `json:"parentId,omitempty"`
+	AuthorId     *string   `json:"authorId,omitempty"`
 }
