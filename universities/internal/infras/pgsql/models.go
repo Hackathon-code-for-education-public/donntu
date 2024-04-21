@@ -226,4 +226,5 @@ type UniversityReview struct {
 	Text           string         `json:"text"`
 	ReviewID       string         `json:"review_id"`
 	ParentReviewID sql.NullString `json:"parent_review_id"`
+	UserID         string         `json:"user_id"`
 }

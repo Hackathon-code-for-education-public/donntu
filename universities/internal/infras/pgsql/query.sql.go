@@ -51,9 +51,9 @@ const createReview = `-- name: CreateReview :one
 insert into university_reviews(university_id,
                                author_status,
                                sentiment, date,
-                               text, review_id, parent_review_id)
-values ($1, $2, $3, $4, $5, $6, $7)
-returning university_id, author_status, sentiment, date, text, review_id, parent_review_id
+                               text, review_id, parent_review_id, user_id)
+values ($1, $2, $3, $4, $5, $6, $7, $8)
+returning university_id, author_status, sentiment, date, text, review_id, parent_review_id, user_id
 `
 
 type CreateReviewParams struct {
@@ -64,6 +64,7 @@ type CreateReviewParams struct {
 	Text           string         `json:"text"`
 	ReviewID       string         `json:"review_id"`
 	ParentReviewID sql.NullString `json:"parent_review_id"`
+	UserID         string         `json:"user_id"`
 }
 
 func (q *Queries) CreateReview(ctx context.Context, arg CreateReviewParams) (UniversityReview, error) {
@@ -75,6 +76,7 @@ func (q *Queries) CreateReview(ctx context.Context, arg CreateReviewParams) (Uni
 		arg.Text,
 		arg.ReviewID,
 		arg.ParentReviewID,
+		arg.UserID,
 	)
 	var i UniversityReview
 	err := row.Scan(
@@ -85,6 +87,7 @@ func (q *Queries) CreateReview(ctx context.Context, arg CreateReviewParams) (Uni
 		&i.Text,
 		&i.ReviewID,
 		&i.ParentReviewID,
+		&i.UserID,
 	)
 	return i, err
 }
@@ -178,7 +181,7 @@ func (q *Queries) GetPanoramas(ctx context.Context, arg GetPanoramasParams) ([]U
 }
 
 const getReview = `-- name: GetReview :one
-select r.university_id, r.author_status, r.sentiment, r.date, r.text, r.review_id, r.parent_review_id, (select count(*) from university_reviews where parent_review_id = r.review_id) as reply_count
+select r.university_id, r.author_status, r.sentiment, r.date, r.text, r.review_id, r.parent_review_id, r.user_id, (select count(*) from university_reviews where parent_review_id = r.review_id) as reply_count
 from university_reviews r
 where r.review_id = $1
 limit 1
@@ -192,6 +195,7 @@ type GetReviewRow struct {
 	Text           string         `json:"text"`
 	ReviewID       string         `json:"review_id"`
 	ParentReviewID sql.NullString `json:"parent_review_id"`
+	UserID         string         `json:"user_id"`
 	ReplyCount     int64          `json:"reply_count"`
 }
 
@@ -206,13 +210,14 @@ func (q *Queries) GetReview(ctx context.Context, reviewID string) (GetReviewRow,
 		&i.Text,
 		&i.ReviewID,
 		&i.ParentReviewID,
+		&i.UserID,
 		&i.ReplyCount,
 	)
 	return i, err
 }
 
 const getReviews = `-- name: GetReviews :many
-select r.university_id, r.author_status, r.sentiment, r.date, r.text, r.review_id, r.parent_review_id,
+select r.university_id, r.author_status, r.sentiment, r.date, r.text, r.review_id, r.parent_review_id, r.user_id,
        (select count(*)
         from university_reviews
         where parent_review_id = r.review_id) as reply_count
@@ -238,6 +243,7 @@ type GetReviewsRow struct {
 	Text           string         `json:"text"`
 	ReviewID       string         `json:"review_id"`
 	ParentReviewID sql.NullString `json:"parent_review_id"`
+	UserID         string         `json:"user_id"`
 	ReplyCount     int64          `json:"reply_count"`
 }
 
@@ -258,6 +264,7 @@ func (q *Queries) GetReviews(ctx context.Context, arg GetReviewsParams) ([]GetRe
 			&i.Text,
 			&i.ReviewID,
 			&i.ParentReviewID,
+			&i.UserID,
 			&i.ReplyCount,
 		); err != nil {
 			return nil, err
@@ -274,7 +281,7 @@ func (q *Queries) GetReviews(ctx context.Context, arg GetReviewsParams) ([]GetRe
 }
 
 const getReviewsByParent = `-- name: GetReviewsByParent :many
-select university_id, author_status, sentiment, date, text, review_id, parent_review_id
+select university_id, author_status, sentiment, date, text, review_id, parent_review_id, user_id
 from university_reviews r
 where r.parent_review_id = $1
 order by r.date
@@ -297,6 +304,7 @@ func (q *Queries) GetReviewsByParent(ctx context.Context, parentReviewID sql.Nul
 			&i.Text,
 			&i.ReviewID,
 			&i.ParentReviewID,
+			&i.UserID,
 		); err != nil {
 			return nil, err
 		}

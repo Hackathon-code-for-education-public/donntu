@@ -9,7 +9,7 @@ type (
 	UniversityRepository interface {
 		GetOpenDays(ctx context.Context, universityID string) ([]*domain.OpenDay, error)
 
-		CreateReview(ctx context.Context, review *domain.Review) (*domain.Review, error)
+		CreateReview(ctx context.Context, review *domain.Review, authorId string) (*domain.Review, error)
 		GetReplies(ctx context.Context, reviewID string) ([]*domain.Review, *domain.Review, error)
 		GetReviews(ctx context.Context, universityID string, limit, offset int) ([]*domain.Review, error)
 
@@ -25,7 +25,7 @@ type (
 	UniversityService interface {
 		GetOpenDays(ctx context.Context, universityID string) ([]*domain.OpenDay, error)
 
-		CreateReview(ctx context.Context, review *domain.Review) (*domain.Review, error)
+		CreateReview(ctx context.Context, review *domain.Review, authorId string) (*domain.Review, error)
 		GetReplies(ctx context.Context, reviewID string) ([]*domain.Review, *domain.Review, error)
 		GetReviews(ctx context.Context, universityID string, limit, offset int) ([]*domain.Review, error)
 

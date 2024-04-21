@@ -9,8 +9,8 @@ where u.id = $1;
 insert into university_reviews(university_id,
                                author_status,
                                sentiment, date,
-                               text, review_id, parent_review_id)
-values ($1, $2, $3, $4, $5, $6, $7)
+                               text, review_id, parent_review_id, user_id)
+values ($1, $2, $3, $4, $5, $6, $7, $8)
 returning *;
 
 -- name: GetReviews :many

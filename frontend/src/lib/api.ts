@@ -1,5 +1,5 @@
 import { AuthAPI } from "./auth";
-import { API_HOST } from "./config";
+import { API_HOST, API_HOST2 } from "./config";
 
 export class API {
   static async request(
@@ -74,6 +74,23 @@ export class API {
       return await this.requestWithFormData(url, "POST", formData);
     } catch (error) {
       console.error("Upload failed:", error);
+      throw error;
+    }
+  }
+
+  static async sendChatMessage(
+    chatId: string,
+    message: string
+  ): Promise<any> {
+    const url = `${API_HOST2}/api/v1/chats/${chatId}`
+    const body = {
+      text: message
+    }
+
+    try {
+      return await this.request(url, "POST", body);
+    } catch (error) {
+      console.error("send chat message failed:", error);
       throw error;
     }
   }

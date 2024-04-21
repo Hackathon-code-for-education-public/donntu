@@ -29,8 +29,8 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type VerificationClient interface {
 	Send(ctx context.Context, in *VerificationRequest, opts ...grpc.CallOption) (*SendRequestResponse, error)
-	Approve(ctx context.Context, in *ApproveRequest, opts ...grpc.CallOption) (*Empty, error)
-	Decline(ctx context.Context, in *DenialRequest, opts ...grpc.CallOption) (*Empty, error)
+	Approve(ctx context.Context, in *ApproveRequest, opts ...grpc.CallOption) (*Empty2, error)
+	Decline(ctx context.Context, in *DenialRequest, opts ...grpc.CallOption) (*Empty2, error)
 }
 
 type verificationClient struct {
@@ -50,8 +50,8 @@ func (c *verificationClient) Send(ctx context.Context, in *VerificationRequest, 
 	return out, nil
 }
 
-func (c *verificationClient) Approve(ctx context.Context, in *ApproveRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *verificationClient) Approve(ctx context.Context, in *ApproveRequest, opts ...grpc.CallOption) (*Empty2, error) {
+	out := new(Empty2)
 	err := c.cc.Invoke(ctx, Verification_Approve_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -59,8 +59,8 @@ func (c *verificationClient) Approve(ctx context.Context, in *ApproveRequest, op
 	return out, nil
 }
 
-func (c *verificationClient) Decline(ctx context.Context, in *DenialRequest, opts ...grpc.CallOption) (*Empty, error) {
-	out := new(Empty)
+func (c *verificationClient) Decline(ctx context.Context, in *DenialRequest, opts ...grpc.CallOption) (*Empty2, error) {
+	out := new(Empty2)
 	err := c.cc.Invoke(ctx, Verification_Decline_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
@@ -73,8 +73,8 @@ func (c *verificationClient) Decline(ctx context.Context, in *DenialRequest, opt
 // for forward compatibility
 type VerificationServer interface {
 	Send(context.Context, *VerificationRequest) (*SendRequestResponse, error)
-	Approve(context.Context, *ApproveRequest) (*Empty, error)
-	Decline(context.Context, *DenialRequest) (*Empty, error)
+	Approve(context.Context, *ApproveRequest) (*Empty2, error)
+	Decline(context.Context, *DenialRequest) (*Empty2, error)
 	mustEmbedUnimplementedVerificationServer()
 }
 
@@ -85,10 +85,10 @@ type UnimplementedVerificationServer struct {
 func (UnimplementedVerificationServer) Send(context.Context, *VerificationRequest) (*SendRequestResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Send not implemented")
 }
-func (UnimplementedVerificationServer) Approve(context.Context, *ApproveRequest) (*Empty, error) {
+func (UnimplementedVerificationServer) Approve(context.Context, *ApproveRequest) (*Empty2, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Approve not implemented")
 }
-func (UnimplementedVerificationServer) Decline(context.Context, *DenialRequest) (*Empty, error) {
+func (UnimplementedVerificationServer) Decline(context.Context, *DenialRequest) (*Empty2, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Decline not implemented")
 }
 func (UnimplementedVerificationServer) mustEmbedUnimplementedVerificationServer() {}

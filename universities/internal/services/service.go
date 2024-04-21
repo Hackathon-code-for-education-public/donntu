@@ -56,14 +56,14 @@ func (s *universityService) SearchUniversities(ctx context.Context, name string)
 	return s.universityRepo.SearchUniversities(ctx, name)
 }
 
-func (s *universityService) CreateReview(ctx context.Context, review *domain.Review) (*domain.Review, error) {
+func (s *universityService) CreateReview(ctx context.Context, review *domain.Review, authorId string) (*domain.Review, error) {
 	id, err := uuid.NewV7()
 	if err != nil {
 		return nil, fmt.Errorf("failed to generate uuid: %w", err)
 	}
 	review.Id = id.String()
 
-	return s.universityRepo.CreateReview(ctx, review)
+	return s.universityRepo.CreateReview(ctx, review, authorId)
 }
 
 func (s *universityService) GetReplies(ctx context.Context, reviewID string) ([]*domain.Review, *domain.Review, error) {
