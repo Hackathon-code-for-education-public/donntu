@@ -132,11 +132,11 @@ func (a *Application) Run() error {
 
 	v1v2 := a.http2.Group("/api/v1")
 	chats := v1v2.Group("chats")
-	chats.Get("/", a.authController.AuthRequiredV2(nil), a.chatController.GetChats())
-	chats.Post("/", a.authController.AuthRequiredV2(nil), a.chatController.CreateChat())
-	chats.Get("/:id", a.authController.AuthRequiredV2(nil), a.chatController.Attach())
-	chats.Post("/:id", a.authController.AuthRequiredV2(nil), a.chatController.SendMessage())
-	chats.Get("/history/:id", a.authController.AuthRequiredV2(nil), a.chatController.GetHistory())
+	chats.Get("/", a.authController.AuthRequiredV2(domain.UserRoleAny), a.chatController.GetChats())
+	chats.Post("/", a.authController.AuthRequiredV2(domain.UserRoleAny), a.chatController.CreateChat())
+	chats.Get("/:id", a.authController.AuthRequiredV2(domain.UserRoleAny), a.chatController.Attach())
+	chats.Post("/:id", a.authController.AuthRequiredV2(domain.UserRoleAny), a.chatController.SendMessage())
+	chats.Get("/history/:id", a.authController.AuthRequiredV2(domain.UserRoleAny), a.chatController.GetHistory())
 
 	go func() {
 		err := a.http2.Listen(fmt.Sprintf(":%d", a.cfg.HTTP.Port+1))
