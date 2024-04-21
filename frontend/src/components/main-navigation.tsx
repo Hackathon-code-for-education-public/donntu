@@ -27,6 +27,13 @@ export function MainNavigation() {
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
+          <NavigationMenuItem>
+              <Link href="/university" legacyBehavior passHref>
+                <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+                  Университеты
+                </NavigationMenuLink>
+              </Link>
+            </NavigationMenuItem>
           {user && (
             <NavigationMenuItem>
               <Link href="/account" legacyBehavior passHref>
