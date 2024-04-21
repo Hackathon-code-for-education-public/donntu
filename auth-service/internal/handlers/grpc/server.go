@@ -68,9 +68,12 @@ func (s *Server) SignIn(ctx context.Context, request *auth.SignInRequest) (*auth
 
 func (s *Server) SignUp(ctx context.Context, request *auth.SignUpRequest) (*auth.Tokens, error) {
 	user := &entity.User{
-		Email:    request.Email,
-		Password: request.Password,
-		Role:     entity.Role(request.Role),
+		Email:      request.Email,
+		Password:   request.Password,
+		Role:       entity.Role(request.Role),
+		LastName:   request.LastName,
+		FirstName:  request.FirstName,
+		MiddleName: request.MiddleName,
 	}
 
 	tokens, err := s.uc.SignUp(ctx, user)

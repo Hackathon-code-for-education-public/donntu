@@ -21,6 +21,9 @@ message SignUpRequest {
   string email = 1;
   string password = 2;
   Role role = 3;
+  string lastName = 4;
+  string firstName = 5;
+  string middleName = 6;
 }
 
 message SignOutRequest {
