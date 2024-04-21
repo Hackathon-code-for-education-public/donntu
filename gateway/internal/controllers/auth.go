@@ -253,6 +253,16 @@ func (a *AuthController) GetUser() fiber.Handler {
 }
 
 func (a *AuthController) GetProfile() fiber.Handler {
+
+	type response struct {
+		Id         string          `json:"id"`
+		Email      string          `json:"email"`
+		LastName   string          `json:"lastName"`
+		FirstName  string          `json:"firstName"`
+		MiddleName string          `json:"middleName"`
+		Role       domain.UserRole `json:"role"`
+	}
+
 	return func(c fiber.Ctx) error {
 		user, k := c.Locals("user").(*domain.UserClaims)
 		if !k {
@@ -264,7 +274,14 @@ func (a *AuthController) GetProfile() fiber.Handler {
 			return internal(err.Error())
 		}
 
-		return ok(c, u)
+		return ok(c, response{
+			Id:         user.Id,
+			Email:      u.Email,
+			LastName:   u.LastName,
+			FirstName:  u.FirstName,
+			MiddleName: u.MiddleName,
+			Role:       u.Role,
+		})
 	}
 }
 
