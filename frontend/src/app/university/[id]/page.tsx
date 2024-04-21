@@ -122,32 +122,44 @@ export default function Page({ params }: { params: Params }) {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="about" className="m-5">
-            {/*
-              <div className="grid grid-cols-3 gap-4 text-center py-4 bg-gray-200 rounded-b-lg">
-              <div>
-                <div className="text-3xl font-bold">22</div>
-                <div className="text-sm">направлений подготовки</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold">59</div>
-                <div className="text-sm">образовательных программ</div>
-              </div>
-              <div>
-                <div className="text-3xl font-bold">1879</div>
-                <div className="text-sm">бюджетных мест</div>
-              </div>
-              <div className="col-span-3">
-                <div className="text-3xl font-bold">72.3</div>
-                <div className="text-sm">средневзвешенный проходной балл</div>
-              </div>
+            <div className="grid grid-cols-3 gap-4 text-center py-4 bg-gray-200 rounded-lg">
+              {isLoading ? (
+                <div className="flex justify-center items-center flex-col">
+                  <Skeleton className="h-6 w-1/4" />
+                  <Skeleton className="h-6 w-1/2 mt-2" />
+                </div>
+              ) : (
+                <div>
+                  <div className="text-3xl font-bold">{data?.rating}</div>
+                  <div className="text-sm">рейтинг</div>
+                </div>
+              )}
+              {isLoading ? (
+                <div className="flex justify-center items-center flex-col">
+                  <Skeleton className="h-6 w-1/4" />
+                  <Skeleton className="h-6 w-1/2 mt-2" />
+                </div>
+              ) : (
+                <div>
+                  <div className="text-3xl font-bold">{data?.studyFields}</div>
+                  <div className="text-sm">направлений подготовки</div>
+                </div>
+              )}
+              {isLoading ? (
+                <div className="flex justify-center items-center flex-col">
+                  <Skeleton className="h-6 w-1/4" />
+                  <Skeleton className="h-6 w-1/2 mt-2" />
+                </div>
+              ) : (
+                <div>
+                  <div className="text-3xl font-bold">{data?.budgetPlaces}</div>
+                  <div className="text-sm">бюджетных мест</div>
+                </div>
+              )}
             </div>
             <div className="mt-4 text-sm">
-              Результаты представленны самим ВУЗом.
+              Данные представленны самим ВУЗом.
             </div>
-            <div className="mt-4"></div>
-            </div>
-            </div>
-            */}
           </TabsContent>
           <TabsContent value="reviews" className="m-5">
             <h2 className="text-lg">Отзывы</h2>

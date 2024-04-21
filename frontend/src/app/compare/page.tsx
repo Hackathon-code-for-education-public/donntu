@@ -1,4 +1,4 @@
-import UniversityBlock from "@/components/univercity-block";
+import UniversityBlock from "@/components/university-block";
 import { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -10,7 +10,6 @@ export default function Page({
 }: {
   searchParams: { [key: string]: string };
 }) {
-  //   router.push(`tickets/?page=${Number(page) + 1}&per_page=${perPage}`);
 
   return (
     <main className="flex min-h-screen justify-around">
