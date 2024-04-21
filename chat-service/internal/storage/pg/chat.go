@@ -105,8 +105,10 @@ func (c ChatStorage) ListChatByUserId(ctx context.Context, userId string) ([]*dt
 	}
 
 	sql, args, err := squirrel.
-		Select("*").
+		Select("uc2.*").
 		From("users_to_chats uc").
+		InnerJoin("users_to_chats uc2").
+		JoinClause("ON uc.chat_id = uc2.chat_id AND uc.user_id <> uc2.user_id").
 		Where(squirrel.Eq{"uc.user_id": userId}).
 		PlaceholderFormat(squirrel.Dollar).
 		ToSql()
