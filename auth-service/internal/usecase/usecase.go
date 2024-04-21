@@ -23,7 +23,7 @@ type UserStorage interface {
 
 	Create(ctx context.Context, user *models.User) error
 	Update(ctx context.Context, user *models.User) error
-	Delete(ctx context.Context, id int) error
+	Delete(ctx context.Context, id string) error
 
 	PatchRole(ctx context.Context, userId string, role string) error
 }
@@ -153,7 +153,7 @@ func (s *UseCase) SingOut(ctx context.Context, accessToken string) error {
 	return s.tokenStorage.Delete(ctx, claims.Id)
 }
 
-func (s *UseCase) Authenticate(ctx context.Context, accessToken string, role entity.Role) (*entity.UserClaims, error) {
+func (s *UseCase) Authenticate(ctx context.Context, accessToken string, role *entity.Role) (*entity.UserClaims, error) {
 
 	log := ctx.Value("logger").(*slog.Logger).With(slog.String("method", "Authenticate"))
 
@@ -181,9 +181,11 @@ func (s *UseCase) Authenticate(ctx context.Context, accessToken string, role ent
 		return nil, ErrSessionNotFound
 	}
 
-	if u.Role != role {
-		log.Error("invalid role", slog.String("role", role.String()), slog.Any("user_role", u.Role))
-		return nil, ErrInvalidRole
+	if role != nil {
+		if u.Role != *role {
+			log.Error("invalid role", slog.String("role", role.String()), slog.Any("user_role", u.Role))
+			return nil, ErrInvalidRole
+		}
 	}
 
 	return claims, nil
