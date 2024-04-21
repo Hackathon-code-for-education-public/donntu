@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
 	"github.com/lib/pq"
 	"github.com/samber/lo"
 	"time"
@@ -119,25 +120,32 @@ func (u *universitiesPg) CreatePanorama(ctx context.Context, p *domain.Panorama)
 }
 
 func (u *universitiesPg) GetPanoramas(ctx context.Context, universityID string, category string) ([]*domain.Panorama, error) {
-	querier := postgresql.New(u.pg.GetDB())
-	panoramas, err := querier.GetPanoramas(ctx, postgresql.GetPanoramasParams{
-		UniversityID: universityID,
-		Type:         postgresql.PanoramaTypes(category),
-	})
+	db := u.pg.GetDB()
+	query := fmt.Sprintf("select * from university_panoramas where university_id = $1")
+	if category != "" {
+		query += fmt.Sprintf(" and type = '%s'", category)
+	}
+	panoramas := make([]*domain.Panorama, 0)
+	rows, err := db.Query(query, universityID)
 	if err != nil {
 		return nil, err
 	}
-
-	return lo.Map(panoramas, func(item postgresql.UniversityPanorama, _ int) *domain.Panorama {
-		return &domain.Panorama{
-			UniversityId:  item.UniversityID,
-			Address:       item.Address,
-			Name:          item.Name,
-			FirstLocation: item.Firstlocation,
-			LastLocation:  item.Secondlocation,
-			Type:          string(item.Type),
+	defer rows.Close()
+	for rows.Next() {
+		var panorama domain.Panorama
+		if err := rows.Scan(&panorama.UniversityId,
+			&panorama.Address,
+			&panorama.Name,
+			&panorama.FirstLocation,
+			&panorama.LastLocation,
+			&panorama.Type,
+		); err != nil {
+			return nil, err
 		}
-	}), nil
+		panoramas = append(panoramas, &panorama)
+	}
+
+	return panoramas, nil
 }
 
 func (u *universitiesPg) GetUniversitiesTop(ctx context.Context, n int) ([]*domain.University, error) {
