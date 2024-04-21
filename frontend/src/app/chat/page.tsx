@@ -45,6 +45,7 @@ const ChatHistory: React.FC<ChatHistoryProps> = ({ setActiveChatId }) => {
             <div
               key={index}
               className="flex items-start gap-4 rounded-lg bg-white p-4 shadow-sm dark:bg-gray-950 cursor-pointer"
+              /** @ts-ignore */
               onClick={() => setActiveChatId(chat.chatId)}
             >
               <div className="flex-1 space-y-1">
@@ -92,7 +93,9 @@ const ChatSection: React.FC<ChatSectionProps> = ({ activeChatId }) => {
       <div className="flex-1 overflow-y-auto p-4 ">
         <div className="space-y-4">
           {messages.map((msg, index) => {
+            /** @ts-ignore */
             const isYou = msg.userId === user?.id
+            /** @ts-ignore */
             return <MessageBubble key={index} message={{ ...msg, isYou, sender: isYou ? user?.firstName : "Кавырлик" }} />
           })}
         </div>
@@ -124,6 +127,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => (
         className={`text-sm rounded-lg ${message.isYou ? "bg-slate-100" : "bg-gray-100"
           } p-4`}
       >
+        {/** @ts-ignore */}
         {message.message}
       </p>
     </div>
