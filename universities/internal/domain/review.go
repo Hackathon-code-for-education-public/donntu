@@ -27,4 +27,5 @@ type Review struct {
 	Date         time.Time    `json:"date"`
 	Text         string       `json:"text"`
 	RepliesCount int          `json:"repliesCount"`
+	ParentId     *string      `json:"parentId"`
 }

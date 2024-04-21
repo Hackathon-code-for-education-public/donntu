@@ -2,6 +2,8 @@ package router
 
 import (
 	"context"
+	"errors"
+	"fmt"
 	"github.com/samber/lo"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
@@ -45,6 +47,57 @@ func (s *UniversitiesService) GetOpenDays(ctx context.Context, uni *universities
 				Description:    day.Description,
 				UniversityName: day.UniversityName,
 				Time:           day.Date.Unix(),
+			}
+		}),
+	}, nil
+}
+
+func (s *UniversitiesService) CreateReview(ctx context.Context, req *universities.CreateReviewRequest) (*universities.Review, error) {
+	s.log.Info("create_review request received", slog.String("university_id", req.Review.UniversityId))
+	item, err := s.service.CreateReview(ctx, &domain.Review{
+		UniversityId: req.Review.UniversityId,
+		AuthorStatus: domain.AuthorStatus(req.Review.AuthorStatus),
+		Sentiment:    domain.Sentiment(req.Review.Sentiment),
+		Text:         req.Review.Text,
+		ParentId:     req.ParentReviewId,
+	})
+	if err != nil {
+		s.log.Error("failed to create review", slog.String("university_id", req.Review.UniversityId))
+		if errors.Is(err, errors.New("not found")) {
+			return nil, status.Error(codes.NotFound, "parent review not found")
+		}
+
+		return nil, err
+	}
+	fmt.Println(item.Date)
+	return &universities.Review{
+		UniversityId: item.UniversityId,
+		AuthorStatus: string(item.AuthorStatus),
+		Sentiment:    string(item.Sentiment),
+		Text:         item.Text,
+		RepliesCount: int32(item.RepliesCount),
+		ReviewId:     item.Id,
+		Date:         item.Date.Unix(),
+	}, nil
+}
+
+func (s *UniversitiesService) GetReplies(ctx context.Context, id *universities.UniversityId) (*universities.Reviews, error) {
+	s.log.Info("get_replies request received", slog.String("university_id", id.Id))
+	reviews, err := s.service.GetReplies(ctx, id.Id)
+	if err != nil {
+		return nil, err
+	}
+
+	return &universities.Reviews{
+		Reviews: lo.Map(reviews, func(review *domain.Review, _ int) *universities.Review {
+			return &universities.Review{
+				ReviewId:     review.Id,
+				Sentiment:    string(review.Sentiment),
+				RepliesCount: int32(review.RepliesCount),
+				AuthorStatus: string(review.AuthorStatus),
+				Text:         review.Text,
+				Date:         review.Date.Unix(),
+				UniversityId: review.UniversityId,
 			}
 		}),
 	}, nil

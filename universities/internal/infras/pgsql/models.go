@@ -5,6 +5,7 @@
 package postgresql
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"time"
@@ -218,11 +219,11 @@ type UniversityPanorama struct {
 }
 
 type UniversityReview struct {
-	UniversityID string     `json:"university_id"`
-	AuthorStatus Statuses   `json:"author_status"`
-	Sentiment    Sentiments `json:"sentiment"`
-	Date         time.Time  `json:"date"`
-	Text         string     `json:"text"`
-	Repliescount int32      `json:"repliescount"`
-	ReviewID     string     `json:"review_id"`
+	UniversityID   string         `json:"university_id"`
+	AuthorStatus   Statuses       `json:"author_status"`
+	Sentiment      Sentiments     `json:"sentiment"`
+	Date           time.Time      `json:"date"`
+	Text           string         `json:"text"`
+	ReviewID       string         `json:"review_id"`
+	ParentReviewID sql.NullString `json:"parent_review_id"`
 }

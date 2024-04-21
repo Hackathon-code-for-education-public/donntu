@@ -73,6 +73,7 @@ message GetPanoramasRequest {
   string category = 2;
 }
 
+
 message University {
   string id = 1;
   string name = 2;
@@ -97,12 +98,23 @@ message PageParams {
 message SearchUniversitiesRequest {
   string name = 1;
 }
+
 message GetTopOfUniversitiesRequest {
   int32 count = 1;
 }
+
+message CreateReviewRequest {
+  Review review = 1;
+  optional string parent_review_id = 2;
+}
+
 service Universities {
   rpc GetOpenDays(UniversityId) returns (OpenDays);
+
+  rpc CreateReview(CreateReviewRequest) returns (Review);
   rpc GetReviews(GetReviewsRequest) returns (Reviews);
+  rpc GetReplies(UniversityId) returns (Reviews);
+
   rpc CreatePanorama(CreatePanoramaRequest) returns (Panorama);
   rpc GetPanoramas(GetPanoramasRequest) returns (Panoramas);
 

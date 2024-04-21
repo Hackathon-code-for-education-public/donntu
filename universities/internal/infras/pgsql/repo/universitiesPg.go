@@ -2,8 +2,11 @@ package repo
 
 import (
 	"context"
+	"database/sql"
 	"errors"
+	"github.com/lib/pq"
 	"github.com/samber/lo"
+	"time"
 	"universities/internal/domain"
 	postgresql "universities/internal/infras/pgsql"
 	"universities/internal/services"
@@ -38,6 +41,44 @@ func (u *universitiesPg) GetOpenDays(ctx context.Context, universityID string) (
 	return days, nil
 }
 
+func (u *universitiesPg) CreateReview(ctx context.Context, review *domain.Review) (*domain.Review, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	params := postgresql.CreateReviewParams{
+		ReviewID:     review.Id,
+		UniversityID: review.UniversityId,
+		AuthorStatus: postgresql.Statuses(review.AuthorStatus),
+		Sentiment:    postgresql.Sentiments(review.Sentiment),
+		Date:         time.Now(),
+		Text:         review.Text,
+	}
+	if review.ParentId != nil {
+		params.ParentReviewID = sql.NullString{
+			String: *review.ParentId,
+			Valid:  true,
+		}
+	}
+	item, err := querier.CreateReview(ctx, params)
+	if err != nil {
+		if pqErr, ok := err.(*pq.Error); ok {
+			if pqErr.Code == "23503" {
+				return nil, errors.New("not found")
+			}
+			return nil, errors.New(pqErr.Message)
+		}
+		return nil, err
+	}
+
+	return &domain.Review{
+		Id:           item.ReviewID,
+		UniversityId: item.UniversityID,
+		Date:         item.Date,
+		Text:         item.Text,
+		AuthorStatus: domain.AuthorStatus(item.AuthorStatus),
+		RepliesCount: 0,
+		Sentiment:    domain.Sentiment(item.Sentiment),
+	}, nil
+}
+
 func (u *universitiesPg) GetReviews(ctx context.Context, universityID string, limit, offset int) ([]*domain.Review, error) {
 	querier := postgresql.New(u.pg.GetDB())
 	results, err := querier.GetReviews(ctx, postgresql.GetReviewsParams{Limit: int32(limit), Offset: int32(offset), UniversityID: universityID})
@@ -45,14 +86,14 @@ func (u *universitiesPg) GetReviews(ctx context.Context, universityID string, li
 		return nil, err
 	}
 
-	reviews := lo.Map(results, func(item postgresql.UniversityReview, _ int) *domain.Review {
+	reviews := lo.Map(results, func(item postgresql.GetReviewsRow, _ int) *domain.Review {
 		return &domain.Review{
 			Id:           item.ReviewID,
 			UniversityId: item.UniversityID,
 			Date:         item.Date,
 			Text:         item.Text,
 			AuthorStatus: domain.AuthorStatus(item.AuthorStatus),
-			RepliesCount: int(item.Repliescount),
+			RepliesCount: int(item.ReplyCount),
 			Sentiment:    domain.Sentiment(item.Sentiment),
 		}
 	})
@@ -190,6 +231,28 @@ func (u *universitiesPg) SearchUniversities(ctx context.Context, name string) ([
 			Type:         string(item.Type),
 			StudyFields:  int(item.StudyFields),
 			BudgetPlaces: int(item.BudgetPlaces),
+		}
+	}), nil
+}
+
+func (u *universitiesPg) GetReplies(ctx context.Context, reviewID string) ([]*domain.Review, error) {
+	querier := postgresql.New(u.pg.GetDB())
+	results, err := querier.GetReviewsByParent(ctx, sql.NullString{
+		String: reviewID,
+		Valid:  true,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return lo.Map(results, func(item postgresql.UniversityReview, _ int) *domain.Review {
+		return &domain.Review{
+			Id:           item.ReviewID,
+			UniversityId: item.UniversityID,
+			Text:         item.Text,
+			Date:         item.Date,
+			Sentiment:    domain.Sentiment(item.Sentiment),
+			AuthorStatus: domain.AuthorStatus(item.AuthorStatus),
 		}
 	}), nil
 }
