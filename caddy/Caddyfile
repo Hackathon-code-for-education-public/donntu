@@ -1,7 +1,15 @@
+mzhn.fun {
+    reverse_proxy frontend:3000
+}
+
 api.mzhn.fun {
-    reverse_proxy gateway:8080
+    reverse_proxy gateway:9000
 }
 
 chat-api.mzhn.fun {
-    reverse_proxy gateway:8081
+    reverse_proxy gateway:9001
+}
+
+s3.mzhn.fun {
+    reverse_proxy minio:9000
 }
