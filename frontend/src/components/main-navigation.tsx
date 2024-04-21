@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/lib/use-user";
+import { LogoutButton } from "./logout-button";
 
 export function MainNavigation() {
   const { user, loading, loggedOut } = useUser();
@@ -72,14 +73,14 @@ export function MainNavigation() {
           */}
         </NavigationMenuList>
       </NavigationMenu>
-      {!loading && !loggedOut && (
+      {loggedOut && (
         <Button>
           <Link href="/authorization" legacyBehavior passHref>
             Вход
           </Link>
         </Button>
       )}
-      {!loading && loggedOut && <Button>Выйти</Button>}
+      {!loggedOut && <LogoutButton />}
     </header>
   );
 }

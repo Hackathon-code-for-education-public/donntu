@@ -9,7 +9,7 @@ export function LogoutButton() {
     const onClick = async () => {
         await AuthAPI.signOut();
 
-        mutate(undefined, false);
+        mutate(undefined);
     }
 
     return <Button onClick={onClick}>Выйти</Button>
