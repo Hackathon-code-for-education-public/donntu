@@ -109,6 +109,11 @@ func (c *ChatController) GetChats() fiber.Handler {
 
 		recv, err := stream.Recv()
 		if err != nil {
+			if err != io.EOF {
+				return ctx.Status(fiber.StatusOK).JSON(fiber.Map{
+					"data": res,
+				})
+			}
 			l.Error("stream cant received", slog.String("err", err.Error()))
 			return internal(err.Error())
 		}
