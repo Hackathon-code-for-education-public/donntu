@@ -8,11 +8,13 @@ import { SearchInput } from "@/components/university/search-input";
 import { UniversitySkeleton } from "./university/university-skeleton";
 import { UniversityCard } from "./university/university-card";
 
+/** @ts-ignore */
 export function SelectUniversity({ onSelect }) {
   const [open, setOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { data, error } = useUniversities(searchQuery);
 
+  /** @ts-ignore */
   const handleSelectUniversity = (university) => {
     setOpen(false);
     onSelect(university);

@@ -34,6 +34,7 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  /** @ts-ignore */
   const handleLogin = async (event) => {
     event.preventDefault();
     setLoading(true);
@@ -98,6 +99,7 @@ function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  /** @ts-ignore */
   const handleRegister = async (event) => {
     event.preventDefault();
     setLoading(true);

@@ -13,6 +13,7 @@ export function UniversityOpenDays({ universityId }: IProps) {
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
       {isLoading && "Loading..."}
       {data &&
+        /** @ts-ignore */
         data.map((day) => {
           return <OpenDay key={day.id} day={day} />;
         })}

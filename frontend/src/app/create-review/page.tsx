@@ -52,7 +52,7 @@ function CreateReview({
 
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
-  // here
+  /** @ts-ignore */
   const onSubmit = async (data) => {
     console.log(data);
 
