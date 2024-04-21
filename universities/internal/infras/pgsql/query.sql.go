@@ -12,7 +12,8 @@ import (
 
 const addPanorama = `-- name: AddPanorama :one
 insert into university_panoramas (university_id, address, name, firstlocation, secondlocation, type)
-values ($1, $2, $3, $4, $5, $6) returning university_id, address, name, firstlocation, secondlocation, type
+values ($1, $2, $3, $4, $5, $6)
+returning university_id, address, name, firstlocation, secondlocation, type
 `
 
 type AddPanoramaParams struct {
@@ -91,7 +92,11 @@ func (q *Queries) GetOpenDays(ctx context.Context, id string) ([]GetOpenDaysRow,
 }
 
 const getPanoramas = `-- name: GetPanoramas :many
-select university_id, address, name, firstlocation, secondlocation, type from university_panoramas p where university_id = $1 and type = $2 order by p.name
+select university_id, address, name, firstlocation, secondlocation, type
+from university_panoramas p
+where university_id = $1
+  and type = $2
+order by p.name
 `
 
 type GetPanoramasParams struct {
@@ -158,6 +163,160 @@ func (q *Queries) GetReviews(ctx context.Context, arg GetReviewsParams) ([]Unive
 			&i.Date,
 			&i.Text,
 			&i.Repliescount,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getTopOfUniversities = `-- name: GetTopOfUniversities :many
+select id, name, long_name, logo, rating, region, budget_places, type, study_fields
+from universities u
+order by u.rating desc
+limit $1
+`
+
+func (q *Queries) GetTopOfUniversities(ctx context.Context, limit int32) ([]University, error) {
+	rows, err := q.db.QueryContext(ctx, getTopOfUniversities, limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []University
+	for rows.Next() {
+		var i University
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.LongName,
+			&i.Logo,
+			&i.Rating,
+			&i.Region,
+			&i.BudgetPlaces,
+			&i.Type,
+			&i.StudyFields,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUniversities = `-- name: GetUniversities :many
+select id, name, long_name, logo, rating, region, budget_places, type, study_fields
+from universities u
+order by u.name
+offset $1 limit $2
+`
+
+type GetUniversitiesParams struct {
+	Offset int32 `json:"offset"`
+	Limit  int32 `json:"limit"`
+}
+
+func (q *Queries) GetUniversities(ctx context.Context, arg GetUniversitiesParams) ([]University, error) {
+	rows, err := q.db.QueryContext(ctx, getUniversities, arg.Offset, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []University
+	for rows.Next() {
+		var i University
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.LongName,
+			&i.Logo,
+			&i.Rating,
+			&i.Region,
+			&i.BudgetPlaces,
+			&i.Type,
+			&i.StudyFields,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getUniversity = `-- name: GetUniversity :one
+select id, name, long_name, logo, rating, region, budget_places, type, study_fields
+from universities
+where id = $1
+limit 1
+`
+
+func (q *Queries) GetUniversity(ctx context.Context, id string) (University, error) {
+	row := q.db.QueryRowContext(ctx, getUniversity, id)
+	var i University
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.LongName,
+		&i.Logo,
+		&i.Rating,
+		&i.Region,
+		&i.BudgetPlaces,
+		&i.Type,
+		&i.StudyFields,
+	)
+	return i, err
+}
+
+const searchUniversities = `-- name: SearchUniversities :many
+select id, name, long_name, logo, rating, region, budget_places, type, study_fields
+from universities
+where name ilike $1
+   or long_name ilike $2 order by name
+`
+
+type SearchUniversitiesParams struct {
+	Name     string `json:"name"`
+	LongName string `json:"long_name"`
+}
+
+func (q *Queries) SearchUniversities(ctx context.Context, arg SearchUniversitiesParams) ([]University, error) {
+	rows, err := q.db.QueryContext(ctx, searchUniversities, arg.Name, arg.LongName)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []University
+	for rows.Next() {
+		var i University
+		if err := rows.Scan(
+			&i.ID,
+			&i.Name,
+			&i.LongName,
+			&i.Logo,
+			&i.Rating,
+			&i.Region,
+			&i.BudgetPlaces,
+			&i.Type,
+			&i.StudyFields,
 		); err != nil {
 			return nil, err
 		}
