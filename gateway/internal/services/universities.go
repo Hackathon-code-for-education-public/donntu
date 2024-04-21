@@ -129,3 +129,101 @@ func (s *UniversityService) GetPanoramas(ctx context.Context, universityId strin
 
 	return panoramas, nil
 }
+
+func (s *UniversityService) GetUniversitiesTop(ctx context.Context, n int) ([]*domain.University, error) {
+	rpcUniversities, err := s.client.GetTopOfUniversities(ctx, &universities.GetTopOfUniversitiesRequest{
+		Count: int32(n),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	us := make([]*domain.University, len(rpcUniversities.Universities))
+	for i, u := range rpcUniversities.Universities {
+		us[i] = &domain.University{
+			Id:           u.Id,
+			Name:         u.Name,
+			LongName:     u.LongName,
+			Logo:         u.Logo,
+			Rating:       float64(u.Rating),
+			Region:       u.Region,
+			Type:         u.Type,
+			StudyFields:  int(u.StudyFields),
+			BudgetPlaces: int(u.BudgetPlaces),
+		}
+	}
+
+	return us, nil
+}
+
+func (s *UniversityService) GetUniversities(ctx context.Context, offset, limit int) ([]*domain.University, error) {
+	rpcUniversities, err := s.client.GetUniversities(ctx, &universities.PageParams{
+		Offset: int32(offset),
+		Limit:  int32(limit),
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	us := make([]*domain.University, len(rpcUniversities.Universities))
+	for i, u := range rpcUniversities.Universities {
+		us[i] = &domain.University{
+			Id:           u.Id,
+			Name:         u.Name,
+			LongName:     u.LongName,
+			Logo:         u.Logo,
+			Rating:       float64(u.Rating),
+			Region:       u.Region,
+			Type:         u.Type,
+			StudyFields:  int(u.StudyFields),
+			BudgetPlaces: int(u.BudgetPlaces),
+		}
+	}
+
+	return us, nil
+}
+
+func (s *UniversityService) GetUniversity(ctx context.Context, universityID string) (*domain.University, error) {
+	u, err := s.client.GetUniversity(ctx, &universities.UniversityId{Id: universityID})
+	if err != nil {
+		return nil, err
+	}
+
+	return &domain.University{
+		Id:           u.Id,
+		Name:         u.Name,
+		LongName:     u.LongName,
+		Logo:         u.Logo,
+		Rating:       float64(u.Rating),
+		Region:       u.Region,
+		Type:         u.Type,
+		StudyFields:  int(u.StudyFields),
+		BudgetPlaces: int(u.BudgetPlaces),
+	}, nil
+}
+
+func (s *UniversityService) SearchUniversities(ctx context.Context, name string) ([]*domain.University, error) {
+	rpcUniversities, err := s.client.SearchUniversities(ctx, &universities.SearchUniversitiesRequest{
+		Name: name,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	us := make([]*domain.University, len(rpcUniversities.Universities))
+	for i, u := range rpcUniversities.Universities {
+		us[i] = &domain.University{
+			Id:           u.Id,
+			Name:         u.Name,
+			LongName:     u.LongName,
+			Logo:         u.Logo,
+			Rating:       float64(u.Rating),
+			Region:       u.Region,
+			Type:         u.Type,
+			StudyFields:  int(u.StudyFields),
+			BudgetPlaces: int(u.BudgetPlaces),
+		}
+	}
+
+	return us, nil
+}

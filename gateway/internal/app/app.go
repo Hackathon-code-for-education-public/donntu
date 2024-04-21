@@ -64,6 +64,10 @@ func (a *Application) Run() error {
 
 	u := v1.Group("/universities")
 	u.Get("/open", a.universityController.GetOpenDays())
+	u.Get("/", a.universityController.GetUniversities())
+	u.Get("/search", a.universityController.SearchUniversities())
+	u.Get("/top", a.universityController.GetUniversitiesTop())
+	u.Get("/:id", a.universityController.GetUniversity())
 
 	r := v1.Group("/reviews")
 	r.Get("/", a.universityController.GetReviews())

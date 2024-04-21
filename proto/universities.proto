@@ -72,9 +72,41 @@ message GetPanoramasRequest {
   string category = 2;
 }
 
+message University {
+  string id = 1;
+  string name = 2;
+  string longName = 3;
+  string logo = 4;
+  float rating = 5;
+  string region = 6;
+  string type = 7;
+  int32 studyFields = 8;
+  int32 budgetPlaces = 9;
+}
+
+message UniversitiesSchema {
+  repeated University universities = 1;
+}
+
+message PageParams {
+  int32 offset = 1;
+  int32 limit = 2;
+}
+
+message SearchUniversitiesRequest {
+  string name = 1;
+}
+message GetTopOfUniversitiesRequest {
+  int32 count = 1;
+}
 service Universities {
   rpc GetOpenDays(UniversityId) returns (OpenDays);
   rpc GetReviews(GetReviewsRequest) returns (Reviews);
   rpc CreatePanorama(CreatePanoramaRequest) returns (Panorama);
   rpc GetPanoramas(GetPanoramasRequest) returns (Panoramas);
+
+  rpc GetUniversity(UniversityId) returns (University);
+  rpc GetUniversities(PageParams) returns (UniversitiesSchema);
+  rpc SearchUniversities(SearchUniversitiesRequest) returns (UniversitiesSchema);
+  rpc GetTopOfUniversities(GetTopOfUniversitiesRequest) returns (UniversitiesSchema);
 }
